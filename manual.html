@@ -1,0 +1,720 @@
+<title>Manual do Usuário — Almoxarifado NorteShopping</title>
+<style>
+:root{
+  --petroleo:#00616F; --petroleo-esc:#00464B; --petroleo-esc2:#003237;
+  --laranja:#FAA634; --laranja-esc:#e08e1a; --laranja-ink:#00332f;
+  --verde:#008E82; --verde-claro:#6CC680;
+  --page:#f5f4f1; --surface:#ffffff; --surface-2:#f8f7f4;
+  --ink:#15211f; --ink-2:#4c5a57; --ink-3:#8b948f;
+  --line:#e3e1da; --line-soft:#eeece5;
+  --good:#0ca30c; --good-bg:#e8f6e8; --good-ink:#0a6e0a;
+  --warn:#c98500; --warn-bg:#fdf3dd; --warn-ink:#8a5c00;
+  --crit:#d03b3b; --crit-bg:#fbe9e9; --crit-ink:#a52727;
+  --shadow:0 6px 24px rgba(0,70,75,.10),0 2px 6px rgba(0,70,75,.06);
+  --shadow-sm:0 1px 3px rgba(21,33,31,.08);
+  --radius:16px;
+  --maxw:1000px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --page:#0c1413; --surface:#152220; --surface-2:#1b2a28;
+    --ink:#ecf2f0; --ink-2:#b7c4c0; --ink-3:#8494900;
+    --ink-3:#849490;
+    --line:#283835; --line-soft:#22302e;
+    --petroleo:#2c8c97; --petroleo-esc:#04292c; --petroleo-esc2:#021c1f;
+    --good:#2fbb2f; --good-bg:#123a12; --good-ink:#7fdc7f;
+    --warn:#fab219; --warn-bg:#3d2f0a; --warn-ink:#f7cd6b;
+    --crit:#e66767; --crit-bg:#421919; --crit-ink:#f1a0a0;
+    --surface-2:#1b2a28;
+    --shadow:0 8px 30px rgba(0,0,0,.5);
+    --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0c1413; --surface:#152220; --surface-2:#1b2a28;
+  --ink:#ecf2f0; --ink-2:#b7c4c0; --ink-3:#849490;
+  --line:#283835; --line-soft:#22302e;
+  --petroleo:#2c8c97; --petroleo-esc:#04292c; --petroleo-esc2:#021c1f;
+  --good:#2fbb2f; --good-bg:#123a12; --good-ink:#7fdc7f;
+  --warn:#fab219; --warn-bg:#3d2f0a; --warn-ink:#f7cd6b;
+  --crit:#e66767; --crit-bg:#421919; --crit-ink:#f1a0a0;
+  --shadow:0 8px 30px rgba(0,0,0,.5);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+}
+:root[data-theme="light"]{
+  --page:#f5f4f1; --surface:#ffffff; --surface-2:#f8f7f4;
+  --ink:#15211f; --ink-2:#4c5a57; --ink-3:#8b948f;
+  --line:#e3e1da; --line-soft:#eeece5;
+  --petroleo:#00616F; --petroleo-esc:#00464B; --petroleo-esc2:#003237;
+  --good:#0ca30c; --good-bg:#e8f6e8; --good-ink:#0a6e0a;
+  --warn:#c98500; --warn-bg:#fdf3dd; --warn-ink:#8a5c00;
+  --crit:#d03b3b; --crit-bg:#fbe9e9; --crit-ink:#a52727;
+  --shadow:0 6px 24px rgba(0,70,75,.10),0 2px 6px rgba(0,70,75,.06);
+  --shadow-sm:0 1px 3px rgba(21,33,31,.08);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:Gantari,Montserrat,"Segoe UI",system-ui,-apple-system,sans-serif;
+  background:var(--page); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.55;
+}
+h1,h2,h3{margin:0; text-wrap:balance; line-height:1.15}
+p{margin:0}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ---------- deck shell ---------- */
+.deck{max-width:var(--maxw); margin:0 auto; padding:0 20px}
+.progress{position:fixed; top:0; left:0; height:4px; background:var(--laranja); width:0; z-index:50; transition:width .35s cubic-bezier(.4,0,.2,1)}
+
+.slide{display:none; min-height:100vh; padding:76px 0 108px; flex-direction:column; justify-content:center; animation:fade .45s ease}
+.slide.on{display:flex}
+@keyframes fade{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: reduce){ .slide.on{animation:none} .progress{transition:none} }
+
+.eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:var(--petroleo); margin-bottom:16px}
+:root[data-theme="dark"] .eyebrow{color:var(--verde-claro)}
+@media (prefers-color-scheme: dark){ .eyebrow{color:var(--verde-claro)} }
+.eyebrow .n{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:6px; background:var(--laranja); color:var(--laranja-ink); font-size:12px}
+h2.title{font-size:clamp(28px,4.5vw,44px); font-weight:800; letter-spacing:-.4px; margin-bottom:14px}
+.lead{font-size:clamp(16px,2vw,19px); color:var(--ink-2); max-width:64ch}
+
+/* ---------- reusable bits ---------- */
+.grid{display:grid; gap:16px}
+.two{grid-template-columns:1fr 1fr}
+.three{grid-template-columns:repeat(3,1fr)}
+@media (max-width:760px){ .two,.three{grid-template-columns:1fr} }
+
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm)}
+.pad{padding:22px}
+
+.feat{display:flex; gap:14px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px}
+.feat .ic{flex:0 0 42px; width:42px; height:42px; border-radius:11px; background:var(--surface-2); display:grid; place-items:center; color:var(--petroleo)}
+:root[data-theme="dark"] .feat .ic{color:var(--verde-claro)}
+@media (prefers-color-scheme: dark){ .feat .ic{color:var(--verde-claro)} }
+.feat h3{font-size:16px; margin-bottom:4px}
+.feat p{font-size:14px; color:var(--ink-2)}
+
+.steps{display:flex; flex-direction:column; gap:14px; counter-reset:s}
+.step{display:flex; gap:16px; align-items:flex-start}
+.step .b{counter-increment:s; flex:0 0 34px; width:34px; height:34px; border-radius:50%; background:var(--petroleo); color:#fff; font-weight:800; display:grid; place-items:center; font-size:15px}
+.step .b::before{content:counter(s)}
+.step h3{font-size:16.5px; margin-bottom:3px}
+.step p{font-size:14.5px; color:var(--ink-2)}
+.step p code{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:1px 6px; font-size:13px}
+
+.callout{display:flex; gap:14px; align-items:flex-start; border-radius:14px; padding:16px 18px; font-size:14.5px}
+.callout .ci{flex:0 0 24px}
+.callout.info{background:color-mix(in srgb,var(--petroleo) 9%,var(--surface)); border:1px solid color-mix(in srgb,var(--petroleo) 26%,transparent); color:var(--ink)}
+.callout.warn{background:var(--warn-bg); border:1px solid color-mix(in srgb,var(--warn) 40%,transparent); color:var(--ink)}
+.callout.good{background:var(--good-bg); border:1px solid color-mix(in srgb,var(--good) 36%,transparent); color:var(--ink)}
+.callout b{color:var(--ink)}
+
+.kbd{display:inline-block; min-width:20px; text-align:center; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 7px; font-size:12.5px; background:var(--surface-2); font-family:inherit; font-weight:600}
+
+/* ---------- UI mockups ---------- */
+.mock{border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow); background:var(--surface)}
+.mock-top{display:flex; align-items:center; gap:7px; padding:9px 12px; background:var(--surface-2); border-bottom:1px solid var(--line)}
+.dot{width:10px; height:10px; border-radius:50%; background:var(--line)}
+.mock-top .tt{margin-left:8px; font-size:12px; color:var(--ink-3); font-weight:600}
+
+.app{display:grid; grid-template-columns:150px 1fr; min-height:230px}
+@media (max-width:640px){ .app{grid-template-columns:64px 1fr} }
+.side{background:var(--petroleo-esc); color:#cfe3e1; padding:12px 10px; font-size:12px}
+.side .brand{display:flex; align-items:center; gap:8px; padding-bottom:10px; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,.14)}
+.side .brand svg{width:18px; height:20px}
+.side .brand b{color:#fff; font-size:12.5px}
+.side .navi{display:flex; flex-direction:column; gap:3px}
+.side .navi span{padding:6px 9px; border-radius:8px; color:#bcd6d4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.side .navi span.act{background:var(--laranja); color:var(--laranja-ink); font-weight:700}
+@media (max-width:640px){ .side .navi span{font-size:0; padding:8px} .side .navi span::first-letter{font-size:13px} .side .brand b{display:none} }
+.canvas{padding:16px; background:var(--surface)}
+
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+@media (max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+.kpi{background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:11px 12px}
+.kpi .l{font-size:9.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--ink-3); font-weight:700}
+.kpi .v{font-size:21px; font-weight:800; margin-top:3px; letter-spacing:-.5px}
+.kpi .v.small{font-size:15px}
+.kpi.crit .v{color:var(--crit)}
+.kpi.warn .v{color:var(--warn)}
+
+.bars{display:flex; align-items:flex-end; gap:9px; height:90px; padding:10px 4px 0}
+.bars .col{flex:1; display:flex; flex-direction:column; align-items:center; gap:5px}
+.bars .bar{width:100%; max-width:26px; background:var(--petroleo); border-radius:4px 4px 0 0}
+.bars .cl{font-size:10px; color:var(--ink-3)}
+
+table.t{width:100%; border-collapse:collapse; font-size:12.5px}
+table.t th{text-align:left; font-size:9.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-3); padding:6px 8px; border-bottom:1px solid var(--line); font-weight:700}
+table.t td{padding:7px 8px; border-bottom:1px solid var(--line-soft)}
+table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
+.mono{font-family:"Cascadia Code",Consolas,monospace; font-size:11.5px; color:var(--ink-2)}
+
+.chip{display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700}
+.chip.ok{background:var(--good-bg); color:var(--good-ink)}
+.chip.warn{background:var(--warn-bg); color:var(--warn-ink)}
+.chip.crit{background:var(--crit-bg); color:var(--crit-ink)}
+.chip .d{width:7px; height:7px; border-radius:50%; background:currentColor}
+.tag-hoje{display:inline-block; background:var(--crit); color:#fff; font-size:10px; font-weight:800; padding:1px 7px; border-radius:5px; text-transform:uppercase; letter-spacing:.4px}
+
+.btnface{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:9px; font-size:13px; font-weight:700; border:1px solid var(--line); background:var(--surface); color:var(--ink)}
+.btnface.primary{background:var(--petroleo); color:#fff; border-color:transparent}
+.btnface.orange{background:var(--laranja); color:var(--laranja-ink); border-color:transparent}
+
+.semaforo{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+@media (max-width:640px){ .semaforo{grid-template-columns:1fr} }
+.sem{border-radius:14px; padding:16px; border:1px solid var(--line)}
+.sem .h{display:flex; align-items:center; gap:9px; font-weight:800; font-size:15px; margin-bottom:6px}
+.sem .h .b{width:16px; height:16px; border-radius:50%}
+.sem.g{background:var(--good-bg)} .sem.g .b{background:var(--good)} .sem.g .h{color:var(--good-ink)}
+.sem.y{background:var(--warn-bg)} .sem.y .b{background:var(--warn)} .sem.y .h{color:var(--warn-ink)}
+.sem.r{background:var(--crit-bg)} .sem.r .b{background:var(--crit)} .sem.r .h{color:var(--crit-ink)}
+.sem p{font-size:13px; color:var(--ink-2)}
+
+/* data-flow diagram */
+.flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center}
+.flow .node{flex:1; min-width:150px; text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 12px}
+.flow .node .ic{width:44px; height:44px; margin:0 auto 8px; border-radius:12px; background:var(--surface-2); display:grid; place-items:center; color:var(--petroleo)}
+:root[data-theme="dark"] .flow .node .ic{color:var(--verde-claro)}
+@media (prefers-color-scheme: dark){ .flow .node .ic{color:var(--verde-claro)} }
+.flow .node h3{font-size:14.5px; margin-bottom:3px}
+.flow .node p{font-size:12.5px; color:var(--ink-3)}
+.flow .arrow{color:var(--ink-3); flex:0 0 auto}
+@media (max-width:640px){ .flow{flex-direction:column} .flow .arrow{transform:rotate(90deg)} }
+
+.faq{display:flex; flex-direction:column; gap:12px}
+.qa{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 18px}
+.qa .q{font-weight:700; font-size:15px; display:flex; gap:9px; align-items:flex-start}
+.qa .q .m{color:var(--laranja-esc); font-weight:900}
+:root[data-theme="dark"] .qa .q .m{color:var(--laranja)}
+@media (prefers-color-scheme: dark){ .qa .q .m{color:var(--laranja)} }
+.qa .a{font-size:14px; color:var(--ink-2); margin-top:5px; padding-left:19px}
+
+.pill-list{display:flex; flex-wrap:wrap; gap:8px}
+.pill-list span{background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:5px 13px; font-size:13px; font-weight:600; color:var(--ink-2)}
+
+/* ---------- cover ---------- */
+#s0{background:
+    radial-gradient(1100px 600px at 82% -8%, color-mix(in srgb,var(--petroleo) 30%,transparent), transparent 60%),
+    linear-gradient(160deg, var(--petroleo-esc), var(--petroleo-esc2));
+  color:#eafffb; text-align:left; min-height:100vh}
+#s0 .deck{width:100%}
+#s0 .cov-logo{display:flex; align-items:center; gap:14px; margin-bottom:40px}
+#s0 .cov-logo svg{width:42px; height:47px}
+#s0 .cov-logo .nm{font-weight:800; font-size:19px; letter-spacing:.5px; color:#fff}
+#s0 .cov-logo .sb{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#8fd3cf}
+#s0 .kick{display:inline-block; font-size:12.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--laranja); margin-bottom:18px}
+#s0 h1{font-size:clamp(34px,6.5vw,68px); font-weight:800; letter-spacing:-1.5px; line-height:1.02; color:#fff; max-width:15ch}
+#s0 .sub{font-size:clamp(16px,2.4vw,21px); color:#c4e6e2; margin-top:20px; max-width:52ch}
+#s0 .meta{margin-top:44px; display:flex; gap:26px; flex-wrap:wrap; font-size:13.5px; color:#a9dbd6}
+#s0 .meta b{color:#fff; display:block; font-size:19px; font-weight:800}
+#s0 .go{margin-top:40px; display:inline-flex; align-items:center; gap:10px; background:var(--laranja); color:var(--laranja-ink); font-weight:800; font-size:15px; padding:14px 24px; border-radius:12px; border:none; cursor:pointer; box-shadow:0 8px 24px rgba(250,166,52,.35)}
+#s0 .go:hover{background:#ffb84d}
+
+/* ---------- nav controls ---------- */
+.controls{position:fixed; bottom:0; left:0; right:0; z-index:40; display:flex; align-items:center; justify-content:center; gap:14px; padding:14px 18px;
+  background:color-mix(in srgb,var(--page) 86%,transparent); backdrop-filter:blur(10px); border-top:1px solid var(--line)}
+.controls .nbtn{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-family:inherit; font-weight:700; font-size:13.5px; padding:9px 15px; border-radius:10px; cursor:pointer}
+.controls .nbtn:hover:not(:disabled){border-color:var(--petroleo); color:var(--petroleo)}
+.controls .nbtn:disabled{opacity:.4; cursor:not-allowed}
+.controls .nbtn.primary{background:var(--petroleo); color:#fff; border-color:transparent}
+.controls .nbtn.primary:hover{background:var(--petroleo-esc)}
+.dots{display:flex; gap:7px; flex-wrap:wrap; max-width:340px; justify-content:center}
+.dots button{width:9px; height:9px; border-radius:50%; border:none; background:var(--line); cursor:pointer; padding:0}
+.dots button.on{background:var(--laranja); transform:scale(1.25)}
+.counter{position:fixed; top:16px; right:20px; z-index:40; font-size:12.5px; font-weight:700; color:var(--ink-3); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:5px 13px; font-variant-numeric:tabular-nums}
+.brandmark{position:fixed; top:14px; left:20px; z-index:40; display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--ink-2)}
+.brandmark svg{width:16px; height:18px}
+#s0 ~ .counter{}
+.theme-toggle{position:fixed; top:14px; right:118px; z-index:41; width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface); cursor:pointer; display:grid; place-items:center; color:var(--ink-2)}
+.theme-toggle:hover{color:var(--petroleo); border-color:var(--petroleo)}
+
+@media print{ .controls,.counter,.theme-toggle,.brandmark{display:none} .slide{display:flex!important; page-break-after:always; min-height:auto} }
+</style>
+
+<div class="progress" id="progress"></div>
+
+<div class="brandmark" aria-hidden="true">
+  <svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg"><path fill="var(--laranja)" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg>
+  <span>Manual do Almoxarifado</span>
+</div>
+<button class="theme-toggle" id="themeBtn" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+</button>
+<div class="counter"><span id="cur">1</span> / <span id="tot">1</span></div>
+
+<!-- ============ SLIDE 0 — CAPA ============ -->
+<section class="slide" id="s0">
+  <div class="deck">
+    <div class="cov-logo">
+      <svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg"><path fill="var(--laranja)" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg>
+      <div><div class="nm">ALLOS</div><div class="sb">NorteShopping</div></div>
+    </div>
+    <span class="kick">Manual do Usuário</span>
+    <h1>Controle de Estoque do Almoxarifado</h1>
+    <p class="sub">Tudo o que você precisa para operar o sistema no dia a dia — cadastrar, dar entrada e saída, acompanhar o estoque crítico e nunca perder seus dados.</p>
+    <div class="meta">
+      <div><b>500</b>itens já cadastrados</div>
+      <div><b>10</b>telas de trabalho</div>
+      <div><b>~8 min</b>de leitura</div>
+    </div>
+    <button class="go" onclick="go(1)">Começar o manual
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ============ SLIDE 1 — O QUE É ============ -->
+<section class="slide" id="s1">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">1</span> Visão geral</span>
+    <h2 class="title">O que este sistema faz por você</h2>
+    <p class="lead" style="margin-bottom:26px">É o controle de estoque das peças da manutenção do NorteShopping. Ele roda direto no navegador — sem instalar nada, sem internet obrigatória — e organiza toda a operação do almoxarifado em um só lugar.</p>
+    <div class="grid two">
+      <div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></div><div><h3>Sabe o que tem em estoque</h3><p>Quantidade atual de cada peça, valor em reais e onde ela está guardada.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><div><h3>Avisa o que está acabando</h3><p>Semáforo de cores e alertas quando o estoque cai abaixo do mínimo.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><div><h3>Monta a lista de compras</h3><p>Cria sozinho as solicitações de reposição, com quantidade sugerida.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div><div><h3>Registra cada movimento</h3><p>Todo lançamento de entrada e saída fica gravado com data e observação.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 2 — ONDE FICAM OS DADOS ============ -->
+<section class="slide" id="s2">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">2</span> O mais importante de tudo</span>
+    <h2 class="title">Onde os seus dados ficam guardados</h2>
+    <p class="lead" style="margin-bottom:24px">Os dados ficam salvos <b>no próprio navegador do computador que você usa</b> — não vão para a internet nem para um servidor. Entender isso evita a maior dor de cabeça possível: perder os lançamentos.</p>
+    <div class="flow" style="margin-bottom:22px">
+      <div class="node"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Seu computador</h3><p>A estação onde você trabalha</p></div>
+      <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="node"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></div><h3>Navegador</h3><p>Chrome, Edge…</p></div>
+      <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="node" style="border-color:var(--laranja); border-width:2px"><div class="ic" style="background:var(--warn-bg); color:var(--laranja-esc)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></div><h3>Base local</h3><p>Aqui ficam seus 500 itens</p></div>
+    </div>
+    <div class="grid two">
+      <div class="callout warn"><span class="ci">⚠️</span><div>Cada <b>computador + navegador</b> tem a sua própria base. O que você lança no Chrome do seu PC <b>não aparece</b> no notebook de outra pessoa. E se alguém <b>limpar os dados de navegação</b>, a base some.</div></div>
+      <div class="callout good"><span class="ci">✅</span><div>A solução é simples e está no próprio sistema: o botão <b>Exportar Backup</b> gera um arquivo com tudo. Faça isso com frequência — explicamos a rotina no slide 15.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 3 — PRIMEIRO ACESSO ============ -->
+<section class="slide" id="s3">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">3</span> Primeiro acesso</span>
+    <h2 class="title">Ligando o sistema pela primeira vez</h2>
+    <div class="grid two" style="align-items:center; gap:30px">
+      <div class="steps">
+        <div class="step"><div class="b"></div><div><h3>Abra o link no navegador</h3><p>Use sempre o <b>mesmo navegador</b> na <b>mesma máquina</b> — essa será a estação oficial do almoxarifado.</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Clique em “Carregar lista NorteShopping”</h3><p>O botão azul-petróleo aparece na tela inicial. Ele traz os <b>500 itens</b> de Civil, Elétrica e Hidráulica já prontos.</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Pronto para usar</h3><p>O painel se preenche na hora. A partir daí o sistema salva tudo sozinho a cada lançamento.</p></div></div>
+      </div>
+      <div class="mock">
+        <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Tela inicial</span></div>
+        <div class="canvas" style="text-align:center; padding:28px 20px">
+          <div style="width:52px; height:52px; margin:0 auto 14px; border-radius:14px; background:var(--surface-2); display:grid; place-items:center; color:var(--petroleo)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></div>
+          <h3 style="font-size:17px; margin-bottom:6px">Almoxarifado vazio</h3>
+          <p style="font-size:13px; color:var(--ink-2); max-width:36ch; margin:0 auto 16px">Carregue a lista oficial, importe uma planilha ou cadastre itens manualmente.</p>
+          <div style="display:flex; flex-direction:column; gap:8px; align-items:center">
+            <span class="btnface primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg> Carregar lista NorteShopping (500 itens)</span>
+            <div style="display:flex; gap:8px"><span class="btnface">Importar planilha</span><span class="btnface">Cadastrar itens</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout info" style="margin-top:22px"><span class="ci">💡</span><div>O estoque <b>máximo</b> não vem na planilha, então o sistema assume o <b>dobro do mínimo</b>. Você pode ajustar item a item quando quiser — isso afeta a quantidade sugerida nas compras.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 4 — PAINEL ============ -->
+<section class="slide" id="s4">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">4</span> O Painel</span>
+    <h2 class="title">Lendo o Painel num relance</h2>
+    <p class="lead" style="margin-bottom:22px">É a primeira tela. Os números do topo (os “KPIs”) resumem a situação; os gráficos mostram o consumo e o que está crítico.</p>
+    <div class="mock">
+      <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Painel</span></div>
+      <div class="app">
+        <div class="side">
+          <div class="brand"><svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg"><path fill="var(--laranja)" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg><b>NorteShopping</b></div>
+          <div class="navi"><span class="act">Painel</span><span>Itens</span><span>Saída</span><span>Entrada</span><span>Movimentações</span><span>Crítico</span><span>Compras</span></div>
+        </div>
+        <div class="canvas">
+          <div class="kpis">
+            <div class="kpi"><div class="l">Itens</div><div class="v tnum">500</div></div>
+            <div class="kpi"><div class="l">Em estoque</div><div class="v tnum">104.817</div></div>
+            <div class="kpi"><div class="l">Valor</div><div class="v small tnum">R$ 22 mi</div></div>
+            <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px">
+            <div style="font-size:11px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:.5px">Consumo mensal · últimos 6 meses</div>
+            <div class="bars">
+              <div class="col"><div class="bar" style="height:38%"></div><div class="cl">Fev</div></div>
+              <div class="col"><div class="bar" style="height:55%"></div><div class="cl">Mar</div></div>
+              <div class="col"><div class="bar" style="height:42%"></div><div class="cl">Abr</div></div>
+              <div class="col"><div class="bar" style="height:70%"></div><div class="cl">Mai</div></div>
+              <div class="col"><div class="bar" style="height:60%"></div><div class="cl">Jun</div></div>
+              <div class="col"><div class="bar" style="height:88%; background:var(--laranja)"></div><div class="cl">Jul</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid three" style="margin-top:18px">
+      <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">📦</span><div><b>Itens</b> e <b>Em estoque</b>: quantos produtos existem e a soma das unidades.</div></div>
+      <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">💰</span><div><b>Valor</b>: quanto vale o estoque parado (quantidade × valor unitário).</div></div>
+      <div class="callout warn" style="padding:13px 15px; font-size:13px"><span class="ci">🔻</span><div><b>Abaixo do mínimo</b>: o número que você deve vigiar — peças a repor.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 5 — MENU ============ -->
+<section class="slide" id="s5">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">5</span> Navegação</span>
+    <h2 class="title">O menu lateral: onde fica cada coisa</h2>
+    <p class="lead" style="margin-bottom:24px">Todo o sistema é operado pelo menu à esquerda. Estas são as telas que você vai usar no dia a dia:</p>
+    <div class="grid two">
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div><div><h3>Painel</h3><p>Resumo geral, KPIs e gráficos.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><div><h3>Itens</h3><p>Cadastrar, editar e buscar peças.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div><div><h3>Registrar Saída</h3><p>Baixa quando uma peça é usada.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><h3>Entrada de Material</h3><p>Adiciona quando chega material.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.8 1 6.4 2.6L21 8"/><path d="M21 3v5h-5"/></svg></div><div><h3>Movimentações</h3><p>Histórico completo, com filtros.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><h3>Estoque Crítico &amp; Compras</h3><p>O que repor e as solicitações abertas.</p></div></div>
+    </div>
+    <div class="callout info" style="margin-top:20px"><span class="ci">🔎</span><div>No topo há uma <b>busca global</b>: digite parte do código, da descrição ou da categoria para achar qualquer peça instantaneamente.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 6 — CADASTRO ============ -->
+<section class="slide" id="s6">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">6</span> Itens</span>
+    <h2 class="title">Cadastrar, editar e excluir uma peça</h2>
+    <div class="grid two" style="gap:28px; align-items:start">
+      <div>
+        <div class="steps">
+          <div class="step"><div class="b"></div><div><h3>Abra a tela “Itens”</h3><p>Você vê a lista completa em tabela, com código, descrição, estoque e situação.</p></div></div>
+          <div class="step"><div class="b"></div><div><h3>Novo item</h3><p>Clique em <b>Novo item</b>, preencha código, descrição, categoria, unidade e os estoques mínimo/máximo.</p></div></div>
+          <div class="step"><div class="b"></div><div><h3>Editar ou excluir</h3><p>Use os botões <b>lápis</b> (editar) e <b>lixeira</b> (excluir) na própria linha da peça.</p></div></div>
+        </div>
+        <div class="callout info" style="margin-top:16px; font-size:13px; padding:13px 15px"><span class="ci">📍</span><div>Preencha <b>Prateleira, Coluna e Gaveta</b> para achar a peça fisicamente, e <b>Fornecedor</b> e <b>Lead time</b> para os alertas de compra ficarem mais espertos.</div></div>
+      </div>
+      <div class="mock">
+        <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Itens</span></div>
+        <div class="canvas" style="padding:12px">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+            <span style="font-size:13px; font-weight:700">Itens cadastrados</span>
+            <span class="btnface primary" style="padding:6px 11px; font-size:12px">+ Novo item</span>
+          </div>
+          <div style="overflow-x:auto">
+          <table class="t">
+            <thead><tr><th>Código</th><th>Descrição</th><th class="num">Atual</th><th>Situação</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">CIV-0001</td><td>Adesivo de contato 730g</td><td class="num tnum">17</td><td><span class="chip ok"><span class="d"></span>OK</span></td></tr>
+              <tr><td class="mono">ELE-0044</td><td>Disjuntor tripolar 63A</td><td class="num tnum">6</td><td><span class="chip warn"><span class="d"></span>Atenção</span></td></tr>
+              <tr><td class="mono">HID-0102</td><td>Registro de gaveta 3/4"</td><td class="num tnum">2</td><td><span class="chip crit"><span class="d"></span>Crítico</span></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 7 — SAÍDA E ENTRADA ============ -->
+<section class="slide" id="s7">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">7</span> O dia a dia</span>
+    <h2 class="title">Registrar Saída e Entrada</h2>
+    <p class="lead" style="margin-bottom:22px">Estas são as duas telas que você mais vai usar. A conta é automática: o sistema soma na entrada e subtrai na saída, e guarda cada movimento no histórico.</p>
+    <div class="grid two" style="gap:22px">
+      <div class="card pad">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px"><div style="width:38px;height:38px;border-radius:10px;background:var(--crit-bg);color:var(--crit-ink);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div><h3 style="font-size:18px">Registrar Saída</h3></div>
+        <p style="font-size:14px; color:var(--ink-2); margin-bottom:12px">Quando uma peça é retirada para a manutenção.</p>
+        <div class="steps" style="gap:9px">
+          <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)">Escolha o <b>item</b> e digite a <b>quantidade</b> retirada.</p></div></div>
+          <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)">Adicione uma <b>observação</b> (ex.: equipamento atendido).</p></div></div>
+          <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)">Confirme. O estoque <b>diminui</b> na hora.</p></div></div>
+        </div>
+      </div>
+      <div class="card pad">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px"><div style="width:38px;height:38px;border-radius:10px;background:var(--good-bg);color:var(--good-ink);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><h3 style="font-size:18px">Entrada de Material</h3></div>
+        <p style="font-size:14px; color:var(--ink-2); margin-bottom:12px">Quando chega material do fornecedor.</p>
+        <div class="steps" style="gap:9px">
+          <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--good)"></div><div><p style="color:var(--ink)">Escolha o <b>item</b> e a <b>quantidade</b> recebida.</p></div></div>
+          <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--good)"></div><div><p style="color:var(--ink)">Observação (ex.: nota fiscal, fornecedor).</p></div></div>
+          <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--good)"></div><div><p style="color:var(--ink)">Confirme. O estoque <b>aumenta</b> na hora.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 8 — MOVIMENTAÇÕES ============ -->
+<section class="slide" id="s8">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">8</span> Histórico</span>
+    <h2 class="title">Movimentações: o histórico de tudo</h2>
+    <p class="lead" style="margin-bottom:22px">Cada entrada e saída fica registrada aqui, com data, tipo, item, quantidade e observação. Use os <b>filtros</b> para achar o que precisa — por período, por item ou por tipo.</p>
+    <div class="mock">
+      <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Movimentações</span></div>
+      <div class="canvas" style="padding:12px">
+        <div class="pill-list" style="margin-bottom:12px">
+          <span>📅 Período: últimos 30 dias</span><span>📦 Item: todos</span><span>↕ Tipo: todos</span>
+        </div>
+        <div style="overflow-x:auto">
+        <table class="t">
+          <thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th class="num">Qtd.</th><th>Observação</th></tr></thead>
+          <tbody>
+            <tr><td class="tnum">22/07</td><td><span class="chip crit"><span class="d"></span>Saída</span></td><td>Disjuntor tripolar 63A</td><td class="num tnum">4</td><td style="color:var(--ink-3)">Troca no QGBT — Loja 210</td></tr>
+            <tr><td class="tnum">21/07</td><td><span class="chip ok"><span class="d"></span>Entrada</span></td><td>Registro de gaveta 3/4"</td><td class="num tnum">50</td><td style="color:var(--ink-3)">NF 12.884</td></tr>
+            <tr><td class="tnum">20/07</td><td><span class="chip crit"><span class="d"></span>Saída</span></td><td>Adesivo de contato 730g</td><td class="num tnum">2</td><td style="color:var(--ink-3)">Reparo bancada</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="callout info" style="margin-top:18px"><span class="ci">🧾</span><div>O histórico é a sua prova de auditoria: mostra <b>quem mexeu no quê e quando</b>. Nunca apague movimentações para “corrigir” um erro — lance o movimento contrário (uma entrada que compense uma saída errada, por exemplo).</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 9 — SEMÁFORO ============ -->
+<section class="slide" id="s9">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">9</span> Estoque crítico</span>
+    <h2 class="title">O semáforo de cores</h2>
+    <p class="lead" style="margin-bottom:24px">Para saber o que precisa de atenção sem pensar, o sistema pinta cada peça com uma cor conforme o estoque atual em relação ao mínimo.</p>
+    <div class="semaforo">
+      <div class="sem g"><div class="h"><span class="b"></span>Verde · OK</div><p>Estoque confortável, acima do mínimo. Nada a fazer.</p></div>
+      <div class="sem y"><div class="h"><span class="b"></span>Amarelo · Atenção</div><p>Chegando perto do mínimo (até 10% acima). Fique de olho.</p></div>
+      <div class="sem r"><div class="h"><span class="b"></span>Vermelho · Crítico</div><p>No mínimo ou abaixo. Precisa repor — já vira solicitação de compra.</p></div>
+    </div>
+    <div class="callout info" style="margin-top:24px"><span class="ci">🎯</span><div>A tela <b>Estoque Crítico</b> lista <b>somente as peças vermelhas e amarelas</b>, então você olha direto o que importa, sem rolar a lista inteira de 500 itens.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 10 — COMPRAS ============ -->
+<section class="slide" id="s10">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">10</span> Compras</span>
+    <h2 class="title">A lista de compras se monta sozinha</h2>
+    <p class="lead" style="margin-bottom:20px">Quando uma peça bate no mínimo, o sistema cria automaticamente uma <b>solicitação de compra</b>, já com a quantidade sugerida para repor o estoque até o máximo.</p>
+    <div class="mock">
+      <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Compras</span></div>
+      <div class="canvas" style="padding:12px">
+        <div style="overflow-x:auto">
+        <table class="t">
+          <thead><tr><th>Descrição</th><th class="num">Atual</th><th class="num">Mín.</th><th class="num">Sugerido</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Registro de gaveta 3/4" <span class="tag-hoje">Comprar hoje</span></td><td class="num tnum">2</td><td class="num tnum">8</td><td class="num tnum"><b>14</b></td><td><span class="chip crit"><span class="d"></span>Pendente</span></td></tr>
+            <tr><td>Disjuntor tripolar 63A</td><td class="num tnum">6</td><td class="num tnum">10</td><td class="num tnum"><b>14</b></td><td><span class="chip warn"><span class="d"></span>Comprado</span></td></tr>
+            <tr><td>Cabo flexível 2,5mm² (rolo)</td><td class="num tnum">9</td><td class="num tnum">12</td><td class="num tnum"><b>15</b></td><td><span class="chip ok"><span class="d"></span>Recebido</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="grid two" style="margin-top:18px">
+      <div class="callout info" style="font-size:13.5px"><span class="ci">🔖</span><div>Acompanhe cada solicitação pelo <b>status</b>: <b>Pendente</b> → <b>Comprado</b> → <b>Recebido</b>. Ao marcar como recebido, dê a <b>entrada</b> do material para o estoque subir.</div></div>
+      <div class="callout warn" style="font-size:13.5px"><span class="ci">🔥</span><div>A etiqueta <b>“Comprar hoje”</b> aparece quando o estoque não dura até a próxima entrega (considera o <b>lead time</b> do fornecedor). É a prioridade máxima.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 11 — INDICADORES ============ -->
+<section class="slide" id="s11">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">11</span> Indicadores</span>
+    <h2 class="title">Indicadores que preveem a falta</h2>
+    <p class="lead" style="margin-bottom:24px">Conforme você registra as saídas, o sistema aprende o ritmo de consumo e passa a estimar <b>quando cada peça vai acabar</b> — para você comprar antes de faltar.</p>
+    <div class="grid two">
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg></div><div><h3>Consumo de 30 e 90 dias</h3><p>Quanto de cada peça saiu no período recente.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><h3>Dias até faltar</h3><p>Estimativa de quantos dias o estoque atual ainda dura.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><h3>Previsão de ruptura</h3><p>Alerta das peças em rota de acabar em breve.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div><div><h3>“Comprar hoje”</h3><p>Cruza consumo × lead time e diz o que já não pode esperar.</p></div></div>
+    </div>
+    <div class="callout good" style="margin-top:22px"><span class="ci">📈</span><div>Quanto mais fiel for o registro de <b>saídas</b>, mais precisos ficam esses números. Nos primeiros dias eles ainda estarão “aprendendo” — é normal.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 12 — IMPORTAR ============ -->
+<section class="slide" id="s12">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">12</span> Planilhas</span>
+    <h2 class="title">Importar itens de uma planilha</h2>
+    <p class="lead" style="margin-bottom:22px">Além dos 500 itens embutidos, você pode subir uma planilha <b>Excel (.xlsx)</b> ou <b>CSV</b>. O formato da lista oficial ALLOS é reconhecido automaticamente.</p>
+    <div class="grid two" style="gap:26px; align-items:start">
+      <div class="steps">
+        <div class="step"><div class="b"></div><div><h3>Vá em “Dados / Importar”</h3><p>Clique para escolher o arquivo no computador.</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Selecione o .xlsx ou .csv</h3><p>O sistema encontra o cabeçalho sozinho (mesmo com linhas de título antes).</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Confira o resumo</h3><p>Ele informa quantos itens foram <b>adicionados</b> e quantos <b>atualizados</b>.</p></div></div>
+      </div>
+      <div>
+        <div class="card pad" style="padding:16px">
+          <div style="font-size:12px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px">Colunas reconhecidas</div>
+          <div class="pill-list">
+            <span>Código</span><span>Categoria</span><span>Descrição</span><span>Unidade</span><span>Qtd. em estoque</span><span>Estoque mínimo</span><span>Valor unitário</span><span>Localização</span><span>Fornecedor</span><span>Lead time</span>
+          </div>
+        </div>
+        <div class="callout good" style="margin-top:14px; font-size:13.5px"><span class="ci">🛡️</span><div>Ao reimportar, itens já existentes são <b>atualizados</b> — e os campos que você preencheu à mão (fornecedor, lead time, localização) são <b>preservados</b>.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 13 — EXPORTAR ============ -->
+<section class="slide" id="s13">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">13</span> Exportar</span>
+    <h2 class="title">Exportar para Excel e CSV</h2>
+    <p class="lead" style="margin-bottom:24px">Precisa mandar a situação do estoque para a gerência ou para Suprimentos? Exporte com um clique — gera um arquivo que abre no Excel.</p>
+    <div class="grid two">
+      <div class="card pad">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px"><div style="width:44px;height:44px;border-radius:11px;background:var(--good-bg);color:var(--good-ink);display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13l3 3 3-3M11 16V9" transform="translate(0,0)"/></svg></div><h3 style="font-size:18px">Excel / CSV</h3></div>
+        <p style="font-size:14px; color:var(--ink-2)">Baixa a lista de itens com estoque, valores e situação. Ideal para relatórios e para quem só precisa <b>consultar</b>.</p>
+      </div>
+      <div class="card pad">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px"><div style="width:44px;height:44px;border-radius:11px;background:var(--surface-2);color:var(--petroleo);display:grid;place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></div><h3 style="font-size:18px">Movimentações</h3></div>
+        <p style="font-size:14px; color:var(--ink-2)">Também dá para exportar o histórico de entradas e saídas para conferência e prestação de contas.</p>
+      </div>
+    </div>
+    <div class="callout info" style="margin-top:22px"><span class="ci">📤</span><div>Exportar é diferente de fazer <b>backup</b>. O Excel serve para <b>ler e relatar</b>; o backup (próximo slide) serve para <b>proteger e restaurar</b> o sistema inteiro.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 14 — BACKUP ============ -->
+<section class="slide" id="s14">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">14</span> A regra de ouro</span>
+    <h2 class="title">Backup: nunca perca seus dados</h2>
+    <p class="lead" style="margin-bottom:22px">Como os dados vivem só no navegador, o <b>backup é a sua rede de segurança</b>. Ele gera um arquivo com <b>tudo</b> — itens, movimentações e compras — que você guarda em lugar seguro.</p>
+    <div class="grid two" style="gap:22px">
+      <div class="card pad">
+        <h3 style="font-size:17px; margin-bottom:10px; display:flex; align-items:center; gap:9px"><span class="btnface orange" style="padding:6px 11px; font-size:12px; pointer-events:none">Exportar Backup</span></h3>
+        <p style="font-size:14px; color:var(--ink-2); margin-bottom:8px">Gera um arquivo <b>.json</b>. Guarde-o numa pasta da <b>rede ou do OneDrive</b> — não deixe só no PC.</p>
+        <div class="callout good" style="font-size:13px; padding:11px 13px"><span class="ci">📆</span><div>Faça isso <b>toda semana</b> (ou todo dia, se o movimento for grande). Vale o hábito: sexta-feira, antes de sair, exporte.</div></div>
+      </div>
+      <div class="card pad">
+        <h3 style="font-size:17px; margin-bottom:10px; display:flex; align-items:center; gap:9px"><span class="btnface" style="padding:6px 11px; font-size:12px; pointer-events:none">Importar Backup</span></h3>
+        <p style="font-size:14px; color:var(--ink-2); margin-bottom:8px">Restaura tudo a partir de um arquivo salvo. Use se trocar de computador, limpar o navegador ou precisar recuperar os dados.</p>
+        <div class="callout warn" style="font-size:13px; padding:11px 13px"><span class="ci">⚠️</span><div>Importar um backup <b>substitui</b> o que estiver na tela. Tenha certeza de que é a versão certa.</div></div>
+      </div>
+    </div>
+    <div class="callout info" style="margin-top:20px"><span class="ci">💾</span><div><b>Regra prática:</b> Excel para relatório, <b>JSON para segurança</b>. É o backup JSON que devolve o sistema exatamente como estava.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 15 — BOAS PRÁTICAS ============ -->
+<section class="slide" id="s15">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">15</span> Operação</span>
+    <h2 class="title">Como operar bem no dia a dia</h2>
+    <p class="lead" style="margin-bottom:24px">Quatro hábitos que mantêm o controle confiável e evitam confusão entre computadores.</p>
+    <div class="grid two">
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><div><h3>Uma estação oficial</h3><p>Lance entradas e saídas sempre no <b>mesmo PC e navegador</b>. Essa é a base verdadeira.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></div><div><h3>Backup toda semana</h3><p>Exporte o JSON e guarde na rede. É o seguro contra qualquer perda.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><div><h3>Lance na hora</h3><p>Registre a saída <b>no momento</b> em que a peça sai. Deixar para depois é como o estoque fica errado.</p></div></div>
+      <div class="feat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div><div><h3>Para compartilhar</h3><p>Quem só consulta abre o link e <b>importa o backup</b> mais recente — sem lançar nada, para não gerar conflito.</p></div></div>
+    </div>
+    <div class="callout warn" style="margin-top:22px"><span class="ci">🤝</span><div>O sistema <b>não é multiusuário em tempo real</b>: dois computadores não se sincronizam sozinhos. Se mais de uma pessoa precisa lançar, façam na mesma estação — ou troquem a base pelo arquivo de backup.</div></div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 16 — FAQ ============ -->
+<section class="slide" id="s16">
+  <div class="deck">
+    <span class="eyebrow"><span class="n">16</span> Dúvidas rápidas</span>
+    <h2 class="title">Perguntas frequentes</h2>
+    <div class="faq">
+      <div class="qa"><div class="q"><span class="m">P.</span> Preciso de internet para usar?</div><div class="a">Só para abrir o link na primeira vez. Depois de carregado, ele funciona mesmo offline — os dados estão no seu navegador.</div></div>
+      <div class="qa"><div class="q"><span class="m">P.</span> Apaguei um item / lancei errado. E agora?</div><div class="a">Para item, use editar ou exclua e cadastre de novo. Para movimentação errada, lance o movimento contrário (uma entrada compensa uma saída indevida). E, se tiver backup recente, dá para restaurar.</div></div>
+      <div class="qa"><div class="q"><span class="m">P.</span> Sumiram meus dados ao abrir noutro PC.</div><div class="a">Não sumiram: cada PC/navegador tem a própria base. Leve os dados com o arquivo de <b>backup</b> e use “Importar Backup” na outra máquina.</div></div>
+      <div class="qa"><div class="q"><span class="m">P.</span> Posso mudar o estoque mínimo/máximo?</div><div class="a">Sim, a qualquer momento, na edição do item. Isso ajusta o semáforo e a quantidade sugerida de compra.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 17 — FIM ============ -->
+<section class="slide" id="s17">
+  <div class="deck">
+    <div style="text-align:center; max-width:60ch; margin:0 auto">
+      <div style="width:60px; height:67px; margin:0 auto 22px"><svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg" style="width:100%"><path fill="var(--laranja)" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg></div>
+      <h2 class="title" style="font-size:clamp(26px,4vw,38px)">Pronto para operar</h2>
+      <p class="lead" style="margin:0 auto 26px">Você já sabe o essencial: carregar a lista, dar entrada e saída, ler o semáforo, montar as compras e — o mais importante — <b>fazer backup</b>. Volte a este manual sempre que precisar.</p>
+      <div class="card pad" style="text-align:left; max-width:440px; margin:0 auto">
+        <div style="font-size:12px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-3); margin-bottom:12px">Lembre-se todos os dias</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14.5px">
+          <div style="display:flex; gap:10px; align-items:center"><span style="color:var(--good)">✔</span> Lançar entradas e saídas na hora</div>
+          <div style="display:flex; gap:10px; align-items:center"><span style="color:var(--good)">✔</span> Olhar o Estoque Crítico e as Compras</div>
+          <div style="display:flex; gap:10px; align-items:center"><span style="color:var(--good)">✔</span> Sempre na mesma estação oficial</div>
+          <div style="display:flex; gap:10px; align-items:center"><span style="color:var(--laranja-esc)">★</span> <b>Exportar backup toda semana</b></div>
+        </div>
+      </div>
+      <button class="go" style="margin-top:30px; background:var(--petroleo); color:#fff; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:10px; font-weight:800; font-size:15px; padding:14px 24px; border-radius:12px" onclick="go(0)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        Voltar ao início
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="controls">
+  <button class="nbtn" id="prev" onclick="go(idx-1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg> Anterior</button>
+  <div class="dots" id="dots"></div>
+  <button class="nbtn primary" id="next" onclick="go(idx+1)">Próximo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const N = slides.length;
+let idx = 0;
+const dotsWrap = document.getElementById('dots');
+document.getElementById('tot').textContent = N;
+slides.forEach((_,i)=>{
+  const b = document.createElement('button');
+  b.setAttribute('aria-label','Ir para o slide '+(i+1));
+  b.onclick = ()=>go(i);
+  dotsWrap.appendChild(b);
+});
+const dots = Array.from(dotsWrap.children);
+
+function go(n){
+  idx = Math.max(0, Math.min(N-1, n));
+  slides.forEach((s,i)=>s.classList.toggle('on', i===idx));
+  dots.forEach((d,i)=>d.classList.toggle('on', i===idx));
+  document.getElementById('cur').textContent = idx+1;
+  document.getElementById('progress').style.width = ((idx)/(N-1)*100)+'%';
+  document.getElementById('prev').disabled = idx===0;
+  document.getElementById('next').disabled = idx===N-1;
+  window.scrollTo({top:0, behavior:'auto'});
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'){ e.preventDefault(); go(idx+1); }
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(idx-1); }
+  else if(e.key==='Home'){ e.preventDefault(); go(0); }
+  else if(e.key==='End'){ e.preventDefault(); go(N-1); }
+});
+
+// swipe (touch)
+let tx=0;
+document.addEventListener('touchstart', e=>{ tx = e.changedTouches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  const dx = e.changedTouches[0].clientX - tx;
+  if(Math.abs(dx)>60){ dx<0 ? go(idx+1) : go(idx-1); }
+}, {passive:true});
+
+// theme toggle
+const root = document.documentElement;
+document.getElementById('themeBtn').onclick = ()=>{
+  const dark = root.getAttribute('data-theme')==='dark' ||
+    (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+  root.setAttribute('data-theme', dark ? 'light' : 'dark');
+};
+
+go(0);
+</script>

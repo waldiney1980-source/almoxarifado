@@ -1,0 +1,1773 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Almoxarifado NorteShopping</title>
+<style>
+:root{
+  /* Identidade ALLOS: petróleo #00616F/#00464B, laranja #FAA634, verde #008E82, neutro quente #CCC5BC */
+  --accent:#00616F; --accent-strong:#00464B; --accent-soft:#e2eeef;
+  --page:#f5f4f1; --surface:#ffffff; --surface-2:#f8f7f4;
+  --ink:#15211f; --ink-2:#4c5a57; --ink-3:#8b948f;
+  --line:#e3e1da; --line-soft:#eeece5;
+  --good:#0ca30c; --good-bg:#e8f6e8; --good-ink:#0a6e0a;
+  --warn:#c98500; --warn-bg:#fdf3dd; --warn-ink:#8a5c00;
+  --crit:#d03b3b; --crit-bg:#fbe9e9; --crit-ink:#a52727;
+  --laranja:#FAA634; --laranja-ink:#00332f;
+  --sidebar-bg:#00464B; --sidebar-ink:#bfd8d6; --sidebar-active:#FAA634; --sidebar-active-ink:#00332f;
+  --grid:#e1e0d9; --shadow:0 1px 3px rgba(21,33,31,.07),0 1px 2px rgba(21,33,31,.05);
+  --chart-bar:#00616F; --chart-bar-2:#8fc1c4;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --page:#0e1716; --surface:#152220; --surface-2:#1b2a28;
+    --ink:#ecf2f0; --ink-2:#b7c4c0; --ink-3:#7e8b87;
+    --line:#283835; --line-soft:#22302e;
+    --accent:#3fa9b5; --accent-strong:#2c8c97; --accent-soft:#123b40;
+    --good:#2fbb2f; --good-bg:#123a12; --good-ink:#7fdc7f;
+    --warn:#fab219; --warn-bg:#3d2f0a; --warn-ink:#f7cd6b;
+    --crit:#e66767; --crit-bg:#421919; --crit-ink:#f1a0a0;
+    --laranja:#FAA634; --laranja-ink:#00332f;
+    --sidebar-bg:#062e31; --sidebar-ink:#9fc0be; --sidebar-active:#FAA634; --sidebar-active-ink:#00332f;
+    --grid:#2c2c2a; --shadow:0 1px 3px rgba(0,0,0,.4);
+    --chart-bar:#3fa9b5; --chart-bar-2:#1f5f66;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0e1716; --surface:#152220; --surface-2:#1b2a28;
+  --ink:#ecf2f0; --ink-2:#b7c4c0; --ink-3:#7e8b87;
+  --line:#283835; --line-soft:#22302e;
+  --accent:#3fa9b5; --accent-strong:#2c8c97; --accent-soft:#123b40;
+  --good:#2fbb2f; --good-bg:#123a12; --good-ink:#7fdc7f;
+  --warn:#fab219; --warn-bg:#3d2f0a; --warn-ink:#f7cd6b;
+  --crit:#e66767; --crit-bg:#421919; --crit-ink:#f1a0a0;
+  --laranja:#FAA634; --laranja-ink:#00332f;
+  --sidebar-bg:#062e31; --sidebar-ink:#9fc0be; --sidebar-active:#FAA634; --sidebar-active-ink:#00332f;
+  --grid:#2c2c2a; --shadow:0 1px 3px rgba(0,0,0,.4);
+  --chart-bar:#3fa9b5; --chart-bar-2:#1f5f66;
+}
+:root[data-theme="light"]{
+  --page:#f5f4f1; --surface:#ffffff; --surface-2:#f8f7f4;
+  --ink:#15211f; --ink-2:#4c5a57; --ink-3:#8b948f;
+  --line:#e3e1da; --line-soft:#eeece5;
+  --accent:#00616F; --accent-strong:#00464B; --accent-soft:#e2eeef;
+  --good:#0ca30c; --good-bg:#e8f6e8; --good-ink:#0a6e0a;
+  --warn:#c98500; --warn-bg:#fdf3dd; --warn-ink:#8a5c00;
+  --crit:#d03b3b; --crit-bg:#fbe9e9; --crit-ink:#a52727;
+  --laranja:#FAA634; --laranja-ink:#00332f;
+  --sidebar-bg:#00464B; --sidebar-ink:#bfd8d6; --sidebar-active:#FAA634; --sidebar-active-ink:#00332f;
+  --grid:#e1e0d9; --shadow:0 1px 3px rgba(21,33,31,.07),0 1px 2px rgba(21,33,31,.05);
+  --chart-bar:#00616F; --chart-bar-2:#8fc1c4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:Gantari,Montserrat,"Segoe UI",system-ui,-apple-system,sans-serif;
+  background:var(--page); color:var(--ink); font-size:14px; line-height:1.45;
+}
+#app{display:flex; min-height:100vh}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  width:222px; flex:0 0 222px; background:var(--sidebar-bg); color:var(--sidebar-ink);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sidebar .logo{
+  padding:18px 16px 14px; border-bottom:1px solid rgba(255,255,255,.12);
+  display:flex; align-items:center; gap:11px;
+}
+.sidebar .logo svg{width:27px; height:30px; flex:0 0 27px}
+.sidebar .logo .t1{font-weight:700; font-size:15px; color:#fff; letter-spacing:.2px}
+.sidebar .logo .t2{font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; margin-top:2px; opacity:.85}
+.nav{padding:10px 8px; display:flex; flex-direction:column; gap:2px}
+.nav button{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:none; border:0; color:var(--sidebar-ink); font:inherit; font-size:13.5px;
+  padding:9px 12px; border-radius:6px; cursor:pointer;
+}
+.nav button:hover{background:rgba(255,255,255,.08); color:#fff}
+.nav button.active{background:var(--sidebar-active); color:var(--sidebar-active-ink); font-weight:600}
+.nav button:focus-visible{outline:2px solid #fff; outline-offset:-2px}
+.nav .badge{margin-left:auto; background:#d03b3b; color:#fff; font-size:11px; font-weight:700;
+  border-radius:9px; padding:1px 7px; min-width:18px; text-align:center}
+.nav svg{width:16px; height:16px; flex:0 0 16px}
+.sidebar .foot{margin-top:auto; padding:12px 16px; font-size:11px; opacity:.6}
+
+/* ============ MAIN ============ */
+.main{flex:1; min-width:0; display:flex; flex-direction:column}
+.topbar{
+  display:flex; align-items:center; gap:14px; padding:12px 22px;
+  background:var(--surface); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;
+}
+.topbar h1{font-size:16px; font-weight:600; margin:0; white-space:nowrap}
+.searchwrap{margin-left:auto; position:relative; width:min(340px,40%)}
+.searchwrap input{
+  width:100%; padding:8px 12px 8px 34px; border:1px solid var(--line); border-radius:7px;
+  background:var(--surface-2); color:var(--ink); font:inherit;
+}
+.searchwrap svg{position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--ink-3)}
+.userchip{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-2); white-space:nowrap}
+.userchip .avatar{width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px}
+.content{padding:20px 22px 40px; display:flex; flex-direction:column; gap:18px}
+
+/* ============ COMPONENTS ============ */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px}
+.card{background:var(--surface); border:1px solid var(--line-soft); border-radius:10px; padding:16px 18px; box-shadow:var(--shadow)}
+.kpi .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink-3); font-weight:600}
+.kpi .val{font-size:30px; font-weight:700; margin-top:4px; line-height:1.1}
+.kpi .sub{font-size:12px; color:var(--ink-2); margin-top:4px}
+.kpi.alerta .val{color:var(--crit)}
+.kpi.ok .val{color:var(--good-ink)}
+.panelgrid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+@media(max-width:980px){.panelgrid{grid-template-columns:1fr}}
+.panel{background:var(--surface); border:1px solid var(--line-soft); border-radius:10px; box-shadow:var(--shadow); overflow:hidden}
+.panel .phead{display:flex; align-items:center; gap:10px; padding:13px 18px; border-bottom:1px solid var(--line-soft)}
+.panel .phead h3{margin:0; font-size:13.5px; font-weight:600}
+.panel .phead .hint{font-size:11.5px; color:var(--ink-3); margin-left:auto}
+.panel .pbody{padding:14px 18px}
+.panel .pbody.flush{padding:0}
+
+.tablewrap{overflow-x:auto}
+table.data{width:100%; border-collapse:collapse; font-size:13px}
+table.data th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-3);
+  font-weight:600; padding:9px 14px; border-bottom:1px solid var(--line); white-space:nowrap;
+  background:var(--surface-2);
+}
+table.data td{padding:9px 14px; border-bottom:1px solid var(--line-soft); vertical-align:middle}
+table.data tr:last-child td{border-bottom:0}
+table.data tbody tr:hover{background:var(--surface-2)}
+table.data td.num, table.data th.num{text-align:right; font-variant-numeric:tabular-nums}
+.empty{padding:34px 20px; text-align:center; color:var(--ink-3); font-size:13px}
+
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+  border-radius:20px; padding:3px 10px; white-space:nowrap}
+.pill::before{content:""; width:7px; height:7px; border-radius:50%; background:currentColor}
+.pill.verde{background:var(--good-bg); color:var(--good-ink)}
+.pill.amarelo{background:var(--warn-bg); color:var(--warn-ink)}
+.pill.vermelho{background:var(--crit-bg); color:var(--crit-ink)}
+.pill.azul{background:var(--accent-soft); color:var(--accent)}
+.pill.cinza{background:var(--line-soft); color:var(--ink-2)}
+.tag-hoje{display:inline-flex; align-items:center; gap:5px; background:var(--crit); color:#fff;
+  font-size:11px; font-weight:700; border-radius:5px; padding:3px 8px; text-transform:uppercase; letter-spacing:.4px}
+
+.btn{
+  display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--surface);
+  color:var(--ink); font:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:7px; cursor:pointer;
+}
+.btn:hover{background:var(--surface-2)}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+.btn.primary:hover{background:var(--accent-strong); border-color:var(--accent-strong)}
+.btn.danger{color:var(--crit); border-color:var(--crit)}
+.btn.danger:hover{background:var(--crit-bg)}
+.btn.sm{padding:5px 10px; font-size:12px}
+.btn svg{width:14px; height:14px}
+.btnrow{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.iconbtn{background:none; border:0; cursor:pointer; padding:5px; border-radius:5px; color:var(--ink-2); display:inline-flex}
+.iconbtn:hover{background:var(--line-soft); color:var(--ink)}
+.iconbtn.del:hover{background:var(--crit-bg); color:var(--crit)}
+.iconbtn svg{width:15px; height:15px}
+
+.formgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px}
+.span2{grid-column:span 2}
+@media(max-width:600px){.span2{grid-column:auto}}
+.field{display:flex; flex-direction:column; gap:4px}
+.field label{font-size:11.5px; font-weight:600; color:var(--ink-2); text-transform:uppercase; letter-spacing:.4px}
+.field input,.field select,.field textarea{
+  padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--surface);
+  color:var(--ink); font:inherit; width:100%;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+.field .req{color:var(--crit)}
+.filterbar{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; padding:13px 18px; border-bottom:1px solid var(--line-soft); background:var(--surface)}
+.filterbar .field{min-width:140px; flex:0 1 auto}
+
+/* charts */
+.chart svg{display:block; width:100%; height:auto}
+.chart .bar{fill:var(--chart-bar)}
+.chart .bar:hover{fill:var(--accent-strong)}
+.chart .gridline{stroke:var(--grid); stroke-width:1}
+.chart .axis{fill:var(--ink-3); font-size:11px}
+.chart .vlabel{fill:var(--ink-2); font-size:11px; font-weight:600}
+.chart .baseline{stroke:var(--line); stroke-width:1}
+
+/* modal */
+.modal-overlay{position:fixed; inset:0; background:rgba(10,16,28,.55); z-index:100;
+  display:flex; align-items:flex-start; justify-content:center; padding:5vh 16px 16px; overflow-y:auto}
+.modal{background:var(--surface); border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,.3);
+  width:100%; max-width:680px; overflow:hidden}
+.modal.sm{max-width:440px}
+.modal .mhead{display:flex; align-items:center; padding:16px 20px; border-bottom:1px solid var(--line-soft)}
+.modal .mhead h3{margin:0; font-size:15px; font-weight:600}
+.modal .mhead .iconbtn{margin-left:auto}
+.modal .mbody{padding:18px 20px}
+.modal .mfoot{display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; border-top:1px solid var(--line-soft); background:var(--surface-2)}
+
+/* toast */
+#toasts{position:fixed; bottom:18px; right:18px; z-index:200; display:flex; flex-direction:column; gap:8px}
+.toast{background:var(--ink); color:var(--page); padding:10px 16px; border-radius:8px; font-size:13px;
+  box-shadow:0 4px 14px rgba(0,0,0,.25); max-width:340px; animation:tin .2s ease}
+.toast.err{background:var(--crit); color:#fff}
+@keyframes tin{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+@media(prefers-reduced-motion:reduce){.toast{animation:none}}
+
+.viewhead{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.viewhead h2{margin:0; font-size:18px; font-weight:700}
+.viewhead .desc{color:var(--ink-2); font-size:13px}
+.viewhead .btnrow{margin-left:auto}
+.mono{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.small{font-size:12px}
+.loclabel{font-size:12px; color:var(--ink-2); white-space:nowrap}
+
+/* responsive */
+@media(max-width:840px){
+  #app{flex-direction:column}
+  .sidebar{width:100%; flex:none; height:auto; position:static}
+  .nav{flex-direction:row; flex-wrap:wrap}
+  .nav button{width:auto}
+  .sidebar .foot{display:none}
+  .topbar{flex-wrap:wrap}
+  .searchwrap{width:100%; order:3; margin-left:0}
+}
+input[type=file]{display:none}
+a{color:var(--accent)}
+
+/* login */
+.auth-wrap{position:fixed; inset:0; z-index:300; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(900px 500px at 80% -10%, rgba(0,97,111,.55), transparent 60%), linear-gradient(160deg,#00464B,#003237); padding:20px}
+.auth-card{background:var(--surface); color:var(--ink); border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,.35);
+  width:100%; max-width:390px; padding:28px 26px}
+.auth-card .alogo{display:flex; align-items:center; gap:12px; margin-bottom:18px}
+.auth-card .alogo svg{width:30px; height:33px}
+.auth-card h2{margin:0 0 4px; font-size:18px}
+.auth-card .sub{font-size:13px; color:var(--ink-2); margin-bottom:16px}
+.auth-card .field{margin-bottom:12px}
+.auth-msg{font-size:13px; margin:10px 0 0; min-height:18px}
+.auth-msg.err{color:var(--crit)}
+.auth-msg.ok{color:var(--good-ink)}
+.auth-loading{position:fixed; inset:0; z-index:290; display:flex; align-items:center; justify-content:center;
+  background:var(--page); color:var(--ink-2); font-size:14px; flex-direction:column; gap:12px}
+</style>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg" aria-label="ALLOS" role="img">
+        <path fill="#FAA634" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/>
+      </svg>
+      <div>
+        <div class="t1">NorteShopping</div>
+        <div class="t2">ALLOS &middot; Almoxarifado</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot"><span id="syncstate">Conectando…</span><br><span id="whoami"></span> · <a href="#" id="logout" style="color:inherit">Sair</a></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <h1 id="viewtitle">Dashboard</h1>
+      <div class="searchwrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="globalsearch" type="search" placeholder="Buscar por código, descrição ou categoria…" aria-label="Busca global">
+      </div>
+      <div class="userchip">
+        <div class="avatar" id="avatar">A</div>
+        <span id="username" title="Clique para alterar o operador" style="cursor:pointer">Almoxarife</span>
+      </div>
+    </header>
+    <main class="content" id="view"></main>
+  </div>
+</div>
+<div id="modal-root"></div>
+<div id="auth-root"></div>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+/* ================= NUVEM (Supabase) ================= */
+const SUPA_URL = "https://mhqhbnfbfrfsckhcvzis.supabase.co";
+const SUPA_KEY = "sb_publishable_cz6stQiD91vUY50hapD3Qw_Non3Y2ea";
+const SESS_KEY = "alx_sessao_v1";
+const OPER_KEY = "alx_operador_v1";
+const DB_KEY_ANTIGO = "alx_norteshopping_v1"; // base LocalStorage da versão anterior
+
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() :
+  "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = Math.random()*16|0; return (c==="x" ? r : (r&3|8)).toString(16);
+  }));
+
+let db = { items:[], movs:[], compras:[], user: localStorage.getItem(OPER_KEY) || "Almoxarife" };
+
+/* ---- sessão ---- */
+let sess = null;
+try{ sess = JSON.parse(localStorage.getItem(SESS_KEY) || "null"); }catch(e){}
+function setSess(s){
+  sess = s;
+  if(s) localStorage.setItem(SESS_KEY, JSON.stringify(s));
+  else localStorage.removeItem(SESS_KEY);
+}
+async function authReq(path, body){
+  const r = await fetch(`${SUPA_URL}/auth/v1/${path}`, {
+    method:"POST", headers:{ "Content-Type":"application/json", apikey:SUPA_KEY },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(traduzAuth(d.error_description || d.msg || d.message || ("falha de autenticação ("+r.status+")")));
+  return d;
+}
+function traduzAuth(m){
+  const t = {
+    "Invalid login credentials":"E-mail ou senha incorretos.",
+    "Email not confirmed":"E-mail ainda não confirmado. Verifique sua caixa de entrada.",
+    "User already registered":"Este e-mail já tem conta. Use “Entrar”.",
+    "Password should be at least 6 characters":"A senha precisa ter pelo menos 6 caracteres."
+  };
+  return t[m] || m;
+}
+function saveTokens(d){
+  setSess({
+    access_token: d.access_token, refresh_token: d.refresh_token,
+    expires_at: Math.floor(Date.now()/1000) + (d.expires_in||3600) - 60,
+    email: (d.user && d.user.email) || (sess && sess.email) || ""
+  });
+}
+let refreshEmCurso = null;
+async function ensureToken(){
+  if(!sess) throw new Error("Sessão expirada. Entre novamente.");
+  if(sess.expires_at > Math.floor(Date.now()/1000)) return sess.access_token;
+  if(!refreshEmCurso){
+    refreshEmCurso = authReq("token?grant_type=refresh_token", { refresh_token: sess.refresh_token })
+      .then(d => { saveTokens(d); })
+      .finally(() => { refreshEmCurso = null; });
+  }
+  await refreshEmCurso;
+  return sess.access_token;
+}
+async function api(pathQuery, opts){
+  opts = opts || {};
+  for(let tent=0; tent<2; tent++){
+    const token = await ensureToken();
+    const r = await fetch(`${SUPA_URL}/rest/v1/${pathQuery}`, {
+      method: opts.method || "GET",
+      headers: Object.assign({ apikey:SUPA_KEY, Authorization:"Bearer "+token, "Content-Type":"application/json" }, opts.headers||{}),
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+    if(r.status===401 && tent===0){ if(sess) sess.expires_at = 0; continue; }
+    if(!r.ok){
+      const d = await r.json().catch(()=>({}));
+      throw new Error(d.message || d.hint || d.details || ("erro "+r.status+" no servidor"));
+    }
+    const txt = await r.text();
+    return txt ? JSON.parse(txt) : null;
+  }
+}
+
+/* ---- mapeamento app ⇄ tabelas ---- */
+const itemToRow = i => ({ id:i.id, codigo:i.codigo||"", descricao:i.descricao||"", categoria:i.categoria||"",
+  unidade:i.unidade||"UN", atual:i.atual||0, min:i.min||0, max:i.max||0, valor_unit:i.valorUnit||0,
+  prateleira:i.prateleira||"", coluna:i.coluna||"", gaveta:i.gaveta||"", fornecedor:i.fornecedor||"",
+  lead_time:i.leadTime||0, ultima_compra:i.ultimaCompra||"" });
+const rowToItem = r => ({ id:r.id, codigo:r.codigo, descricao:r.descricao, categoria:r.categoria,
+  unidade:r.unidade, atual:r.atual, min:r.min, max:r.max, valorUnit:r.valor_unit,
+  prateleira:r.prateleira, coluna:r.coluna, gaveta:r.gaveta, fornecedor:r.fornecedor,
+  leadTime:r.lead_time, ultimaCompra:r.ultima_compra });
+const movToRow = m => ({ id:m.id, type:m.type, item_id:m.itemId, qty:m.qty||0, date:m.date||"",
+  obs:m.obs||"", equip:m.equip||"", usuario:m.user||"", ts:m.ts||0 });
+const rowToMov = r => ({ id:r.id, type:r.type, itemId:r.item_id, qty:r.qty, date:r.date,
+  obs:r.obs, equip:r.equip, user:r.usuario, ts:Number(r.ts)||0 });
+const compraToRow = c => ({ id:c.id, item_id:c.itemId, qtd:c.qtd||0, status:c.status||"Pendente",
+  criada_em:c.criadaEm||"", recebida_em:c.recebidaEm||"" });
+const rowToCompra = r => ({ id:r.id, itemId:r.item_id, qtd:r.qtd, status:r.status,
+  criadaEm:r.criada_em, recebidaEm:r.recebida_em });
+const TABS = [
+  { table:"alx_itens",   key:"items",   toRow:itemToRow,   fromRow:rowToItem },
+  { table:"alx_movs",    key:"movs",    toRow:movToRow,    fromRow:rowToMov },
+  { table:"alx_compras", key:"compras", toRow:compraToRow, fromRow:rowToCompra }
+];
+
+/* ---- sincronização: snapshot + gravação por diferença ---- */
+let snap = { alx_itens:{}, alx_movs:{}, alx_compras:{} }; // id -> {json, updated_at}
+let saving = false, savePendente = false, syncErro = false;
+
+async function fetchAll(table){
+  const out = [];
+  for(let from=0;;from+=1000){
+    const page = await api(`${table}?select=*&order=id.asc`, { headers:{ Range: from+"-"+(from+999) } });
+    out.push(...(page||[]));
+    if(!page || page.length<1000) break;
+  }
+  return out;
+}
+async function loadCloud(){
+  const novo = {};
+  const novoSnap = { alx_itens:{}, alx_movs:{}, alx_compras:{} };
+  for(const t of TABS){
+    const rows = await fetchAll(t.table);
+    novo[t.key] = rows.map(t.fromRow);
+    for(let i=0;i<rows.length;i++){
+      novoSnap[t.table][rows[i].id] = {
+        json: JSON.stringify(t.toRow(novo[t.key][i])),
+        updated_at: Number(rows[i].updated_at)||0
+      };
+    }
+  }
+  db.items = novo.items; db.movs = novo.movs; db.compras = novo.compras;
+  snap = novoSnap;
+}
+function save(){ queueSave(); }
+function queueSave(){
+  if(saving){ savePendente = true; return; }
+  doSave();
+}
+async function doSave(){
+  saving = true; savePendente = false; syncUI("saving");
+  try{
+    const agora = Date.now();
+    const dels = [], ups = [], novoSnap = [];
+    for(const t of TABS){
+      const vivos = new Set();
+      const upRows = [];
+      for(const obj of db[t.key]){
+        vivos.add(obj.id);
+        const row = t.toRow(obj);
+        const j = JSON.stringify(row);
+        const s = snap[t.table][obj.id];
+        if(!s || s.json !== j){
+          const ua = Math.max(agora, s ? s.updated_at+1 : 0);
+          upRows.push(Object.assign({ updated_at: ua }, row));
+          novoSnap.push([t.table, obj.id, j, ua]);
+        }
+      }
+      const delIds = Object.keys(snap[t.table]).filter(id => !vivos.has(id));
+      if(delIds.length) dels.push([t.table, delIds]);
+      if(upRows.length) ups.push([t.table, upRows]);
+    }
+    // exclusões primeiro: ao substituir a lista inteira, os códigos antigos saem
+    // antes de os novos entrarem (o código do item é único no banco)
+    for(const [table, ids] of dels){
+      for(let i=0;i<ids.length;i+=80)
+        await api(`${table}?id=in.(${ids.slice(i,i+80).join(",")})`, { method:"DELETE", headers:{ Prefer:"return=minimal" } });
+      for(const id of ids) delete snap[table][id];
+    }
+    for(const [table, rows] of ups){
+      for(let i=0;i<rows.length;i+=500)
+        await api(table, { method:"POST", body:rows.slice(i,i+500),
+          headers:{ Prefer:"resolution=merge-duplicates,return=minimal" } });
+    }
+    for(const [table,id,j,ua] of novoSnap) snap[table][id] = { json:j, updated_at:ua };
+    syncErro = false; syncUI("ok");
+  }catch(e){
+    syncErro = true; syncUI("erro");
+    toast("Falha ao salvar na nuvem: " + e.message + ". Vou tentar de novo em instantes.", true);
+    setTimeout(queueSave, 15000);
+  }finally{
+    saving = false;
+    if(savePendente) queueSave();
+  }
+}
+function syncUI(state){
+  const el = document.getElementById("syncstate");
+  if(!el) return;
+  if(state==="saving") el.textContent = "Salvando na nuvem…";
+  else if(state==="erro") el.innerHTML = '<span style="color:#ffb3a8">Sem conexão — alterações pendentes</span>';
+  else el.textContent = "Nuvem sincronizada às " + new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+}
+/* ids do formato antigo (não-uuid) viram uuid, preservando as referências */
+function normalizeIds(d){
+  const isU = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s||""));
+  const map = {};
+  const fix = id => { if(isU(id)) return String(id).toLowerCase(); if(!map[id]) map[id] = uid(); return map[id]; };
+  (d.items||[]).forEach(i => i.id = fix(i.id));
+  (d.movs||[]).forEach(m => { m.id = fix(m.id); m.itemId = fix(m.itemId); });
+  (d.compras||[]).forEach(c => { c.id = fix(c.id); c.itemId = fix(c.itemId); });
+}
+
+/* ================= HELPERS ================= */
+const fmtN = new Intl.NumberFormat("pt-BR");
+const fmtBRL = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"});
+const fmtD = new Intl.DateTimeFormat("pt-BR");
+const fmtDT = new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"});
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { const n = Number(String(v==null?"":v).replace(",", ".")); return isFinite(n) ? n : 0; };
+const todayISO = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const parseISO = s => { const [y,m,d]=String(s||"").split("-").map(Number); return new Date(y||1970,(m||1)-1,d||1); };
+const dISO = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const fdate = s => s ? fmtD.format(parseISO(String(s).slice(0,10))) : "—";
+const itemById = id => db.items.find(i => i.id === id);
+const locStr = it => [it.prateleira&&("Prat. "+it.prateleira), it.coluna&&("Col. "+it.coluna), it.gaveta&&("Gav. "+it.gaveta)].filter(Boolean).join(" · ") || "—";
+
+function statusItem(it){
+  if(it.atual <= it.min) return "vermelho";
+  if(it.atual <= it.min * 1.1) return "amarelo";
+  return "verde";
+}
+const statusLabel = { verde:"Normal", amarelo:"Atenção", vermelho:"Crítico" };
+
+function consumoPeriodo(itemId, dias){
+  const lim = new Date(); lim.setDate(lim.getDate() - dias);
+  return db.movs.filter(m => m.type==="saida" && m.itemId===itemId && parseISO(m.date) >= lim)
+                .reduce((s,m) => s + m.qty, 0);
+}
+function mediaDiaria(itemId){ return consumoPeriodo(itemId, 90) / 90; }
+function diasAteRuptura(it){
+  const md = mediaDiaria(it.id);
+  if(md <= 0) return Infinity;
+  return it.atual / md;
+}
+function comprarHoje(it){
+  const md = mediaDiaria(it.id);
+  const lt = it.leadTime || 0;
+  return md > 0 && lt > 0 && it.atual < md * lt;
+}
+
+/* auto purchase requests */
+function syncCompras(){
+  for(const it of db.items){
+    const aberta = db.compras.find(c => c.itemId===it.id && (c.status==="Pendente" || c.status==="Comprado"));
+    if(it.atual <= it.min){
+      if(!aberta){
+        db.compras.push({ id:uid(), itemId:it.id, qtd:Math.max(1,(it.max||0)-it.atual), status:"Pendente", criadaEm:todayISO() });
+      } else if(aberta.status==="Pendente"){
+        aberta.qtd = Math.max(1,(it.max||0)-it.atual);
+      }
+    } else {
+      // stock recovered: drop stale pending auto-requests
+      db.compras = db.compras.filter(c => !(c.itemId===it.id && c.status==="Pendente"));
+    }
+  }
+  db.compras = db.compras.filter(c => itemById(c.itemId));
+}
+function comprasAbertas(){ return db.compras.filter(c => c.status==="Pendente" || c.status==="Comprado"); }
+
+function commit(){ syncCompras(); save(); render(); }
+
+/* ================= TOAST ================= */
+function toast(msg, err){
+  const t = document.createElement("div");
+  t.className = "toast" + (err ? " err" : "");
+  t.textContent = msg;
+  document.getElementById("toasts").appendChild(t);
+  setTimeout(() => t.remove(), 4200);
+}
+
+/* ================= ICONS ================= */
+const I = {
+  dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 8-9-5-9 5v8l9 5 9-5V8Z"/><path d="m3.3 8.3 8.7 4.8 8.7-4.8"/><path d="M12 22V13"/></svg>',
+  in:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>',
+  out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M4 3h16"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>',
+  cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .6h9.7a1 1 0 0 0 1-.7L22 7H6"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  data:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m1 0-1 14H8L7 6"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 5-5m-5 5-5-5"/><path d="M4 21h16"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0-5 5m5-5 5 5"/><path d="M4 3h16"/></svg>',
+  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/></svg>'
+};
+
+/* ================= VIEWS REGISTRY ================= */
+const VIEWS = [
+  { id:"dashboard", label:"Dashboard", icon:I.dash },
+  { id:"itens", label:"Itens", icon:I.box },
+  { id:"entrada", label:"Entrada", icon:I.in },
+  { id:"saida", label:"Saída", icon:I.out },
+  { id:"movs", label:"Movimentações", icon:I.list },
+  { id:"critico", label:"Estoque Crítico", icon:I.alert },
+  { id:"compras", label:"Compras", icon:I.cart },
+  { id:"indicadores", label:"Indicadores", icon:I.chart },
+  { id:"auditoria", label:"Auditoria", icon:I.hist },
+  { id:"dados", label:"Dados", icon:I.data }
+];
+let current = "dashboard";
+let searchTerm = "";
+let movFilters = { de:"", ate:"", item:"", tipo:"" };
+
+function go(view){ current = view; render(); }
+
+/* ================= NAV & TOPBAR ================= */
+function renderNav(){
+  const nCrit = db.items.filter(i => i.atual <= i.min).length;
+  document.getElementById("nav").innerHTML = VIEWS.map(v =>
+    `<button class="${v.id===current?'active':''}" data-view="${v.id}">${v.icon}<span>${v.label}</span>${v.id==='critico'&&nCrit?`<span class="badge">${nCrit}</span>`:''}${v.id==='compras'&&comprasAbertas().length?`<span class="badge" style="background:var(--warn)">${comprasAbertas().length}</span>`:''}</button>`
+  ).join("");
+  document.getElementById("viewtitle").textContent = VIEWS.find(v=>v.id===current).label;
+  document.getElementById("username").textContent = db.user;
+  document.getElementById("avatar").textContent = (db.user||"A").trim().charAt(0).toUpperCase();
+  const who = document.getElementById("whoami");
+  if(who) who.textContent = sess && sess.email ? sess.email : "";
+}
+document.getElementById("nav").addEventListener("click", e => {
+  const b = e.target.closest("button[data-view]");
+  if(b) go(b.dataset.view);
+});
+document.getElementById("globalsearch").addEventListener("input", e => {
+  searchTerm = e.target.value.trim().toLowerCase();
+  if(current !== "itens") current = "itens";
+  render(true);
+});
+document.getElementById("username").addEventListener("click", () => {
+  openModal(`
+    <div class="mhead"><h3>Operador</h3><button class="iconbtn" data-close>${I.x}</button></div>
+    <div class="mbody"><div class="field"><label>Nome do operador (registrado nas movimentações)</label>
+    <input id="f-user" value="${esc(db.user)}"></div></div>
+    <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="save-user">Salvar</button></div>`, "sm");
+  document.getElementById("save-user").onclick = () => {
+    db.user = document.getElementById("f-user").value.trim() || "Almoxarife";
+    localStorage.setItem(OPER_KEY, db.user);
+    closeModal(); commit();
+  };
+});
+
+/* ================= CHARTS (SVG) ================= */
+function barChartV(data, {h=210, fmt=fmtN.format.bind(fmtN)}={}){
+  if(!data.length || data.every(d=>!d.value)) return '<div class="empty">Sem dados no período. Registre saídas para alimentar o gráfico.</div>';
+  const w = 560, padL = 40, padR = 8, padT = 18, padB = 26;
+  const iw = w - padL - padR, ih = h - padT - padB;
+  const max = Math.max(...data.map(d=>d.value), 1);
+  const step = iw / data.length;
+  const bw = Math.min(44, step * 0.55);
+  const ticks = 4;
+  let s = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de barras">`;
+  for(let t=0;t<=ticks;t++){
+    const v = max*t/ticks, y = padT + ih - ih*t/ticks;
+    s += `<line class="gridline" x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}"/>`;
+    s += `<text class="axis" x="${padL-6}" y="${y+4}" text-anchor="end">${fmt(Math.round(v))}</text>`;
+  }
+  data.forEach((d,i)=>{
+    const bh = Math.max(d.value>0?2:0, ih * d.value/max);
+    const x = padL + step*i + (step-bw)/2, y = padT + ih - bh;
+    s += `<g><rect class="bar" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3"><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
+    if(d.value>0) s += `<text class="vlabel" x="${x+bw/2}" y="${y-5}" text-anchor="middle">${fmt(d.value)}</text>`;
+    s += `<text class="axis" x="${padL + step*i + step/2}" y="${h-8}" text-anchor="middle">${esc(d.label)}</text></g>`;
+  });
+  s += `<line class="baseline" x1="${padL}" y1="${padT+ih}" x2="${w-padR}" y2="${padT+ih}"/></svg>`;
+  return `<div class="chart">${s}</div>`;
+}
+function barChartH(data, {fmt=fmtN.format.bind(fmtN)}={}){
+  if(!data.length) return '<div class="empty">Sem consumo registrado nos últimos 90 dias.</div>';
+  const w = 560, rowH = 34, padT = 6, padB = 6, labelW = 170;
+  const h = padT + padB + rowH*data.length;
+  const iw = w - labelW - 60;
+  const max = Math.max(...data.map(d=>d.value),1);
+  let s = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Itens mais consumidos">`;
+  data.forEach((d,i)=>{
+    const y = padT + rowH*i, bw = Math.max(2, iw*d.value/max);
+    const lbl = d.label.length>26 ? d.label.slice(0,25)+"…" : d.label;
+    s += `<g><text class="axis" x="${labelW-8}" y="${y+rowH/2+4}" text-anchor="end">${esc(lbl)}<title>${esc(d.label)}</title></text>`;
+    s += `<rect class="bar" x="${labelW}" y="${y+rowH/2-8}" width="${bw}" height="16" rx="3"><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
+    s += `<text class="vlabel" x="${labelW+bw+8}" y="${y+rowH/2+4}">${fmt(d.value)}</text></g>`;
+  });
+  s += `</svg>`;
+  return `<div class="chart">${s}</div>`;
+}
+
+/* ================= DASHBOARD ================= */
+function monthKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+function vDashboard(){
+  const totalItens = db.items.length;
+  const totalEstoque = db.items.reduce((s,i)=>s+i.atual,0);
+  const valorEstoque = db.items.reduce((s,i)=>s+i.atual*(i.valorUnit||0),0);
+  const abaixoMin = db.items.filter(i=>i.atual<=i.min).length;
+  const solic = comprasAbertas().length;
+  const hoje = new Date();
+  const meses = [];
+  for(let k=5;k>=0;k--){
+    const d = new Date(hoje.getFullYear(), hoje.getMonth()-k, 1);
+    meses.push({ key:monthKey(d), label:MESES[d.getMonth()]+"/"+String(d.getFullYear()).slice(2), value:0 });
+  }
+  for(const m of db.movs){
+    if(m.type!=="saida") continue;
+    const k = String(m.date).slice(0,7);
+    const b = meses.find(x=>x.key===k);
+    if(b) b.value += m.qty;
+  }
+  const cons = {};
+  const lim = new Date(); lim.setDate(lim.getDate()-90);
+  for(const m of db.movs){
+    if(m.type!=="saida" || parseISO(m.date)<lim) continue;
+    cons[m.itemId] = (cons[m.itemId]||0)+m.qty;
+  }
+  const top = Object.entries(cons).map(([id,v])=>({label:(itemById(id)||{}).descricao||"(excluído)", value:v}))
+    .sort((a,b)=>b.value-a.value).slice(0,6);
+  const criticos = db.items.filter(i=>i.atual<=i.min*1.1).sort((a,b)=>(a.atual-a.min)-(b.atual-b.min)).slice(0,8);
+  const comprarAgora = db.items.filter(comprarHoje);
+
+  return `
+  <div class="cards">
+    <div class="card kpi"><div class="lbl">Itens cadastrados</div><div class="val mono">${fmtN.format(totalItens)}</div><div class="sub">SKUs ativos no almoxarifado</div></div>
+    <div class="card kpi"><div class="lbl">Total em estoque</div><div class="val mono">${fmtN.format(totalEstoque)}</div><div class="sub">Unidades somadas</div></div>
+    ${valorEstoque?`<div class="card kpi"><div class="lbl">Valor em estoque</div><div class="val mono" style="font-size:24px">${fmtBRL.format(valorEstoque)}</div><div class="sub">quantidade × valor unitário</div></div>`:""}
+    <div class="card kpi ${abaixoMin?'alerta':'ok'}"><div class="lbl">Abaixo do mínimo</div><div class="val mono">${fmtN.format(abaixoMin)}</div><div class="sub">${abaixoMin?'Requer reposição':'Tudo dentro do mínimo'}</div></div>
+    <div class="card kpi ${solic?'alerta':''}"><div class="lbl">Solicitações abertas</div><div class="val mono">${fmtN.format(solic)}</div><div class="sub">Pendentes ou em compra</div></div>
+  </div>
+  ${comprarAgora.length?`<div class="panel" style="border-left:4px solid var(--crit)"><div class="pbody" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <span class="tag-hoje">Comprar hoje</span>
+    <span>${comprarAgora.length} ${comprarAgora.length===1?'item não cobre':'itens não cobrem'} o consumo previsto durante o lead time do fornecedor:</span>
+    <strong>${comprarAgora.slice(0,4).map(i=>esc(i.descricao)).join(", ")}${comprarAgora.length>4?" +"+(comprarAgora.length-4):""}</strong>
+    <button class="btn sm" data-goto="compras" style="margin-left:auto">Ver compras</button></div></div>`:""}
+  <div class="panelgrid">
+    <div class="panel"><div class="phead"><h3>Consumo mensal</h3><span class="hint">saídas · últimos 6 meses</span></div>
+      <div class="pbody">${barChartV(meses.map(m=>({label:m.label,value:m.value})))}</div></div>
+    <div class="panel"><div class="phead"><h3>Itens mais consumidos</h3><span class="hint">últimos 90 dias</span></div>
+      <div class="pbody">${barChartH(top)}</div></div>
+  </div>
+  <div class="panel"><div class="phead"><h3>Estoque crítico</h3><span class="hint">atual ≤ 110% do mínimo</span>
+    </div><div class="pbody flush">
+    ${criticos.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th>Situação</th><th>Localização</th></tr></thead><tbody>
+      ${criticos.map(i=>`<tr><td class="mono">${esc(i.codigo)}</td><td>${esc(i.descricao)}</td>
+        <td class="num">${fmtN.format(i.atual)}</td><td class="num">${fmtN.format(i.min)}</td>
+        <td><span class="pill ${statusItem(i)}">${statusLabel[statusItem(i)]}</span>${comprarHoje(i)?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
+        <td class="loclabel">${esc(locStr(i))}</td></tr>`).join("")}
+    </tbody></table></div>`:`<div class="empty">Nenhum item em situação crítica. 👍</div>`}
+  </div></div>
+  ${!db.items.length?`<div class="panel"><div class="pbody" style="text-align:center;padding:30px">
+    <p style="margin:0 0 14px">O almoxarifado ainda está vazio. Carregue a lista oficial do NorteShopping, importe uma planilha ou cadastre itens manualmente.</p>
+    <div class="btnrow" style="justify-content:center">
+      <button class="btn primary" id="lista-ns">${I.box} Carregar lista NorteShopping (500 itens)</button>
+      <button class="btn" data-goto="dados">Importar planilha</button>
+      <button class="btn" data-goto="itens">${I.plus} Cadastrar itens</button>
+      <button class="btn" id="seed-demo">Dados de demonstração</button>
+    </div></div></div>`:""}`;
+}
+
+/* ================= ITENS ================= */
+function vItens(){
+  const q = searchTerm;
+  const list = db.items.filter(i => !q || [i.codigo,i.descricao,i.categoria].some(f => String(f||"").toLowerCase().includes(q)))
+    .sort((a,b)=>String(a.codigo).localeCompare(String(b.codigo),undefined,{numeric:true}));
+  return `
+  <div class="viewhead"><h2>Itens</h2><span class="desc">${fmtN.format(list.length)} de ${fmtN.format(db.items.length)} itens${q?` · filtro: “${esc(q)}”`:""}</span>
+    <div class="btnrow">
+      <button class="btn" id="exp-itens-csv">${I.down} CSV</button>
+      <button class="btn" id="exp-itens-xlsx">${I.down} Excel</button>
+      <button class="btn primary" id="novo-item">${I.plus} Novo item</button>
+    </div></div>
+  <div class="panel"><div class="pbody flush">
+    ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Código</th><th>Descrição</th><th>Categoria</th><th>Un.</th>
+      <th class="num">Atual</th><th class="num">Mín.</th><th class="num">Máx.</th>
+      <th class="num">Valor unit.</th>
+      <th>Situação</th><th>Localização</th><th>Fornecedor</th><th class="num">Lead time</th><th>Últ. compra</th><th></th></tr></thead><tbody>
+    ${list.map(i=>`<tr>
+      <td class="mono">${esc(i.codigo)}</td><td><strong>${esc(i.descricao)}</strong></td>
+      <td>${esc(i.categoria||"—")}</td><td>${esc(i.unidade||"—")}</td>
+      <td class="num"><strong>${fmtN.format(i.atual)}</strong></td>
+      <td class="num">${fmtN.format(i.min)}</td><td class="num">${fmtN.format(i.max)}</td>
+      <td class="num">${i.valorUnit?fmtBRL.format(i.valorUnit):"—"}</td>
+      <td><span class="pill ${statusItem(i)}">${statusLabel[statusItem(i)]}</span></td>
+      <td class="loclabel">${esc(locStr(i))}</td>
+      <td>${esc(i.fornecedor||"—")}</td>
+      <td class="num">${i.leadTime?i.leadTime+" d":"—"}</td>
+      <td>${fdate(i.ultimaCompra)}</td>
+      <td style="white-space:nowrap"><button class="iconbtn" data-edit="${i.id}" title="Editar">${I.edit}</button><button class="iconbtn del" data-del="${i.id}" title="Excluir">${I.trash}</button></td>
+    </tr>`).join("")}
+    </tbody></table></div>`:`<div class="empty">${q?"Nenhum item corresponde à busca.":"Nenhum item cadastrado ainda."}</div>`}
+  </div></div>`;
+}
+
+function itemForm(it){
+  it = it || {};
+  return `
+  <div class="formgrid">
+    <div class="field"><label>Código <span class="req">*</span></label><input id="f-codigo" value="${esc(it.codigo||"")}" required></div>
+    <div class="field span2"><label>Descrição <span class="req">*</span></label><input id="f-descricao" value="${esc(it.descricao||"")}" required></div>
+    <div class="field"><label>Categoria</label><input id="f-categoria" value="${esc(it.categoria||"")}" list="cats">
+      <datalist id="cats">${[...new Set(db.items.map(x=>x.categoria).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join("")}</datalist></div>
+    <div class="field"><label>Unidade</label><input id="f-unidade" value="${esc(it.unidade||"UN")}"></div>
+    <div class="field"><label>Estoque atual</label><input id="f-atual" type="number" min="0" step="any" value="${it.atual??0}"></div>
+    <div class="field"><label>Estoque mínimo</label><input id="f-min" type="number" min="0" step="any" value="${it.min??0}"></div>
+    <div class="field"><label>Estoque máximo</label><input id="f-max" type="number" min="0" step="any" value="${it.max??0}"></div>
+    <div class="field"><label>Prateleira</label><input id="f-prateleira" value="${esc(it.prateleira||"")}"></div>
+    <div class="field"><label>Coluna</label><input id="f-coluna" value="${esc(it.coluna||"")}"></div>
+    <div class="field"><label>Gaveta</label><input id="f-gaveta" value="${esc(it.gaveta||"")}"></div>
+    <div class="field span2"><label>Fornecedor principal</label><input id="f-fornecedor" value="${esc(it.fornecedor||"")}"></div>
+    <div class="field"><label>Lead time (dias)</label><input id="f-leadtime" type="number" min="0" value="${it.leadTime??""}"></div>
+    <div class="field"><label>Última compra</label><input id="f-ultima" type="date" value="${esc(it.ultimaCompra||"")}"></div>
+    <div class="field"><label>Valor unitário (R$)</label><input id="f-valor" type="number" min="0" step="0.01" value="${it.valorUnit??""}"></div>
+  </div>`;
+}
+function openItemModal(id){
+  const it = id ? itemById(id) : null;
+  openModal(`
+    <div class="mhead"><h3>${it?"Editar item":"Novo item"}</h3><button class="iconbtn" data-close>${I.x}</button></div>
+    <div class="mbody">${itemForm(it)}</div>
+    <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="save-item">${it?"Salvar alterações":"Cadastrar"}</button></div>`);
+  document.getElementById("save-item").onclick = () => {
+    const g = i => document.getElementById(i).value.trim();
+    const codigo = g("f-codigo"), descricao = g("f-descricao");
+    if(!codigo || !descricao){ toast("Código e descrição são obrigatórios.", true); return; }
+    const dupe = db.items.find(x => x.codigo.toLowerCase()===codigo.toLowerCase() && x.id!==(it&&it.id));
+    if(dupe){ toast("Já existe um item com o código "+codigo+".", true); return; }
+    const data = {
+      codigo, descricao, categoria:g("f-categoria"), unidade:g("f-unidade")||"UN",
+      atual:num(g("f-atual")), min:num(g("f-min")), max:num(g("f-max")),
+      prateleira:g("f-prateleira"), coluna:g("f-coluna"), gaveta:g("f-gaveta"),
+      fornecedor:g("f-fornecedor"), leadTime:Math.round(num(g("f-leadtime"))), ultimaCompra:g("f-ultima"),
+      valorUnit:num(g("f-valor"))
+    };
+    if(it) Object.assign(it, data);
+    else db.items.push(Object.assign({id:uid()}, data));
+    closeModal(); toast(it?"Item atualizado.":"Item cadastrado."); commit();
+  };
+}
+
+/* ================= ENTRADA / SAÍDA ================= */
+function vMovForm(tipo){
+  const isOut = tipo==="saida";
+  const opts = db.items.slice().sort((a,b)=>a.descricao.localeCompare(b.descricao))
+    .map(i=>`<option value="${i.id}">${esc(i.codigo)} — ${esc(i.descricao)} (${fmtN.format(i.atual)} ${esc(i.unidade||"UN")})</option>`).join("");
+  const recentes = db.movs.filter(m=>m.type===tipo).slice(-8).reverse();
+  return `
+  <div class="viewhead"><h2>${isOut?"Saída de material":"Entrada de material"}</h2>
+    <span class="desc">${isOut?"Registre o consumo retirado do almoxarifado.":"Registre recebimentos e devoluções ao estoque."}</span></div>
+  <div class="panel"><div class="pbody">
+    ${db.items.length?`
+    <div class="formgrid">
+      <div class="field span2"><label>Item <span class="req">*</span></label>
+        <select id="m-item"><option value="">Selecione…</option>${opts}</select></div>
+      <div class="field"><label>Quantidade <span class="req">*</span></label><input id="m-qtd" type="number" min="0" step="any" placeholder="0"></div>
+      <div class="field"><label>Data</label><input id="m-data" type="date" value="${todayISO()}"></div>
+      ${isOut?`<div class="field"><label>Equipamento / destino</label><input id="m-equip" placeholder="Ex.: Chiller 02, Escada rolante L3"></div>`:""}
+      <div class="field span2"><label>Observação</label><input id="m-obs" placeholder="${isOut?'Ex.: OS 4231 — troca preventiva':'Ex.: NF 1234 — Fornecedor'}"></div>
+    </div>
+    <div class="btnrow" style="margin-top:14px">
+      <button class="btn primary" id="m-save">${isOut?I.out+" Registrar saída":I.in+" Registrar entrada"}</button>
+      <span class="muted small" id="m-hint"></span>
+    </div>`:`<div class="empty">Cadastre itens antes de lançar movimentações.</div>`}
+  </div></div>
+  <div class="panel"><div class="phead"><h3>Últimos lançamentos de ${isOut?"saída":"entrada"}</h3></div><div class="pbody flush">
+    ${recentes.length?`<div class="tablewrap"><table class="data"><thead><tr><th>Data</th><th>Item</th><th class="num">Qtd.</th>${isOut?"<th>Equipamento</th>":""}<th>Usuário</th><th>Observação</th></tr></thead><tbody>
+    ${recentes.map(m=>{const it=itemById(m.itemId);return `<tr><td>${fdate(m.date)}</td><td>${esc(it?it.descricao:"(excluído)")}</td><td class="num">${fmtN.format(m.qty)}</td>${isOut?`<td>${esc(m.equip||"—")}</td>`:""}<td>${esc(m.user||"—")}</td><td>${esc(m.obs||"—")}</td></tr>`}).join("")}
+    </tbody></table></div>`:`<div class="empty">Nenhum lançamento ainda.</div>`}
+  </div></div>`;
+}
+function wireMovForm(tipo){
+  const btn = document.getElementById("m-save");
+  if(!btn) return;
+  const sel = document.getElementById("m-item");
+  sel.addEventListener("change", ()=>{
+    const it = itemById(sel.value);
+    document.getElementById("m-hint").textContent = it ? `Estoque atual: ${fmtN.format(it.atual)} ${it.unidade||"UN"} · mínimo ${fmtN.format(it.min)}` : "";
+  });
+  btn.onclick = () => {
+    const it = itemById(sel.value);
+    const qtd = num(document.getElementById("m-qtd").value);
+    const date = document.getElementById("m-data").value || todayISO();
+    const obs = document.getElementById("m-obs").value.trim();
+    const equip = tipo==="saida" ? document.getElementById("m-equip").value.trim() : "";
+    if(!it){ toast("Selecione um item.", true); return; }
+    if(qtd<=0){ toast("Informe uma quantidade maior que zero.", true); return; }
+    const registrar = () => {
+      it.atual = tipo==="saida" ? it.atual - qtd : it.atual + qtd;
+      db.movs.push({ id:uid(), type:tipo, itemId:it.id, qty:qtd, date, obs, equip, user:db.user, ts:Date.now() });
+      if(tipo==="entrada") it.ultimaCompra = it.ultimaCompra && it.ultimaCompra>date ? it.ultimaCompra : date;
+      toast((tipo==="saida"?"Saída":"Entrada")+` registrada: ${fmtN.format(qtd)} × ${it.descricao}. Novo saldo: ${fmtN.format(it.atual)}.`);
+      commit();
+    };
+    if(tipo==="saida" && qtd>it.atual){
+      confirmDlg(`A saída (${fmtN.format(qtd)}) é maior que o estoque atual (${fmtN.format(it.atual)}). O saldo ficará negativo. Continuar?`, registrar, "Registrar mesmo assim");
+      return;
+    }
+    registrar();
+  };
+}
+
+/* ================= MOVIMENTAÇÕES ================= */
+function vMovs(){
+  const f = movFilters;
+  let list = db.movs.slice().sort((a,b)=> (b.date+"").localeCompare(a.date+"") || (b.ts||0)-(a.ts||0));
+  if(f.de) list = list.filter(m=>m.date>=f.de);
+  if(f.ate) list = list.filter(m=>m.date<=f.ate);
+  if(f.item) list = list.filter(m=>m.itemId===f.item);
+  if(f.tipo) list = list.filter(m=>m.type===f.tipo);
+  const opts = db.items.slice().sort((a,b)=>a.descricao.localeCompare(b.descricao))
+    .map(i=>`<option value="${i.id}" ${f.item===i.id?"selected":""}>${esc(i.codigo)} — ${esc(i.descricao)}</option>`).join("");
+  const totE = list.filter(m=>m.type==="entrada").reduce((s,m)=>s+m.qty,0);
+  const totS = list.filter(m=>m.type==="saida").reduce((s,m)=>s+m.qty,0);
+  return `
+  <div class="viewhead"><h2>Movimentações</h2>
+    <span class="desc">${fmtN.format(list.length)} registros · entradas ${fmtN.format(totE)} · saídas ${fmtN.format(totS)}</span>
+    <div class="btnrow"><button class="btn" id="exp-movs-csv">${I.down} CSV</button><button class="btn" id="exp-movs-xlsx">${I.down} Excel</button></div></div>
+  <div class="panel">
+    <div class="filterbar">
+      <div class="field"><label>De</label><input type="date" id="fl-de" value="${esc(f.de)}"></div>
+      <div class="field"><label>Até</label><input type="date" id="fl-ate" value="${esc(f.ate)}"></div>
+      <div class="field" style="min-width:220px"><label>Item</label><select id="fl-item"><option value="">Todos</option>${opts}</select></div>
+      <div class="field"><label>Tipo</label><select id="fl-tipo">
+        <option value="">Todos</option>
+        <option value="entrada" ${f.tipo==="entrada"?"selected":""}>Entrada</option>
+        <option value="saida" ${f.tipo==="saida"?"selected":""}>Saída</option></select></div>
+      <button class="btn sm" id="fl-clear">Limpar filtros</button>
+    </div>
+    <div class="pbody flush">
+    ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Data</th><th>Tipo</th><th>Item</th><th class="num">Qtd.</th><th>Equipamento</th><th>Usuário</th><th>Observação</th></tr></thead><tbody>
+    ${list.slice(0,400).map(m=>{const it=itemById(m.itemId);return `<tr>
+      <td>${fdate(m.date)}</td>
+      <td><span class="pill ${m.type==="entrada"?"azul":"cinza"}">${m.type==="entrada"?"Entrada":"Saída"}</span></td>
+      <td>${it?`<strong>${esc(it.descricao)}</strong> <span class="muted small mono">${esc(it.codigo)}</span>`:"(excluído)"}</td>
+      <td class="num">${m.type==="saida"?"−":"+"}${fmtN.format(m.qty)}</td>
+      <td>${esc(m.equip||"—")}</td><td>${esc(m.user||"—")}</td><td>${esc(m.obs||"—")}</td></tr>`}).join("")}
+    </tbody></table>${list.length>400?`<div class="empty">Exibindo os 400 mais recentes de ${fmtN.format(list.length)}. Use os filtros ou exporte para ver tudo.</div>`:""}</div>`
+    :`<div class="empty">Nenhuma movimentação encontrada com estes filtros.</div>`}
+  </div></div>`;
+}
+function wireMovs(){
+  const upd = ()=>{ movFilters = {
+    de:document.getElementById("fl-de").value, ate:document.getElementById("fl-ate").value,
+    item:document.getElementById("fl-item").value, tipo:document.getElementById("fl-tipo").value }; render(); };
+  ["fl-de","fl-ate","fl-item","fl-tipo"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("change",upd); });
+  const c=document.getElementById("fl-clear"); if(c) c.onclick=()=>{ movFilters={de:"",ate:"",item:"",tipo:""}; render(); };
+}
+
+/* ================= ESTOQUE CRÍTICO ================= */
+function vCritico(){
+  const list = db.items.filter(i=>i.atual<=i.min).sort((a,b)=>(a.atual-a.min)-(b.atual-b.min));
+  const atencao = db.items.filter(i=>i.atual>i.min && i.atual<=i.min*1.1);
+  return `
+  <div class="viewhead"><h2>Estoque crítico</h2>
+    <span class="desc">Itens com estoque atual ≤ estoque mínimo</span></div>
+  <div class="cards">
+    <div class="card kpi ${list.length?'alerta':'ok'}"><div class="lbl">Críticos (≤ mínimo)</div><div class="val mono">${list.length}</div></div>
+    <div class="card kpi"><div class="lbl">Em atenção (até 10% acima do mín.)</div><div class="val mono" style="color:var(--warn-ink)">${atencao.length}</div></div>
+    <div class="card kpi ok"><div class="lbl">Normais</div><div class="val mono">${db.items.length-list.length-atencao.length}</div></div>
+  </div>
+  <div class="panel"><div class="phead"><h3>Itens críticos</h3><span class="hint">ordenado pela maior falta</span></div><div class="pbody flush">
+    ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th class="num">Máximo</th><th class="num">Repor</th><th>Situação</th><th>Fornecedor</th><th>Localização</th></tr></thead><tbody>
+    ${list.map(i=>`<tr><td class="mono">${esc(i.codigo)}</td><td><strong>${esc(i.descricao)}</strong></td>
+      <td class="num" style="color:var(--crit);font-weight:700">${fmtN.format(i.atual)}</td>
+      <td class="num">${fmtN.format(i.min)}</td><td class="num">${fmtN.format(i.max)}</td>
+      <td class="num"><strong>${fmtN.format(Math.max(0,i.max-i.atual))}</strong></td>
+      <td><span class="pill vermelho">Crítico</span>${comprarHoje(i)?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
+      <td>${esc(i.fornecedor||"—")}</td><td class="loclabel">${esc(locStr(i))}</td></tr>`).join("")}
+    </tbody></table></div>`:`<div class="empty">Nenhum item abaixo do mínimo. Estoque saudável.</div>`}
+  </div></div>
+  ${atencao.length?`<div class="panel"><div class="phead"><h3>Em atenção</h3><span class="hint">até 10% acima do mínimo</span></div><div class="pbody flush">
+    <div class="tablewrap"><table class="data"><thead><tr><th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th>Situação</th></tr></thead><tbody>
+    ${atencao.map(i=>`<tr><td class="mono">${esc(i.codigo)}</td><td>${esc(i.descricao)}</td><td class="num">${fmtN.format(i.atual)}</td><td class="num">${fmtN.format(i.min)}</td><td><span class="pill amarelo">Atenção</span></td></tr>`).join("")}
+    </tbody></table></div></div></div>`:""}`;
+}
+
+/* ================= COMPRAS ================= */
+function vCompras(){
+  const list = db.compras.slice().sort((a,b)=>{
+    const ord = {Pendente:0, Comprado:1, Recebido:2};
+    return (ord[a.status]-ord[b.status]) || (b.criadaEm+"").localeCompare(a.criadaEm+"");
+  });
+  const pillC = { Pendente:"vermelho", Comprado:"amarelo", Recebido:"verde" };
+  return `
+  <div class="viewhead"><h2>Compras</h2>
+    <span class="desc">Solicitações geradas automaticamente quando o estoque atinge o mínimo. Quantidade sugerida = máximo − atual.</span>
+    <div class="btnrow"><button class="btn" id="exp-compras-csv">${I.down} CSV</button></div></div>
+  <div class="panel"><div class="pbody flush">
+    ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Criada em</th><th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th class="num">Qtd. sugerida</th><th class="num">Valor est.</th><th>Fornecedor</th><th class="num">Lead time</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+    ${list.map(c=>{const it=itemById(c.itemId); if(!it) return ""; return `<tr>
+      <td>${fdate(c.criadaEm)}</td><td class="mono">${esc(it.codigo)}</td>
+      <td><strong>${esc(it.descricao)}</strong>${comprarHoje(it)&&c.status!=="Recebido"?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
+      <td class="num">${fmtN.format(it.atual)}</td><td class="num">${fmtN.format(it.min)}</td>
+      <td class="num"><strong>${fmtN.format(c.qtd)}</strong></td>
+      <td class="num">${it.valorUnit?fmtBRL.format(c.qtd*it.valorUnit):"—"}</td>
+      <td>${esc(it.fornecedor||"—")}</td><td class="num">${it.leadTime?it.leadTime+" d":"—"}</td>
+      <td><span class="pill ${pillC[c.status]}">${c.status}</span></td>
+      <td style="white-space:nowrap">
+        ${c.status==="Pendente"?`<button class="btn sm" data-comprar="${c.id}">Marcar comprado</button>`:""}
+        ${c.status==="Comprado"?`<button class="btn sm primary" data-receber="${c.id}">Receber</button>`:""}
+        ${c.status==="Recebido"?`<span class="muted small">Concluída</span>`:""}
+      </td></tr>`}).join("")}
+    </tbody></table></div>`:`<div class="empty">Nenhuma solicitação de compra. Elas aparecem aqui automaticamente quando um item atinge o estoque mínimo.</div>`}
+  </div></div>`;
+}
+function openReceberModal(compraId){
+  const c = db.compras.find(x=>x.id===compraId); if(!c) return;
+  const it = itemById(c.itemId); if(!it) return;
+  openModal(`
+    <div class="mhead"><h3>Receber material</h3><button class="iconbtn" data-close>${I.x}</button></div>
+    <div class="mbody">
+      <p style="margin:0 0 12px"><strong>${esc(it.descricao)}</strong> <span class="muted mono">${esc(it.codigo)}</span><br>
+      <span class="small muted">Estoque atual ${fmtN.format(it.atual)} · sugerido ${fmtN.format(c.qtd)}</span></p>
+      <div class="formgrid">
+        <div class="field"><label>Quantidade recebida</label><input id="r-qtd" type="number" min="0" step="any" value="${c.qtd}"></div>
+        <div class="field"><label>Data</label><input id="r-data" type="date" value="${todayISO()}"></div>
+        <div class="field span2"><label>Observação</label><input id="r-obs" placeholder="Ex.: NF 5678"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="r-save">Confirmar recebimento</button></div>`,"sm");
+  document.getElementById("r-save").onclick = () => {
+    const qtd = num(document.getElementById("r-qtd").value);
+    if(qtd<=0){ toast("Quantidade inválida.", true); return; }
+    const date = document.getElementById("r-data").value || todayISO();
+    const obs = document.getElementById("r-obs").value.trim() || "Recebimento de compra";
+    it.atual += qtd; it.ultimaCompra = date;
+    db.movs.push({ id:uid(), type:"entrada", itemId:it.id, qty:qtd, date, obs, equip:"", user:db.user, ts:Date.now() });
+    c.status = "Recebido"; c.recebidaEm = date;
+    closeModal(); toast(`Recebido: ${fmtN.format(qtd)} × ${it.descricao}. Novo saldo: ${fmtN.format(it.atual)}.`);
+    commit();
+  };
+}
+
+/* ================= INDICADORES ================= */
+function vIndicadores(){
+  const rows = db.items.map(it=>{
+    const c30 = consumoPeriodo(it.id,30), c90 = consumoPeriodo(it.id,90);
+    const md = c90/90;
+    const dias = md>0 ? it.atual/md : Infinity;
+    const ruptura = isFinite(dias) ? new Date(Date.now()+dias*86400000) : null;
+    return { it, c30, c90, md, dias, ruptura, hoje:comprarHoje(it) };
+  }).sort((a,b)=>a.dias-b.dias);
+  const c30t = rows.reduce((s,r)=>s+r.c30,0), c90t = rows.reduce((s,r)=>s+r.c90,0);
+  const emRisco = rows.filter(r=>isFinite(r.dias)&&r.dias<=30).length;
+  const hoje = rows.filter(r=>r.hoje).length;
+  return `
+  <div class="viewhead"><h2>Indicadores inteligentes</h2>
+    <span class="desc">Previsão de ruptura baseada no consumo médio dos últimos 90 dias</span></div>
+  <div class="cards">
+    <div class="card kpi"><div class="lbl">Consumo 30 dias</div><div class="val mono">${fmtN.format(c30t)}</div><div class="sub">unidades saídas</div></div>
+    <div class="card kpi"><div class="lbl">Consumo 90 dias</div><div class="val mono">${fmtN.format(c90t)}</div><div class="sub">unidades saídas</div></div>
+    <div class="card kpi ${emRisco?'alerta':'ok'}"><div class="lbl">Ruptura em ≤ 30 dias</div><div class="val mono">${emRisco}</div><div class="sub">itens em risco</div></div>
+    <div class="card kpi ${hoje?'alerta':'ok'}"><div class="lbl">Comprar hoje</div><div class="val mono">${hoje}</div><div class="sub">estoque &lt; consumo no lead time</div></div>
+  </div>
+  <div class="panel"><div class="phead"><h3>Previsão por item</h3><span class="hint">ordenado pelo menor prazo até ruptura</span></div><div class="pbody flush">
+    ${rows.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Item</th><th class="num">Atual</th><th class="num">Consumo 30d</th><th class="num">Consumo 90d</th>
+      <th class="num">Média/dia</th><th class="num">Dias até faltar</th><th>Ruptura prevista</th><th class="num">Lead time</th><th>Alerta</th></tr></thead><tbody>
+    ${rows.map(r=>{
+      const cor = !isFinite(r.dias)?"":(r.dias<=(r.it.leadTime||7)?"style=\"color:var(--crit);font-weight:700\"":(r.dias<=30?"style=\"color:var(--warn-ink);font-weight:600\"":""));
+      return `<tr>
+      <td><strong>${esc(r.it.descricao)}</strong> <span class="muted small mono">${esc(r.it.codigo)}</span></td>
+      <td class="num">${fmtN.format(r.it.atual)}</td>
+      <td class="num">${fmtN.format(r.c30)}</td><td class="num">${fmtN.format(r.c90)}</td>
+      <td class="num">${r.md>0?r.md.toLocaleString("pt-BR",{maximumFractionDigits:2}):"—"}</td>
+      <td class="num" ${cor}>${isFinite(r.dias)?fmtN.format(Math.floor(r.dias)):"—"}</td>
+      <td>${r.ruptura?fmtD.format(r.ruptura):"<span class='muted'>sem consumo</span>"}</td>
+      <td class="num">${r.it.leadTime?r.it.leadTime+" d":"—"}</td>
+      <td>${r.hoje?'<span class="tag-hoje">Comprar hoje</span>':(isFinite(r.dias)&&r.dias<=30?'<span class="pill amarelo">Programar compra</span>':'<span class="pill verde">OK</span>')}</td>
+    </tr>`}).join("")}
+    </tbody></table></div>`:`<div class="empty">Cadastre itens e registre saídas para gerar previsões.</div>`}
+  </div></div>
+  <div class="panel"><div class="phead"><h3>Consumo por equipamento</h3><span class="hint">últimos 90 dias · campo “equipamento” das saídas</span></div><div class="pbody flush">
+    ${(()=>{ const lim=new Date(); lim.setDate(lim.getDate()-90);
+      const g={};
+      db.movs.filter(m=>m.type==="saida"&&m.equip&&parseISO(m.date)>=lim).forEach(m=>{
+        (g[m.equip]=g[m.equip]||{qtd:0,itens:{}}).qtd+=m.qty;
+        const it=itemById(m.itemId); if(it) g[m.equip].itens[it.descricao]=(g[m.equip].itens[it.descricao]||0)+m.qty;
+      });
+      const rows=Object.entries(g).sort((a,b)=>b[1].qtd-a[1].qtd);
+      if(!rows.length) return `<div class="empty">Nenhuma saída com equipamento informado nos últimos 90 dias. Preencha o campo “Equipamento / destino” na tela de Saída para rastrear consumo por ativo.</div>`;
+      return `<div class="tablewrap"><table class="data"><thead><tr><th>Equipamento</th><th class="num">Total consumido</th><th>Principais itens</th></tr></thead><tbody>
+        ${rows.map(([eq,d])=>{
+          const top=Object.entries(d.itens).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,q])=>`${esc(n)} (${fmtN.format(q)})`).join(", ");
+          return `<tr><td><strong>${esc(eq)}</strong></td><td class="num">${fmtN.format(d.qtd)}</td><td class="small">${top}</td></tr>`;}).join("")}
+      </tbody></table></div>`; })()}
+  </div></div>`;
+}
+
+/* ================= DADOS (import/export/backup) ================= */
+function vDados(){
+  return `
+  <div class="viewhead"><h2>Dados</h2><span class="desc">Importação de planilha, exportação e backup completo</span></div>
+  <div class="panelgrid">
+    <div class="panel"><div class="phead"><h3>Importar planilha de itens</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">Envie um arquivo <strong>.xlsx</strong> ou <strong>.csv</strong>. O formato da lista oficial ALLOS
+      (<em>Código, Categoria, Descrição do Item, Unidade, Quantidade em Estoque, Estoque Mínimo Aceitável, Valor Unitário</em>) é reconhecido
+      automaticamente — o cabeçalho pode estar em qualquer uma das primeiras linhas. Também são aceitas as colunas:</p>
+      <p class="small mono muted" style="word-break:break-word">codigo · descricao · categoria · unidade · estoque_minimo · estoque_maximo · estoque_atual · valor_unitario · localizacao (ou prateleira/coluna/gaveta) · fornecedor · lead_time · ultima_compra</p>
+      <p class="small muted">Itens com código já existente serão atualizados (campos preenchidos manualmente, como fornecedor e lead time, são preservados); novos códigos serão cadastrados. Sem coluna de estoque máximo, assume-se 2× o mínimo.</p>
+      <div class="btnrow">
+        <label class="btn primary" for="file-import">${I.up} Escolher arquivo…</label>
+        <input type="file" id="file-import" accept=".xlsx,.csv">
+        <button class="btn" id="dl-modelo">${I.down} Baixar modelo (xlsx)</button>
+      </div>
+      <div id="import-result" class="small" style="margin-top:10px"></div>
+    </div></div>
+    <div class="panel"><div class="phead"><h3>Exportar</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">Gere arquivos para uso no Excel ou em outros sistemas.</p>
+      <div class="btnrow" style="margin-bottom:10px">
+        <button class="btn" id="exp2-itens-xlsx">${I.down} Itens (Excel)</button>
+        <button class="btn" id="exp2-itens-csv">${I.down} Itens (CSV)</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="exp2-movs-xlsx">${I.down} Movimentações (Excel)</button>
+        <button class="btn" id="exp2-movs-csv">${I.down} Movimentações (CSV)</button>
+      </div>
+    </div></div>
+    <div class="panel"><div class="phead"><h3>Backup completo</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">O backup gera um arquivo <strong>JSON</strong> com todos os itens, movimentações e compras.
+      Os dados já ficam salvos na nuvem (Supabase) — o backup é uma cópia extra de segurança e serve para trazer dados de outra instalação.</p>
+      <div class="btnrow">
+        <button class="btn primary" id="bk-export">${I.down} Exportar backup</button>
+        <label class="btn" for="bk-file">${I.up} Importar backup…</label>
+        <input type="file" id="bk-file" accept=".json">
+      </div>
+    </div></div>
+    <div class="panel"><div class="phead"><h3>Cargas prontas</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">A lista oficial de Hidráulica, Civil e Elétrica do NorteShopping já vem embutida no sistema.</p>
+      <div class="btnrow">
+        <button class="btn primary" id="lista-ns2">${I.box} Carregar lista NorteShopping (500 itens)</button>
+        <button class="btn" id="seed-demo2">Dados de demonstração (com movimentações fictícias)</button>
+      </div>
+    </div></div>
+    <div class="panel"><div class="phead"><h3>Zona de risco</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">Ações irreversíveis sobre a base na nuvem — valem para todos os usuários.</p>
+      <div class="btnrow">
+        <button class="btn danger" id="wipe">${I.trash} Apagar todos os dados</button>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+/* ---------- CSV ---------- */
+function downloadBlob(name, blob){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function toCSV(rows){
+  return "﻿" + rows.map(r => r.map(v => {
+    v = String(v==null?"":v);
+    return /[;"\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+  }).join(";")).join("\r\n");
+}
+function itensRows(){
+  return [["codigo","descricao","categoria","unidade","estoque_atual","estoque_minimo","estoque_maximo","valor_unitario","valor_total","prateleira","coluna","gaveta","fornecedor","lead_time","ultima_compra"],
+    ...db.items.map(i=>[i.codigo,i.descricao,i.categoria,i.unidade,i.atual,i.min,i.max,i.valorUnit||"",i.valorUnit?Math.round(i.valorUnit*i.atual*100)/100:"",i.prateleira,i.coluna,i.gaveta,i.fornecedor,i.leadTime||"",i.ultimaCompra||""])];
+}
+function movsRows(){
+  return [["data","tipo","codigo","item","quantidade","equipamento","usuario","observacao"],
+    ...db.movs.slice().sort((a,b)=>(a.date+"").localeCompare(b.date+"")).map(m=>{
+      const it=itemById(m.itemId)||{};
+      return [m.date, m.type==="saida"?"Saída":"Entrada", it.codigo||"", it.descricao||"(excluído)", m.qty, m.equip||"", m.user||"", m.obs||""];
+    })];
+}
+function comprasRows(){
+  return [["criada_em","codigo","descricao","estoque_atual","estoque_minimo","qtd_sugerida","status"],
+    ...db.compras.map(c=>{const it=itemById(c.itemId)||{};return [c.criadaEm,it.codigo||"",it.descricao||"",it.atual??"",it.min??"",c.qtd,c.status];})];
+}
+
+/* ---------- Minimal XLSX writer (stored ZIP) ---------- */
+const CRC_TABLE = (()=>{ const t=new Uint32Array(256);
+  for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1); t[n]=c; } return t; })();
+function crc32(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c = CRC_TABLE[(c^u8[i])&0xFF] ^ (c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function zipStore(files){ // files: [{name, text}]
+  const enc = new TextEncoder();
+  const parts = [], central = [];
+  let offset = 0;
+  for(const f of files){
+    const nameB = enc.encode(f.name), data = enc.encode(f.text);
+    const crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true);
+    lh.setUint16(8,0,true); lh.setUint16(10,0,true); lh.setUint16(12,0,true);
+    lh.setUint32(14,crc,true); lh.setUint32(18,data.length,true); lh.setUint32(22,data.length,true);
+    lh.setUint16(26,nameB.length,true); lh.setUint16(28,0,true);
+    parts.push(new Uint8Array(lh.buffer), nameB, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true);
+    ch.setUint16(10,0,true); ch.setUint16(12,0,true); ch.setUint16(14,0,true);
+    ch.setUint32(16,crc,true); ch.setUint32(20,data.length,true); ch.setUint32(24,data.length,true);
+    ch.setUint16(28,nameB.length,true);
+    ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer), nameB);
+    offset += 30 + nameB.length + data.length;
+  }
+  const cdSize = central.reduce((s,p)=>s+p.length,0);
+  const eocd = new DataView(new ArrayBuffer(22));
+  eocd.setUint32(0,0x06054b50,true);
+  eocd.setUint16(8,files.length,true); eocd.setUint16(10,files.length,true);
+  eocd.setUint32(12,cdSize,true); eocd.setUint32(16,offset,true);
+  return new Blob([...parts, ...central, new Uint8Array(eocd.buffer)], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function colName(n){ let s=""; n++; while(n>0){ const r=(n-1)%26; s=String.fromCharCode(65+r)+s; n=Math.floor((n-1)/26); } return s; }
+function sheetXML(rows){
+  const xr = rows.map((row,ri)=>"<row r=\""+(ri+1)+"\">"+row.map((v,ci)=>{
+    const ref = colName(ci)+(ri+1);
+    if(typeof v==="number" && isFinite(v)) return `<c r="${ref}"><v>${v}</v></c>`;
+    const t = esc(String(v==null?"":v));
+    return t===""?"":`<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${t}</t></is></c>`;
+  }).join("")+"</row>").join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${xr}</sheetData></worksheet>`;
+}
+function makeXLSX(rows, sheetName){
+  return zipStore([
+    { name:"[Content_Types].xml", text:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>` },
+    { name:"_rels/.rels", text:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+    { name:"xl/workbook.xml", text:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${esc(sheetName||"Dados")}" sheetId="1" r:id="rId1"/></sheets></workbook>` },
+    { name:"xl/_rels/workbook.xml.rels", text:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>` },
+    { name:"xl/worksheets/sheet1.xml", text:sheetXML(rows) }
+  ]);
+}
+
+/* ---------- Minimal XLSX reader ---------- */
+async function unzip(buf){
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  let e = -1;
+  for(let i=buf.byteLength-22; i>=0; i--){ if(dv.getUint32(i,true)===0x06054b50){ e=i; break; } }
+  if(e<0) throw new Error("Arquivo ZIP/XLSX inválido");
+  const count = dv.getUint16(e+10,true);
+  let off = dv.getUint32(e+16,true);
+  const entries = {};
+  for(let i=0;i<count;i++){
+    if(dv.getUint32(off,true)!==0x02014b50) break;
+    const method = dv.getUint16(off+10,true);
+    const csize = dv.getUint32(off+20,true);
+    const nlen = dv.getUint16(off+28,true), elen = dv.getUint16(off+30,true), clen = dv.getUint16(off+32,true);
+    const lho = dv.getUint32(off+42,true);
+    const name = new TextDecoder().decode(u8.subarray(off+46, off+46+nlen));
+    entries[name] = { method, csize, lho };
+    off += 46 + nlen + elen + clen;
+  }
+  return {
+    names: Object.keys(entries),
+    async text(name){
+      const en = entries[name]; if(!en) return null;
+      const nlen = dv.getUint16(en.lho+26,true), elen = dv.getUint16(en.lho+28,true);
+      const start = en.lho + 30 + nlen + elen;
+      const data = u8.slice(start, start+en.csize);
+      if(en.method===0) return new TextDecoder().decode(data);
+      if(en.method!==8) throw new Error("Compressão não suportada");
+      const out = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
+      return new TextDecoder().decode(out);
+    }
+  };
+}
+function cellCol(ref){ let c=0; for(const ch of ref){ if(ch>="A"&&ch<="Z") c=c*26+(ch.charCodeAt(0)-64); else break; } return c-1; }
+async function parseXLSX(buf){
+  const z = await unzip(buf);
+  let shared = [];
+  const ssx = await z.text("xl/sharedStrings.xml");
+  if(ssx){
+    const doc = new DOMParser().parseFromString(ssx, "application/xml");
+    shared = [...doc.getElementsByTagName("si")].map(si => [...si.getElementsByTagName("t")].map(t=>t.textContent).join(""));
+  }
+  let sheetName = "xl/worksheets/sheet1.xml";
+  if(!z.names.includes(sheetName)) sheetName = z.names.find(n => /^xl\/worksheets\/.*\.xml$/.test(n));
+  if(!sheetName) throw new Error("Nenhuma planilha encontrada no arquivo");
+  const sx = await z.text(sheetName);
+  const doc = new DOMParser().parseFromString(sx, "application/xml");
+  const rows = [];
+  for(const rowEl of doc.getElementsByTagName("row")){
+    const row = [];
+    for(const c of rowEl.getElementsByTagName("c")){
+      const ref = c.getAttribute("r") || "";
+      const col = ref ? cellCol(ref) : row.length;
+      const t = c.getAttribute("t");
+      let val = "";
+      if(t==="inlineStr"){ val = [...c.getElementsByTagName("t")].map(x=>x.textContent).join(""); }
+      else {
+        const v = c.getElementsByTagName("v")[0];
+        val = v ? v.textContent : "";
+        if(t==="s") val = shared[Number(val)] ?? "";
+      }
+      row[col] = val;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+function parseCSVText(text){
+  text = text.replace(/^﻿/,"");
+  const firstLine = text.split(/\r?\n/,1)[0] || "";
+  const sep = (firstLine.match(/;/g)||[]).length >= (firstLine.match(/,/g)||[]).length ? ";" : ",";
+  const rows = [];
+  let row = [], cur = "", inQ = false;
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    if(inQ){ if(ch==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else inQ=false; } else cur+=ch; }
+    else if(ch==='"') inQ = true;
+    else if(ch===sep){ row.push(cur); cur=""; }
+    else if(ch==="\n"||ch==="\r"){ if(ch==="\r"&&text[i+1]==="\n") i++; row.push(cur); cur=""; if(row.some(v=>v!=="")) rows.push(row); row=[]; }
+    else cur+=ch;
+  }
+  row.push(cur); if(row.some(v=>v!=="")) rows.push(row);
+  return rows;
+}
+const normHdr = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+const HDR_MAP = {
+  codigo:"codigo", cod:"codigo", sku:"codigo",
+  descricao:"descricao", descricao_do_item:"descricao", item:"descricao", nome:"descricao",
+  categoria:"categoria", grupo:"categoria", familia:"categoria",
+  unidade:"unidade", un:"unidade", und:"unidade",
+  estoque_minimo:"min", estoque_minimo_aceitavel:"min", minimo:"min", min:"min", estoque_min:"min",
+  estoque_maximo:"max", maximo:"max", max:"max", estoque_max:"max",
+  estoque_atual:"atual", quantidade_em_estoque:"atual", atual:"atual", saldo:"atual", quantidade:"atual", qtd:"atual",
+  valor_unitario:"valorUnit", valor_unitario_r:"valorUnit", valor:"valorUnit", preco:"valorUnit", preco_unitario:"valorUnit", custo_unitario:"valorUnit",
+  localizacao:"localizacao", local:"localizacao", endereco:"localizacao",
+  prateleira:"prateleira", coluna:"coluna", gaveta:"gaveta",
+  fornecedor:"fornecedor", fornecedor_principal:"fornecedor",
+  lead_time:"leadTime", leadtime:"leadTime", lead_time_dias:"leadTime", prazo:"leadTime",
+  ultima_compra:"ultimaCompra", ult_compra:"ultimaCompra"
+};
+function excelDateToISO(v){
+  const n = Number(v);
+  if(isFinite(n) && n>20000 && n<80000){ const d = new Date(Date.UTC(1899,11,30) + n*86400000); return dISO(new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())); }
+  const s = String(v).trim();
+  const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(br){ let y=Number(br[3]); if(y<100) y+=2000; return y+"-"+br[2].padStart(2,"0")+"-"+br[1].padStart(2,"0"); }
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  return "";
+}
+function importRows(rows){
+  if(!rows.length) return { add:0, upd:0, skip:0 };
+  // localiza a linha de cabeçalho (pode não ser a primeira — ex.: planilhas com título ALLOS)
+  let hi = -1, hdr = null;
+  for(let i=0; i<Math.min(rows.length,15); i++){
+    const h = (rows[i]||[]).map(x => HDR_MAP[normHdr(x)] || null);
+    if(h.includes("codigo") && h.includes("descricao")){ hi = i; hdr = h; break; }
+  }
+  if(hi < 0)
+    throw new Error("Cabeçalho não reconhecido. São necessárias ao menos as colunas “codigo” e “descricao” (em qualquer uma das 15 primeiras linhas).");
+  let add=0, upd=0, skip=0;
+  for(let r=hi+1;r<rows.length;r++){
+    const o = {};
+    (rows[r]||[]).forEach((v,c)=>{ if(hdr[c]) o[hdr[c]] = v; });
+    const codigo = String(o.codigo||"").trim(), descricao = String(o.descricao||"").trim();
+    if(!codigo || !descricao || normHdr(codigo)==="codigo"){ skip++; continue; }
+    const data = {
+      codigo, descricao,
+      categoria:String(o.categoria||"").trim(), unidade:String(o.unidade||"UN").trim()||"UN",
+      atual:num(o.atual), min:num(o.min), max:num(o.max),
+      valorUnit:num(o.valorUnit),
+      prateleira:String(o.prateleira||"").trim(), coluna:String(o.coluna||"").trim(), gaveta:String(o.gaveta||"").trim(),
+      fornecedor:String(o.fornecedor||"").trim(), leadTime:Math.round(num(o.leadTime)),
+      ultimaCompra:o.ultimaCompra ? excelDateToISO(o.ultimaCompra) : ""
+    };
+    if(!data.prateleira && o.localizacao) data.prateleira = String(o.localizacao).trim();
+    // sem estoque máximo na planilha: assume 2× o mínimo (editável depois)
+    if(!data.max && data.min) data.max = data.min * 2;
+    const ex = db.items.find(i=>i.codigo.toLowerCase()===codigo.toLowerCase());
+    if(ex){
+      // atualiza os essenciais; campos opcionais só sobrescrevem se vierem preenchidos
+      ex.descricao = data.descricao; ex.atual = data.atual; ex.min = data.min;
+      if(data.categoria) ex.categoria = data.categoria;
+      if(data.unidade && data.unidade!=="UN") ex.unidade = data.unidade; else ex.unidade = ex.unidade || data.unidade;
+      if(num(o.max)) ex.max = num(o.max); else if(!ex.max && data.max) ex.max = data.max;
+      if(data.valorUnit) ex.valorUnit = data.valorUnit;
+      if(data.prateleira) ex.prateleira = data.prateleira;
+      if(data.coluna) ex.coluna = data.coluna;
+      if(data.gaveta) ex.gaveta = data.gaveta;
+      if(data.fornecedor) ex.fornecedor = data.fornecedor;
+      if(data.leadTime) ex.leadTime = data.leadTime;
+      if(data.ultimaCompra) ex.ultimaCompra = data.ultimaCompra;
+      upd++;
+    }
+    else { db.items.push(Object.assign({id:uid()}, data)); add++; }
+  }
+  return { add, upd, skip };
+}
+
+/* ---------- lista oficial NorteShopping (500 itens: codigo, categoria, descricao, unidade, atual, min, valor_unit) ---------- */
+const LISTA_NS = [["CIV-0001","Civil","Adesivo de contato (cascola) 730g","UN",17,4,44.18],["CIV-0002","Civil","Aditivo impermeabilizante para argamassa 1L","UN",76,20,26.12],["CIV-0003","Civil","Alicate universal 8\"","UN",461,107,57.07],["CIV-0004","Civil","Andaime tubular fachadeiro (módulo)","UN",21,3,427.15],["CIV-0005","Civil","Anel de concreto para poço de visita 60cm","UN",263,63,118.42],["CIV-0006","Civil","Arame recozido 18 (kg)","KG",186,46,18.42],["CIV-0007","Civil","Areia fina lavada (m³)","M3",59,13,128.15],["CIV-0008","Civil","Areia média lavada (m³)","M3",4,1,109.47],["CIV-0009","Civil","Argamassa colante AC-II 20kg","SC",111,22,24.55],["CIV-0010","Civil","Argamassa colante AC-III 20kg","SC",198,40,28.49],["CIV-0011","Civil","Argamassa de reparo estrutural (grout) 25kg","SC",27,6,98.35],["CIV-0012","Civil","Arruela de pressão 1/4\" zincada (caixa c/100)","CX",70,19,10.78],["CIV-0013","Civil","Arruela lisa 1/4\" zincada (caixa c/100)","CX",140,24,12.57],["CIV-0014","Civil","Balde plástico reforçado 20L","UN",45,10,28.6],["CIV-0015","Civil","Bancada de granito para sanitário (m linear)","M",161,46,640.29],["CIV-0016","Civil","Barra antipânico para porta corta-fogo","UN",103,26,512.74],["CIV-0017","Civil","Barra de apoio para acessibilidade em aço inox 80cm","UN",121,32,157.79],["CIV-0018","Civil","Batente metálico para porta corta-fogo","UN",442,82,644.83],["CIV-0019","Civil","Betoneira 400L monofásica","UN",147,32,2803],["CIV-0020","Civil","Bloco de concreto estrutural 14x19x39cm","UN",88,18,6.34],["CIV-0021","Civil","Bloco de concreto vedação 9x19x39cm","UN",141,36,2.63],["CIV-0022","Civil","Bloco intertravado de concreto (m²)","M2",21,5,45.51],["CIV-0023","Civil","Brita 0 (m³)","M3",189,35,111.98],["CIV-0024","Civil","Brita 1 (m³)","M3",72,21,132.36],["CIV-0025","Civil","Bucha de nylon S6 (caixa c/100)","CX",145,27,27.8],["CIV-0026","Civil","Bucha de nylon S8 (caixa c/100)","CX",199,53,25.13],["CIV-0027","Civil","Caibro de madeira 5x6cm - barra 3m","UN",21,6,25.73],["CIV-0028","Civil","Cal hidratada 20kg","SC",19,3,15.21],["CIV-0029","Civil","Calha de PVC para captação de águas pluviais (m linear)","M",186,37,53.29],["CIV-0030","Civil","Cantoneira de acabamento para forro (barra 3m)","UN",207,59,15.87],["CIV-0031","Civil","Capacete de segurança com jugular (EPI)","UN",78,15,47.5],["CIV-0032","Civil","Carpete forração (m²)","M2",146,34,21.17],["CIV-0033","Civil","Carrinho de mão para obra (caçamba reforçada)","UN",224,64,329.4],["CIV-0034","Civil","Chapa compensada plastificada 12mm 2,20x1,10m","UN",117,35,125.95],["CIV-0035","Civil","Chave de fenda/philips kit 6 peças","KT",129,21,46.92],["CIV-0036","Civil","Chumbador de expansão 3/8\" (caixa c/50)","CX",31,5,63.77],["CIV-0037","Civil","Cimento Portland CP-II 50kg","SC",177,38,30.24],["CIV-0038","Civil","Cimento Portland CP-V ARI 50kg","SC",100,24,33.02],["CIV-0039","Civil","Cinto de segurança tipo paraquedista (EPI)","UN",133,39,243.61],["CIV-0040","Civil","Colete refletivo sinalizador","UN",10,3,32.22],["CIV-0041","Civil","Colher de pedreiro nº8","UN",458,106,22.86],["CIV-0042","Civil","Compensado naval 18mm 2,20x1,10m","UN",333,67,225.36],["CIV-0043","Civil","Cone de sinalização de trânsito 75cm","UN",85,19,35.27],["CIV-0044","Civil","Corrimão de aço inox tubular 2\" (m linear)","M",187,35,214],["CIV-0045","Civil","Cuba de embutir em louça branca","UN",96,22,155.08],["CIV-0046","Civil","Cupinicida para madeira 5L","GL",163,32,101.71],["CIV-0047","Civil","Desempenadeira de aço lisa","UN",316,57,44.17],["CIV-0048","Civil","Desmoldante para forma de concreto 5L","GL",44,10,58.7],["CIV-0049","Civil","Disco de corte para esmerilhadeira 4.1/2\" (caixa c/10)","CX",138,40,78.93],["CIV-0050","Civil","Dispenser de papel toalha interfolhado","UN",255,39,113.91],["CIV-0051","Civil","Dispenser de sabonete líquido industrial","UN",454,135,105.04],["CIV-0052","Civil","Divisória naval de granito para sanitário (m²)","M2",64,10,592.03],["CIV-0053","Civil","Dobradiça 3,5\" cromada","UN",489,79,20.29],["CIV-0054","Civil","Escada de alumínio dupla 8 degraus","UN",422,68,606.17],["CIV-0055","Civil","Escada marinheiro em aço galvanizado (m linear)","M",199,34,440.15],["CIV-0056","Civil","Esmerilhadeira angular 4.1/2\" 850W","UN",489,114,325.15],["CIV-0057","Civil","Espuma expansiva poliuretano 300ml","UN",451,109,26.63],["CIV-0058","Civil","Extintor de incêndio ABC pó químico (suporte de parede)","UN",480,111,39.11],["CIV-0059","Civil","Fechadura tipo alavanca para porta interna","UN",107,27,147.59],["CIV-0060","Civil","Fecho para porta tipo alavanca completo","UN",348,86,85.91],["CIV-0061","Civil","Fita antiderrapante para degraus (rolo 5m)","UN",269,59,30.95],["CIV-0062","Civil","Fita crepe 48mm x 50m","UN",37,7,10.48],["CIV-0063","Civil","Fita dupla face para carpete (rolo 50m)","RL",61,15,42.65],["CIV-0064","Civil","Fita para junta de drywall (rolo 90m)","RL",184,45,15.14],["CIV-0065","Civil","Fita zebrada de sinalização (rolo 200m)","RL",11,3,25.72],["CIV-0066","Civil","Forro de PVC branco em régua (m²)","M2",63,12,27.13],["CIV-0067","Civil","Forro modular de fibra mineral 62,5x62,5cm","UN",281,48,24.71],["CIV-0068","Civil","Fundo preparador de parede 18L","GL",149,35,271.62],["CIV-0069","Civil","Fundo selador acrílico 18L","GL",124,34,181.59],["CIV-0070","Civil","Furadeira de impacto profissional 850W","UN",54,13,307.12],["CIV-0071","Civil","Gesso em pó para reparos 40kg","SC",108,24,43.86],["CIV-0072","Civil","Grade de proteção metálica para vãos (m²)","M2",175,43,273.94],["CIV-0073","Civil","Grelha de piso em ferro fundido 20x20cm","UN",36,8,85.23],["CIV-0074","Civil","Guarda-corpo de vidro laminado (m linear)","M",30,6,468.76],["CIV-0075","Civil","Impermeabilizante cimentício flexível 18kg","SC",117,20,206.63],["CIV-0076","Civil","Kit acessórios porta de vidro (puxador/dobradiça)","KT",121,23,314.22],["CIV-0077","Civil","Kit ferragem para divisória sanitária","KT",116,31,210.02],["CIV-0078","Civil","Kit sinalização de rota de fuga fotoluminescente","KT",28,4,201.28],["CIV-0079","Civil","Kit sinalização tátil e Braille para elevador","KT",6,2,219.91],["CIV-0080","Civil","Lona plástica para proteção 4x100m","RL",63,11,86.32],["CIV-0081","Civil","Luva de látex antiderrapante (caixa c/100)","CX",57,16,39.57],["CIV-0082","Civil","Luva de raspa de couro (EPI)","PR",89,18,28.24],["CIV-0083","Civil","Manta asfáltica impermeabilizante 3mm (rolo 10m²)","RL",70,20,347.5],["CIV-0084","Civil","Marreta de borracha 500g","UN",151,32,48.55],["CIV-0085","Civil","Martelo demolidor rompedor elétrico","UN",406,95,2731.71],["CIV-0086","Civil","Massa acrílica para parede 25kg","SC",42,7,140.29],["CIV-0087","Civil","Massa corrida PVA 18L","GL",17,4,73.06],["CIV-0088","Civil","Massa para junta de drywall 28kg","SC",194,38,87.11],["CIV-0089","Civil","Massa rápida (epóxi) para reparos 500g","UN",249,56,26.5],["CIV-0090","Civil","Maçaneta para porta de vidro tipo puxador","UN",85,13,99.69],["CIV-0091","Civil","Meio-fio de concreto pré-moldado (m linear)","M",50,8,25.16],["CIV-0092","Civil","Mictório de louça com sensor","UN",446,83,377.18],["CIV-0093","Civil","Mola hidráulica de piso para porta de vidro","UN",460,108,285.97],["CIV-0094","Civil","Máscara PFF2 (caixa c/20)","CX",13,3,68.95],["CIV-0095","Civil","Nível a laser autonivelante","UN",303,71,580.57],["CIV-0096","Civil","Nível de bolha em alumínio 60cm","UN",138,25,41.07],["CIV-0097","Civil","Papeleira/dispenser de papel higiênico industrial","UN",127,24,90.13],["CIV-0098","Civil","Parafuso auto-atarrachante 3,5x25mm (caixa c/500)","CX",168,33,34.58],["CIV-0099","Civil","Parafuso chipboard 4,5x50mm (caixa c/200)","CX",195,57,34.49],["CIV-0100","Civil","Parafuso para drywall 25mm (pacote c/1000)","PC",323,97,25.33],["CIV-0101","Civil","Parafuso sextavado 1/4x1\" zincado (caixa c/100)","CX",21,5,34.92],["CIV-0102","Civil","Parafuso sextavado 3/8x1\" zincado (caixa c/50)","CX",36,10,36.16],["CIV-0103","Civil","Parafuso sextavado 5/16x1\" zincado (caixa c/100)","CX",65,13,42.02],["CIV-0104","Civil","Perfil T para forro modular (barra 3,66m)","UN",431,100,14.52],["CIV-0105","Civil","Perfil de alumínio para escada (nariz de degrau)","UN",418,104,35.59],["CIV-0106","Civil","Perfil de alumínio para porta de vidro (m linear)","M",144,28,45.59],["CIV-0107","Civil","Perfil guia para drywall 48mm - barra 3m","UN",485,137,24.28],["CIV-0108","Civil","Perfil montante para drywall 48mm - barra 3m","UN",460,76,20.29],["CIV-0109","Civil","Pincel trincha 2 polegadas","UN",144,28,14.64],["CIV-0110","Civil","Piso cerâmico antiderrapante 45x45cm (m²)","M2",90,16,32.37],["CIV-0111","Civil","Piso granito cinza andorinha (m²)","M2",70,16,172.45],["CIV-0112","Civil","Piso porcelanato polido 60x60cm (m²)","M2",16,3,48.81],["CIV-0113","Civil","Piso tátil de alerta em borracha 25x25cm","UN",146,23,23.47],["CIV-0114","Civil","Piso tátil direcional em borracha 25x25cm","UN",71,17,21.67],["CIV-0115","Civil","Placa de gesso acartonado RU (resistente à umidade)","UN",384,83,55.48],["CIV-0116","Civil","Placa de gesso acartonado standard 1,80x1,20m 12,5mm","UN",292,44,59.7],["CIV-0117","Civil","Placa de sinalização de piso molhado","UN",457,116,33.01],["CIV-0118","Civil","Placa de sinalização de segurança (diversas)","UN",23,6,19.47],["CIV-0119","Civil","Placa fotoluminescente de saída de emergência","UN",80,17,40.39],["CIV-0120","Civil","Porca sextavada 1/4\" zincada (caixa c/100)","CX",96,27,8.5],["CIV-0121","Civil","Porta corta-fogo 90 minutos 80x210cm completa","UN",445,69,2314.57],["CIV-0122","Civil","Porta de madeira semioca 70x210cm","UN",354,66,357.34],["CIV-0123","Civil","Prego 17x27 para madeira (kg)","KG",146,41,11.23],["CIV-0124","Civil","Prego 18x30 para madeira (kg)","KG",161,42,14.88],["CIV-0125","Civil","Protetor auricular tipo plug (EPI)","PR",126,35,7.55],["CIV-0126","Civil","Prumo de face em aço","UN",420,74,34.52],["CIV-0127","Civil","Pá de bico para obra","UN",96,25,37.37],["CIV-0128","Civil","Pó de pedra para assentamento (m³)","M3",108,29,79.93],["CIV-0129","Civil","Rebite de repuxo 4,8x16mm (caixa c/100)","CX",66,13,41.6],["CIV-0130","Civil","Rejunte epóxi para piso técnico 1kg","UN",60,12,48.62],["CIV-0131","Civil","Rejunte flexível cimentício 1kg","UN",245,45,8.66],["CIV-0132","Civil","Rodapé de granito 7cm (m linear)","M",120,24,44.5],["CIV-0133","Civil","Rodo de borracha para limpeza 40cm","UN",451,83,31.41],["CIV-0134","Civil","Rolo de lã para pintura 23cm","UN",103,22,12.43],["CIV-0135","Civil","Rufo metálico galvanizado (m linear)","M",20,6,33.36],["CIV-0136","Civil","Régua de alumínio para nivelamento 2m","UN",333,75,79.54],["CIV-0137","Civil","Sarrafo de madeira 5x2,5cm - barra 3m","UN",436,100,16.15],["CIV-0138","Civil","Selante poliuretano para juntas de dilatação (bisnaga)","UN",64,18,62.87],["CIV-0139","Civil","Serra mármore profissional 1200W","UN",302,89,441.43],["CIV-0140","Civil","Serrote para madeira 22\"","UN",60,14,32.96],["CIV-0141","Civil","Silicone acético uso geral 280g","UN",407,80,21.91],["CIV-0142","Civil","Silicone neutro para vidros 280g","UN",266,45,35.16],["CIV-0143","Civil","Talha manual tipo catraca 1 tonelada","UN",102,19,519.85],["CIV-0144","Civil","Tampa de concreto para caixa de inspeção 60x60cm","UN",5,1,123.79],["CIV-0145","Civil","Tela de proteção anti-pombo (m²)","M2",178,46,31.13],["CIV-0146","Civil","Tela soldada nervurada 15x15cm (m²)","M2",174,31,29.84],["CIV-0147","Civil","Telha metálica termoacústica (m²)","M2",173,50,128.82],["CIV-0148","Civil","Textura acrílica para fachada 25kg","SC",172,48,267.24],["CIV-0149","Civil","Tijolo cerâmico furado 9x19x19cm","UN",158,36,2.44],["CIV-0150","Civil","Tinta acrílica fosca branca 18L","GL",86,18,403.39],["CIV-0151","Civil","Tinta acrílica semibrilho branca 18L","GL",35,6,350.96],["CIV-0152","Civil","Tinta esmalte sintético 3,6L (diversas cores)","GL",100,25,149.84],["CIV-0153","Civil","Tirante/pendural para forro modular","UN",320,75,9.32],["CIV-0154","Civil","Torneira automática temporizada para lavatório","UN",431,65,154.97],["CIV-0155","Civil","Trena a laser digital 40m","UN",225,60,336.07],["CIV-0156","Civil","Trena manual em fibra 20m","UN",169,37,46.23],["CIV-0157","Civil","Trinco/tarjeta para porta 3\"","UN",114,26,19.96],["CIV-0158","Civil","Tubo de queda PVC 100mm para águas pluviais - barra 6m","UN",496,134,96.59],["CIV-0159","Civil","Tábua de madeira para forma 2,5x30cm - barra 3m","UN",48,9,30.09],["CIV-0160","Civil","Vaso sanitário com caixa acoplada","UN",322,64,449.16],["CIV-0161","Civil","Vassoura de nylon para limpeza pesada","UN",389,72,27.28],["CIV-0162","Civil","Vergalhão de aço CA-50 10mm - barra 12m","UN",417,75,58.97],["CIV-0163","Civil","Vergalhão de aço CA-50 8mm - barra 12m","UN",130,39,35.85],["CIV-0164","Civil","Verniz para madeira 3,6L","GL",199,32,145.01],["CIV-0165","Civil","Vidro temperado 10mm (m²)","M2",164,39,332.89],["CIV-0166","Civil","Óculos de proteção incolor (EPI)","UN",201,45,18.06],["ELE-0001","Elétrica","Abraçadeira tipo D para eletroduto 3/4\"","UN",340,86,2.22],["ELE-0002","Elétrica","Acionador manual de alarme de incêndio endereçável","UN",445,118,278.53],["ELE-0003","Elétrica","Analisador de qualidade de energia portátil","UN",222,41,4086.23],["ELE-0004","Elétrica","Barramento trifásico + neutro para QDC","UN",361,82,156.49],["ELE-0005","Elétrica","Base porta-fusível NH tamanho 00 tripolar","UN",132,38,66.03],["ELE-0006","Elétrica","Bateria selada 12V 7Ah para luz de emergência","UN",73,20,48.5],["ELE-0007","Elétrica","Bateria selada 12V 9Ah para no-break","UN",291,70,126.76],["ELE-0008","Elétrica","Botoeira liga/desliga tripla (verde/vermelho/emergência)","UN",461,100,125.5],["ELE-0009","Elétrica","Bucha e arruela para eletroduto 3/4\"","UN",461,104,4.26],["ELE-0010","Elétrica","Cabo PP 3x2,5mm² para extensões - rolo 100m","RL",143,31,682.23],["ELE-0011","Elétrica","Cabo PP 3x4mm² para extensões - rolo 100m","RL",124,27,521.62],["ELE-0012","Elétrica","Cabo de comando blindado 10mm² - rolo 50m","RL",166,32,325.53],["ELE-0013","Elétrica","Cabo de comando blindado 15mm² - rolo 50m","RL",127,31,333.3],["ELE-0014","Elétrica","Cabo de comando blindado 20mm² - rolo 50m","RL",22,6,182.38],["ELE-0015","Elétrica","Cabo de comando blindado 3mm² - rolo 50m","RL",88,17,170.35],["ELE-0016","Elétrica","Cabo de comando blindado 5mm² - rolo 50m","RL",38,7,262.05],["ELE-0017","Elétrica","Cabo de comando blindado 7.5mm² - rolo 50m","RL",42,11,214.91],["ELE-0018","Elétrica","Cabo de rede U/UTP CAT6 - caixa 305m","CX",107,21,385.33],["ELE-0019","Elétrica","Cabo flexível 1,5mm² 750V cor azul - rolo 100m","RL",18,3,741.61],["ELE-0020","Elétrica","Cabo flexível 1,5mm² 750V cor preta - rolo 100m","RL",200,48,718.62],["ELE-0021","Elétrica","Cabo flexível 1,5mm² 750V verde/amarelo (terra) - rolo 100m","RL",198,47,1067.64],["ELE-0022","Elétrica","Cabo flexível 10mm² 750V cor azul - rolo 100m","RL",93,18,757.31],["ELE-0023","Elétrica","Cabo flexível 10mm² 750V cor preta - rolo 100m","RL",110,25,672.78],["ELE-0024","Elétrica","Cabo flexível 10mm² 750V verde/amarelo (terra) - rolo 100m","RL",157,45,1123.18],["ELE-0025","Elétrica","Cabo flexível 120mm² 750V cor preta - rolo 100m","RL",72,16,822.11],["ELE-0026","Elétrica","Cabo flexível 16mm² 750V cor azul - rolo 100m","RL",89,22,121.22],["ELE-0027","Elétrica","Cabo flexível 16mm² 750V cor preta - rolo 100m","RL",188,33,1293.18],["ELE-0028","Elétrica","Cabo flexível 16mm² 750V verde/amarelo (terra) - rolo 100m","RL",35,10,743.69],["ELE-0029","Elétrica","Cabo flexível 2,5mm² 750V cor azul - rolo 100m","RL",103,25,838.46],["ELE-0030","Elétrica","Cabo flexível 2,5mm² 750V cor preta - rolo 100m","RL",24,6,1087.76],["ELE-0031","Elétrica","Cabo flexível 2,5mm² 750V verde/amarelo (terra) - rolo 100m","RL",121,21,272.69],["ELE-0032","Elétrica","Cabo flexível 25mm² 750V cor azul - rolo 100m","RL",86,16,449.42],["ELE-0033","Elétrica","Cabo flexível 25mm² 750V cor preta - rolo 100m","RL",197,56,576.81],["ELE-0034","Elétrica","Cabo flexível 25mm² 750V verde/amarelo (terra) - rolo 100m","RL",110,21,475.12],["ELE-0035","Elétrica","Cabo flexível 35mm² 750V cor azul - rolo 100m","RL",7,2,196.31],["ELE-0036","Elétrica","Cabo flexível 35mm² 750V cor preta - rolo 100m","RL",92,17,159.17],["ELE-0037","Elétrica","Cabo flexível 35mm² 750V verde/amarelo (terra) - rolo 100m","RL",169,26,177.44],["ELE-0038","Elétrica","Cabo flexível 4mm² 750V cor azul - rolo 100m","RL",66,12,124.06],["ELE-0039","Elétrica","Cabo flexível 4mm² 750V cor preta - rolo 100m","RL",42,8,110.98],["ELE-0040","Elétrica","Cabo flexível 4mm² 750V verde/amarelo (terra) - rolo 100m","RL",32,8,752.46],["ELE-0041","Elétrica","Cabo flexível 50mm² 750V cor preta - rolo 100m","RL",182,34,411.31],["ELE-0042","Elétrica","Cabo flexível 6mm² 750V cor azul - rolo 100m","RL",158,38,603.83],["ELE-0043","Elétrica","Cabo flexível 6mm² 750V cor preta - rolo 100m","RL",32,9,1216.85],["ELE-0044","Elétrica","Cabo flexível 6mm² 750V verde/amarelo (terra) - rolo 100m","RL",82,14,312.55],["ELE-0045","Elétrica","Cabo flexível 70mm² 750V cor preta - rolo 100m","RL",82,19,119.03],["ELE-0046","Elétrica","Cabo flexível 95mm² 750V cor preta - rolo 100m","RL",99,21,1460.2],["ELE-0047","Elétrica","Cabo nu de cobre 16mm² para malha de aterramento (m)","M",22,5,22.3],["ELE-0048","Elétrica","Caixa de passagem metálica 20x20x10cm","UN",129,21,106.45],["ELE-0049","Elétrica","Caixa de passagem octogonal 4x4 PVC","UN",440,111,9.95],["ELE-0050","Elétrica","Caixa de passagem retangular 4x2 PVC","UN",412,123,8.44],["ELE-0051","Elétrica","Canaleta de PVC para fiação 20x10mm - barra 2m","UN",182,42,25.65],["ELE-0052","Elétrica","Capacitor de partida para motor monofásico","UN",40,9,54.77],["ELE-0053","Elétrica","Central de alarme de incêndio endereçável (módulo)","UN",439,94,1445.97],["ELE-0054","Elétrica","Chave boia automática para bomba d\u0027água","UN",226,66,74.31],["ELE-0055","Elétrica","Chave magnética de partida direta 220V","UN",429,94,308.9],["ELE-0056","Elétrica","Chave seccionadora sob carga tripolar 100A","UN",95,25,318.85],["ELE-0057","Elétrica","Chave seccionadora sob carga tripolar 250A","UN",143,35,1370.65],["ELE-0058","Elétrica","Condulete PVC tipo LB 3/4\"","UN",401,89,18.87],["ELE-0059","Elétrica","Condulete PVC tipo LL 3/4\"","UN",379,91,12.1],["ELE-0060","Elétrica","Condulete PVC tipo T 3/4\"","UN",130,36,11.83],["ELE-0061","Elétrica","Conduíte metálico galvanizado 3/4\" - barra 3m","UN",456,99,46.07],["ELE-0062","Elétrica","Conector de emenda tipo cunha (pacote c/50)","PC",296,71,92.53],["ELE-0063","Elétrica","Conector para haste de aterramento tipo cunha","UN",19,4,26.37],["ELE-0064","Elétrica","Conector perfurante para rede aérea 16-95mm²","UN",254,46,26.38],["ELE-0065","Elétrica","Contator tripolar 25A bobina 220V","UN",179,34,241.59],["ELE-0066","Elétrica","Contator tripolar 40A bobina 220V","UN",455,87,279.04],["ELE-0067","Elétrica","Contator tripolar 65A bobina 220V","UN",490,88,254.06],["ELE-0068","Elétrica","Câmera IP CFTV bullet 4MP","UN",213,48,482.75],["ELE-0069","Elétrica","Câmera IP CFTV dome 4MP","UN",358,79,812.15],["ELE-0070","Elétrica","Detector de fumaça convencional endereçável","UN",234,63,283.72],["ELE-0071","Elétrica","Disjuntor DR (interruptor diferencial residual) 16A 30mA","UN",118,25,177.92],["ELE-0072","Elétrica","Disjuntor DR (interruptor diferencial residual) 25A 30mA","UN",344,82,222.99],["ELE-0073","Elétrica","Disjuntor DR (interruptor diferencial residual) 40A 30mA","UN",276,56,291.98],["ELE-0074","Elétrica","Disjuntor DR (interruptor diferencial residual) 63A 30mA","UN",286,57,448.99],["ELE-0075","Elétrica","Disjuntor caixa moldada tripolar 100A","UN",143,28,1369.14],["ELE-0076","Elétrica","Disjuntor caixa moldada tripolar 160A","UN",374,67,684.28],["ELE-0077","Elétrica","Disjuntor caixa moldada tripolar 250A","UN",279,82,523.35],["ELE-0078","Elétrica","Disjuntor caixa moldada tripolar 25A","UN",103,19,1350.74],["ELE-0079","Elétrica","Disjuntor caixa moldada tripolar 40A","UN",375,89,1052.09],["ELE-0080","Elétrica","Disjuntor caixa moldada tripolar 63A","UN",310,60,1452.3],["ELE-0081","Elétrica","Disjuntor termomagnético monopolar 100A curva C","UN",104,20,19.52],["ELE-0082","Elétrica","Disjuntor termomagnético monopolar 10A curva C","UN",159,24,31.24],["ELE-0083","Elétrica","Disjuntor termomagnético monopolar 125A curva C","UN",145,23,39.04],["ELE-0084","Elétrica","Disjuntor termomagnético monopolar 150A curva C","UN",154,39,17.45],["ELE-0085","Elétrica","Disjuntor termomagnético monopolar 16A curva C","UN",449,118,20.68],["ELE-0086","Elétrica","Disjuntor termomagnético monopolar 175A curva C","UN",11,3,19.62],["ELE-0087","Elétrica","Disjuntor termomagnético monopolar 200A curva C","UN",230,46,36.12],["ELE-0088","Elétrica","Disjuntor termomagnético monopolar 20A curva C","UN",134,39,58.45],["ELE-0089","Elétrica","Disjuntor termomagnético monopolar 225A curva C","UN",425,68,36.5],["ELE-0090","Elétrica","Disjuntor termomagnético monopolar 250A curva C","UN",300,73,37.13],["ELE-0091","Elétrica","Disjuntor termomagnético monopolar 25A curva C","UN",81,22,17.41],["ELE-0092","Elétrica","Disjuntor termomagnético monopolar 32A curva C","UN",48,14,57.71],["ELE-0093","Elétrica","Disjuntor termomagnético monopolar 40A curva C","UN",396,84,20.33],["ELE-0094","Elétrica","Disjuntor termomagnético monopolar 50A curva C","UN",321,59,41.83],["ELE-0095","Elétrica","Disjuntor termomagnético monopolar 63A curva C","UN",235,67,38.52],["ELE-0096","Elétrica","Disjuntor termomagnético monopolar 70A curva C","UN",306,91,28.38],["ELE-0097","Elétrica","Disjuntor termomagnético monopolar 80A curva C","UN",322,51,28.74],["ELE-0098","Elétrica","Disjuntor termomagnético tripolar 100A curva C","UN",55,16,338.43],["ELE-0099","Elétrica","Disjuntor termomagnético tripolar 125A curva C","UN",113,21,120.26],["ELE-0100","Elétrica","Disjuntor termomagnético tripolar 150A curva C","UN",127,22,83.54],["ELE-0101","Elétrica","Disjuntor termomagnético tripolar 16A curva C","UN",6,1,81.77],["ELE-0102","Elétrica","Disjuntor termomagnético tripolar 200A curva C","UN",245,47,259.92],["ELE-0103","Elétrica","Disjuntor termomagnético tripolar 20A curva C","UN",366,70,127.13],["ELE-0104","Elétrica","Disjuntor termomagnético tripolar 25A curva C","UN",41,10,309.29],["ELE-0105","Elétrica","Disjuntor termomagnético tripolar 32A curva C","UN",408,110,327.93],["ELE-0106","Elétrica","Disjuntor termomagnético tripolar 40A curva C","UN",416,121,231.04],["ELE-0107","Elétrica","Disjuntor termomagnético tripolar 50A curva C","UN",283,52,183.29],["ELE-0108","Elétrica","Disjuntor termomagnético tripolar 63A curva C","UN",141,39,103.21],["ELE-0109","Elétrica","Disjuntor termomagnético tripolar 70A curva C","UN",89,24,80.71],["ELE-0110","Elétrica","Eletroduto PVC rígido roscável 1\" - barra 3m","UN",427,101,35.85],["ELE-0111","Elétrica","Eletroduto PVC rígido roscável 3/4\" - barra 3m","UN",68,15,22.22],["ELE-0112","Elétrica","Eletroduto corrugado flexível 1\" - rolo 50m","RL",106,31,112.57],["ELE-0113","Elétrica","Eletroduto corrugado flexível 3/4\" - rolo 50m","RL",129,28,120.06],["ELE-0114","Elétrica","Espaguete termo-retrátil diversos diâmetros (rolo)","RL",113,29,49.9],["ELE-0115","Elétrica","Extensão elétrica industrial 20m com plugue 3P+T","UN",18,3,300.74],["ELE-0116","Elétrica","Fita autofusão para emenda elétrica","UN",433,121,34.12],["ELE-0117","Elétrica","Fita isolante antichama 19mm x 20m","UN",15,4,10.46],["ELE-0118","Elétrica","Fonte chaveada 24VDC 5A para automação","UN",142,34,197.57],["ELE-0119","Elétrica","Fonte de alimentação 12VDC 10A para CFTV","UN",94,21,212.1],["ELE-0120","Elétrica","Fusível NH tamanho 00 - diversas correntes","UN",474,91,25.59],["ELE-0121","Elétrica","Haste de aterramento copperweld 5/8\" x 2,4m","UN",228,56,89.82],["ELE-0122","Elétrica","Interruptor paralelo (three-way) padrão novo","UN",51,11,13.87],["ELE-0123","Elétrica","Interruptor simples padrão novo","UN",169,42,10.31],["ELE-0124","Elétrica","Inversor de frequência (soft starter) 10cv","UN",173,37,3215.47],["ELE-0125","Elétrica","Inversor de frequência (soft starter) 5cv","UN",344,100,1544.11],["ELE-0126","Elétrica","Luminária LED de sobrepor 40W 4000K","UN",286,44,157.63],["ELE-0127","Elétrica","Luminária LED painel plafon 24W embutir","UN",134,27,64.25],["ELE-0128","Elétrica","Luminária de emergência autônoma LED bloco","UN",211,59,205.83],["ELE-0129","Elétrica","Lâmpada LED bulbo 15W 6500K E27","UN",5,1,24.67],["ELE-0130","Elétrica","Lâmpada LED bulbo 9W 6500K E27","UN",216,34,14.68],["ELE-0131","Elétrica","Lâmpada LED tubular T8 18W 1,20m","UN",323,85,30.55],["ELE-0132","Elétrica","Motor elétrico trifásico 1cv 220/380V","UN",394,62,568.89],["ELE-0133","Elétrica","Motor elétrico trifásico 2cv 220/380V","UN",72,21,696.88],["ELE-0134","Elétrica","Multimedidor de energia digital trifásico","UN",362,81,722.4],["ELE-0135","Elétrica","Módulo de tomada 10A padrão novo","UN",327,79,6.4],["ELE-0136","Elétrica","No-break senoidal 1200VA para automação/CFTV","UN",86,17,481.61],["ELE-0137","Elétrica","Para-raio tipo DPS classe II 275V","UN",213,35,41.23],["ELE-0138","Elétrica","Placa 4x2 cega branca","UN",472,79,11.93],["ELE-0139","Elétrica","Placa 4x2 para 1 posto branca","UN",336,92,13.42],["ELE-0140","Elétrica","Plugue industrial 3P+T 32A 220V","UN",371,72,59.9],["ELE-0141","Elétrica","Quadro de distribuição de embutir 24 disjuntores","UN",217,60,361.62],["ELE-0142","Elétrica","Quadro de distribuição de sobrepor 40 disjuntores","UN",129,28,641.51],["ELE-0143","Elétrica","Reator eletrônico para lâmpada fluorescente 2x32W","UN",102,29,51.57],["ELE-0144","Elétrica","Refletor LED 100W IP65 para área externa","UN",455,78,176.4],["ELE-0145","Elétrica","Refletor LED 200W IP65 para área externa","UN",400,107,168.85],["ELE-0146","Elétrica","Relé de falta de fase trifásico","UN",483,130,160.54],["ELE-0147","Elétrica","Relé de tempo (temporizador) multifunção 220V","UN",6,1,92.06],["ELE-0148","Elétrica","Relé térmico de sobrecarga 17-25A","UN",305,72,137.77],["ELE-0149","Elétrica","Relé térmico de sobrecarga 9-14A","UN",448,77,172.39],["ELE-0150","Elétrica","Rolamento para motor elétrico 6205","UN",181,36,38.85],["ELE-0151","Elétrica","Rolamento para motor elétrico 6305","UN",198,43,68.14],["ELE-0152","Elétrica","Régua de tomadas industrial com disjuntor 6 tomadas","UN",101,30,131.83],["ELE-0153","Elétrica","Sensor de presença para iluminação (infravermelho)","UN",201,37,56.72],["ELE-0154","Elétrica","Sinaleiro luminoso LED 220V (verde/vermelho/amarelo)","UN",27,5,38.27],["ELE-0155","Elétrica","Sirene/strobe para alarme de incêndio 24V","UN",472,128,248.24],["ELE-0156","Elétrica","Solda exotérmica para aterramento (cartucho)","UN",344,92,42.37],["ELE-0157","Elétrica","Soquete/reator para lâmpada de vapor metálico 250W","UN",82,18,138.24],["ELE-0158","Elétrica","Switch de rede gerenciável PoE 24 portas","UN",262,77,970.34],["ELE-0159","Elétrica","Terminal tubular ilhós 10mm² (pacote c/100)","PC",56,16,44.94],["ELE-0160","Elétrica","Terminal tubular ilhós 2,5mm² (pacote c/100)","PC",274,79,28.21],["ELE-0161","Elétrica","Terminal tubular ilhós 6mm² (pacote c/100)","PC",78,16,20.54],["ELE-0162","Elétrica","Tomada 2P+T 10A padrão novo","UN",84,14,14.82],["ELE-0163","Elétrica","Tomada 2P+T 20A padrão novo","UN",140,28,18.5],["ELE-0164","Elétrica","Tomada industrial 3P+T 32A 220V","UN",337,55,102.34],["ELE-0165","Elétrica","Transformador de comando 220/24V 100VA","UN",350,98,142.57],["ELE-0166","Elétrica","Transformador de corrente (TC) 200/5A","UN",167,41,154.6],["ELE-0167","Elétrica","Trilho DIN 35mm - barra 1m","UN",254,71,23.09],["HID-0001","Hidráulica","Abraçadeira metálica tipo cunha 1/2\" a 2\"","UN",40,7,3.61],["HID-0002","Hidráulica","Adaptador PVC soldável com bolsa e rosca 1\"","UN",152,46,16],["HID-0003","Hidráulica","Adaptador PVC soldável com bolsa e rosca 1.1/2\"","UN",227,67,17.19],["HID-0004","Hidráulica","Adaptador PVC soldável com bolsa e rosca 1.1/4\"","UN",365,103,17.45],["HID-0005","Hidráulica","Adaptador PVC soldável com bolsa e rosca 1/2\"","UN",360,70,11.43],["HID-0006","Hidráulica","Adaptador PVC soldável com bolsa e rosca 2\"","UN",171,46,3.55],["HID-0007","Hidráulica","Adaptador PVC soldável com bolsa e rosca 3/4\"","UN",196,42,8.57],["HID-0008","Hidráulica","Anel de vedação O\u0027ring diversos tamanhos (kit)","KT",108,25,23.55],["HID-0009","Hidráulica","Assento sanitário universal","UN",92,16,150.95],["HID-0010","Hidráulica","Boia elétrica de nível para caixa d\u0027água","UN",200,49,64.62],["HID-0011","Hidráulica","Bomba centrífuga 1 CV trifásica","UN",472,112,964.91],["HID-0012","Hidráulica","Bomba centrífuga 1/2 CV monofásica","UN",331,62,477.7],["HID-0013","Hidráulica","Bomba centrífuga 2 CV trifásica","UN",9,3,1710.65],["HID-0014","Hidráulica","Bomba submersível de drenagem 1/3 CV","UN",152,38,655.89],["HID-0015","Hidráulica","Bucha de redução PVC roscável 1\"","UN",231,67,4.84],["HID-0016","Hidráulica","Bucha de redução PVC roscável 1.1/2\"","UN",158,39,19.78],["HID-0017","Hidráulica","Bucha de redução PVC roscável 1.1/4\"","UN",133,29,9.64],["HID-0018","Hidráulica","Bucha de redução PVC roscável 1/2\"","UN",201,56,7.44],["HID-0019","Hidráulica","Bucha de redução PVC roscável 2\"","UN",200,47,3.92],["HID-0020","Hidráulica","Bucha de redução PVC roscável 3/4\"","UN",363,71,12.35],["HID-0021","Hidráulica","Bóia mecânica para caixa d\u0027água 1/2\"","UN",342,72,59.12],["HID-0022","Hidráulica","Caixa de gordura PVC 31L com tampa","UN",447,113,91.38],["HID-0023","Hidráulica","Caixa sifonada PVC 150x150x50mm","UN",30,9,37.34],["HID-0024","Hidráulica","Cavalete hidrométrico completo 3/4\"","UN",431,123,216.68],["HID-0025","Hidráulica","Chave de mangueira storz para incêndio","UN",414,76,94.34],["HID-0026","Hidráulica","Cola para tubo e conexão PVC 175g","UN",117,29,26.43],["HID-0027","Hidráulica","Elemento filtrante refil para filtro de linha","UN",352,93,51.04],["HID-0028","Hidráulica","Engate flexível metálico 30cm 1/2\"","UN",353,97,33.49],["HID-0029","Hidráulica","Engate flexível metálico 40cm 1/2\"","UN",467,114,33.48],["HID-0030","Hidráulica","Esguicho jato/neblina para mangueira de incêndio","UN",408,88,129.07],["HID-0031","Hidráulica","Extintor de incêndio CO2 6kg (carga/recarga)","UN",379,64,283.3],["HID-0032","Hidráulica","Extintor de incêndio PQS 6kg (carga/recarga)","UN",172,45,208.25],["HID-0033","Hidráulica","Filtro de linha para água 3/4\"","UN",72,19,88.1],["HID-0034","Hidráulica","Fita de vedação para juntas de dilatação","RL",96,22,55.06],["HID-0035","Hidráulica","Fita veda rosca (teflon) 18mm x 50m","UN",430,75,7.48],["HID-0036","Hidráulica","Gaxeta de vedação para flange 4\" a 6\"","UN",488,108,84.41],["HID-0037","Hidráulica","Grelha metálica para ralo 150x150mm","UN",387,109,34.58],["HID-0038","Hidráulica","Hidrômetro unijato 3/4\"","UN",244,72,282.8],["HID-0039","Hidráulica","Joelho PVC 45° soldável 100mm","UN",499,92,6.64],["HID-0040","Hidráulica","Joelho PVC 45° soldável 20mm","UN",350,104,24.32],["HID-0041","Hidráulica","Joelho PVC 45° soldável 25mm","UN",416,97,33.92],["HID-0042","Hidráulica","Joelho PVC 45° soldável 32mm","UN",207,31,4.98],["HID-0043","Hidráulica","Joelho PVC 45° soldável 40mm","UN",237,49,19.71],["HID-0044","Hidráulica","Joelho PVC 45° soldável 50mm","UN",139,33,26.72],["HID-0045","Hidráulica","Joelho PVC 45° soldável 60mm","UN",486,100,29.14],["HID-0046","Hidráulica","Joelho PVC 45° soldável 75mm","UN",246,38,24.27],["HID-0047","Hidráulica","Joelho PVC 90° soldável 100mm","UN",292,58,31.18],["HID-0048","Hidráulica","Joelho PVC 90° soldável 20mm","UN",336,54,22.13],["HID-0049","Hidráulica","Joelho PVC 90° soldável 25mm","UN",470,120,29.19],["HID-0050","Hidráulica","Joelho PVC 90° soldável 32mm","UN",64,11,23.42],["HID-0051","Hidráulica","Joelho PVC 90° soldável 40mm","UN",160,48,33.23],["HID-0052","Hidráulica","Joelho PVC 90° soldável 50mm","UN",125,35,5.83],["HID-0053","Hidráulica","Joelho PVC 90° soldável 60mm","UN",237,49,6.48],["HID-0054","Hidráulica","Joelho PVC 90° soldável 75mm","UN",361,105,33.33],["HID-0055","Hidráulica","Junta elástica para tubo PVC/ferro fundido 100mm","UN",385,100,40.96],["HID-0056","Hidráulica","Kit reparo para caixa acoplada universal","UN",340,56,119.11],["HID-0057","Hidráulica","Lixa d\u0027água grão 220 para PVC","UN",213,62,2.47],["HID-0058","Hidráulica","Luva PVC soldável 100mm","UN",358,74,9.83],["HID-0059","Hidráulica","Luva PVC soldável 20mm","UN",491,91,14.41],["HID-0060","Hidráulica","Luva PVC soldável 25mm","UN",356,73,12.16],["HID-0061","Hidráulica","Luva PVC soldável 32mm","UN",335,68,27.25],["HID-0062","Hidráulica","Luva PVC soldável 40mm","UN",102,30,13.15],["HID-0063","Hidráulica","Luva PVC soldável 50mm","UN",426,93,28.57],["HID-0064","Hidráulica","Luva PVC soldável 60mm","UN",333,82,20.56],["HID-0065","Hidráulica","Luva PVC soldável 75mm","UN",30,8,29.19],["HID-0066","Hidráulica","Mangueira cristal reforçada 12mm - rolo 50m","RL",35,9,160.63],["HID-0067","Hidráulica","Mangueira cristal reforçada 15mm - rolo 50m","RL",198,46,149.51],["HID-0068","Hidráulica","Mangueira cristal reforçada 18mm - rolo 50m","RL",62,12,260.05],["HID-0069","Hidráulica","Mangueira cristal reforçada 21mm - rolo 50m","RL",155,23,132.79],["HID-0070","Hidráulica","Mangueira cristal reforçada 24mm - rolo 50m","RL",40,12,338.94],["HID-0071","Hidráulica","Mangueira cristal reforçada 27mm - rolo 50m","RL",47,8,246.66],["HID-0072","Hidráulica","Mangueira cristal reforçada 30mm - rolo 50m","RL",36,5,341.27],["HID-0073","Hidráulica","Mangueira cristal reforçada 33mm - rolo 50m","RL",63,15,319.1],["HID-0074","Hidráulica","Mangueira cristal reforçada 36mm - rolo 50m","RL",70,11,94.58],["HID-0075","Hidráulica","Mangueira cristal reforçada 3mm - rolo 50m","RL",137,23,305.1],["HID-0076","Hidráulica","Mangueira cristal reforçada 6mm - rolo 50m","RL",117,31,108.43],["HID-0077","Hidráulica","Mangueira cristal reforçada 9mm - rolo 50m","RL",30,7,238.84],["HID-0078","Hidráulica","Mangueira de incêndio tipo 2, 15m, com engate","UN",319,50,471.85],["HID-0079","Hidráulica","Niple PVC roscável 1\"","UN",448,111,14.53],["HID-0080","Hidráulica","Niple PVC roscável 1.1/2\"","UN",334,98,6.83],["HID-0081","Hidráulica","Niple PVC roscável 1.1/4\"","UN",250,69,2.97],["HID-0082","Hidráulica","Niple PVC roscável 1/2\"","UN",60,13,8.82],["HID-0083","Hidráulica","Niple PVC roscável 2\"","UN",42,12,16.56],["HID-0084","Hidráulica","Niple PVC roscável 3/4\"","UN",80,13,7.15],["HID-0085","Hidráulica","Pressostato para bomba de água","UN",329,78,70.25],["HID-0086","Hidráulica","Ralo sifonado PVC 100mm","UN",200,60,22.24],["HID-0087","Hidráulica","Redução PVC soldável 20mm","UN",237,54,16.26],["HID-0088","Hidráulica","Redução PVC soldável 25mm","UN",411,105,13.75],["HID-0089","Hidráulica","Redução PVC soldável 32mm","UN",338,95,24.32],["HID-0090","Hidráulica","Redução PVC soldável 40mm","UN",448,82,16.78],["HID-0091","Hidráulica","Redução PVC soldável 50mm","UN",121,26,14.29],["HID-0092","Hidráulica","Redução PVC soldável 60mm","UN",209,44,23.69],["HID-0093","Hidráulica","Registro esfera PVC 1\"","UN",223,44,24.98],["HID-0094","Hidráulica","Registro esfera PVC 1.1/2\"","UN",493,85,41.76],["HID-0095","Hidráulica","Registro esfera PVC 1.1/4\"","UN",39,6,111.91],["HID-0096","Hidráulica","Registro esfera PVC 1/2\"","UN",226,37,23.96],["HID-0097","Hidráulica","Registro esfera PVC 2\"","UN",420,71,92.57],["HID-0098","Hidráulica","Registro esfera PVC 2.1/2\"","UN",494,116,21.3],["HID-0099","Hidráulica","Registro esfera PVC 3\"","UN",67,14,49.61],["HID-0100","Hidráulica","Registro esfera PVC 3/4\"","UN",486,128,106.73],["HID-0101","Hidráulica","Registro esfera PVC 4\"","UN",374,59,106.15],["HID-0102","Hidráulica","Registro gaveta bruto 1\"","UN",164,33,57.39],["HID-0103","Hidráulica","Registro gaveta bruto 1.1/2\"","UN",113,20,95.13],["HID-0104","Hidráulica","Registro gaveta bruto 1.1/4\"","UN",438,73,82.68],["HID-0105","Hidráulica","Registro gaveta bruto 1/2\"","UN",193,32,129.9],["HID-0106","Hidráulica","Registro gaveta bruto 2\"","UN",120,33,56.21],["HID-0107","Hidráulica","Registro gaveta bruto 2.1/2\"","UN",397,108,129.87],["HID-0108","Hidráulica","Registro gaveta bruto 3\"","UN",334,78,99.76],["HID-0109","Hidráulica","Registro gaveta bruto 3/4\"","UN",341,94,99.17],["HID-0110","Hidráulica","Registro gaveta bruto 4\"","UN",97,19,54.77],["HID-0111","Hidráulica","Reparo completo para válvula de descarga","UN",476,96,90.99],["HID-0112","Hidráulica","Selo gaxeta grafitada para bomba 1\"","UN",450,77,61.16],["HID-0113","Hidráulica","Selo gaxeta grafitada para bomba 1/2\"","UN",40,7,184.9],["HID-0114","Hidráulica","Selo gaxeta grafitada para bomba 3/4\"","UN",20,3,180.3],["HID-0115","Hidráulica","Selo gaxeta grafitada para bomba 5/8\"","UN",197,42,160.79],["HID-0116","Hidráulica","Selo mecânico duplo para bomba 1\"","UN",194,38,124.77],["HID-0117","Hidráulica","Selo mecânico duplo para bomba 1/2\"","UN",487,115,121.63],["HID-0118","Hidráulica","Selo mecânico duplo para bomba 3/4\"","UN",31,5,76.14],["HID-0119","Hidráulica","Selo mecânico duplo para bomba 5/8\"","UN",30,8,203.34],["HID-0120","Hidráulica","Selo mecânico simples para bomba 1\"","UN",343,73,111.7],["HID-0121","Hidráulica","Selo mecânico simples para bomba 1/2\"","UN",217,41,175.34],["HID-0122","Hidráulica","Selo mecânico simples para bomba 3/4\"","UN",63,13,203.44],["HID-0123","Hidráulica","Selo mecânico simples para bomba 5/8\"","UN",352,89,81.07],["HID-0124","Hidráulica","Sensor de fluxo de água para sprinklers","UN",346,68,494.65],["HID-0125","Hidráulica","Sprinkler de resposta rápida bulbo 68°C","UN",311,49,59.85],["HID-0126","Hidráulica","Suporte/braçadeira para tubulação PVC 40 a 100mm","UN",489,89,8.29],["HID-0127","Hidráulica","Torneira de jardim/observação 1/2\"","UN",135,26,20.49],["HID-0128","Hidráulica","Tubo PVC soldável 100mm - barra 6m","BR",130,34,43.6],["HID-0129","Hidráulica","Tubo PVC soldável 150mm - barra 6m","BR",100,23,52.23],["HID-0130","Hidráulica","Tubo PVC soldável 200mm - barra 6m","BR",146,40,60.67],["HID-0131","Hidráulica","Tubo PVC soldável 20mm - barra 6m","BR",21,4,149.96],["HID-0132","Hidráulica","Tubo PVC soldável 20mm - barra 6m (compl. 1)","BR",114,17,140.02],["HID-0133","Hidráulica","Tubo PVC soldável 25mm - barra 6m","BR",83,20,167.78],["HID-0134","Hidráulica","Tubo PVC soldável 32mm - barra 6m","BR",184,45,113.88],["HID-0135","Hidráulica","Tubo PVC soldável 40mm - barra 6m","BR",106,16,69.87],["HID-0136","Hidráulica","Tubo PVC soldável 50mm - barra 6m","BR",161,35,75.34],["HID-0137","Hidráulica","Tubo PVC soldável 60mm - barra 6m","BR",95,16,131.89],["HID-0138","Hidráulica","Tubo PVC soldável 75mm - barra 6m","BR",65,14,155.9],["HID-0139","Hidráulica","Tê PVC soldável 100mm","UN",45,9,19.82],["HID-0140","Hidráulica","Tê PVC soldável 20mm","UN",178,33,16.03],["HID-0141","Hidráulica","Tê PVC soldável 25mm","UN",44,10,35.72],["HID-0142","Hidráulica","Tê PVC soldável 32mm","UN",266,48,7.79],["HID-0143","Hidráulica","Tê PVC soldável 40mm","UN",184,48,35.6],["HID-0144","Hidráulica","Tê PVC soldável 50mm","UN",422,73,37.4],["HID-0145","Hidráulica","Tê PVC soldável 60mm","UN",136,24,7.32],["HID-0146","Hidráulica","Tê PVC soldável 75mm","UN",394,104,28.3],["HID-0147","Hidráulica","Válvula de descarga hydra 1.1/2\"","UN",492,131,107.33],["HID-0148","Hidráulica","Válvula de governo e alarme (VGA) 4\"","UN",391,92,3134.12],["HID-0149","Hidráulica","Válvula de pé com crivo 1\"","UN",353,102,165.38],["HID-0150","Hidráulica","Válvula de pé com crivo 1.1/2\"","UN",330,98,162.01],["HID-0151","Hidráulica","Válvula de pé com crivo 1.1/4\"","UN",326,64,107.72],["HID-0152","Hidráulica","Válvula de pé com crivo 1/2\"","UN",245,53,133.95],["HID-0153","Hidráulica","Válvula de pé com crivo 2\"","UN",145,35,103.13],["HID-0154","Hidráulica","Válvula de pé com crivo 2.1/2\"","UN",42,8,114.19],["HID-0155","Hidráulica","Válvula de pé com crivo 3\"","UN",34,7,136.68],["HID-0156","Hidráulica","Válvula de pé com crivo 3/4\"","UN",335,94,99.59],["HID-0157","Hidráulica","Válvula de pé com crivo 4\"","UN",319,76,227.44],["HID-0158","Hidráulica","Válvula de retenção horizontal 1\"","UN",302,70,103.05],["HID-0159","Hidráulica","Válvula de retenção horizontal 1.1/2\"","UN",463,72,180.45],["HID-0160","Hidráulica","Válvula de retenção horizontal 1.1/4\"","UN",297,74,202.72],["HID-0161","Hidráulica","Válvula de retenção horizontal 1/2\"","UN",248,56,91.09],["HID-0162","Hidráulica","Válvula de retenção horizontal 2\"","UN",235,39,211.97],["HID-0163","Hidráulica","Válvula de retenção horizontal 2.1/2\"","UN",180,54,200.83],["HID-0164","Hidráulica","Válvula de retenção horizontal 3\"","UN",335,59,46.02],["HID-0165","Hidráulica","Válvula de retenção horizontal 3/4\"","UN",229,68,77.07],["HID-0166","Hidráulica","Válvula de retenção horizontal 4\"","UN",317,55,129.57],["HID-0167","Hidráulica","Válvula sifão para caixa acoplada","UN",149,31,49.24]];
+function carregarListaNS(){
+  db.items = LISTA_NS.map(r => ({
+    id:uid(), codigo:r[0], categoria:r[1], descricao:r[2], unidade:r[3]||"UN",
+    atual:r[4]||0, min:r[5]||0, max:(r[5]||0)*2, valorUnit:r[6]||0,
+    prateleira:"", coluna:"", gaveta:"", fornecedor:"", leadTime:0, ultimaCompra:""
+  }));
+  db.movs = []; db.compras = [];
+  toast("Lista NorteShopping carregada: "+db.items.length+" itens (estoque máximo assumido como 2× o mínimo — ajuste conforme necessário).");
+  commit();
+}
+
+/* ---------- demo seed ---------- */
+function seedDemo(){
+  const cats = {
+    "Elétrica":[["EL-001","Disjuntor bipolar 25A","UN",8,5,20,"Schneider BR",7],["EL-002","Lâmpada LED tubular 18W","UN",42,30,120,"Ilumina RJ",5],["EL-003","Cabo flexível 2,5mm (m)","M",180,100,400,"CondutorMax",10],["EL-004","Contator tripolar 32A","UN",3,4,12,"Schneider BR",15],["EL-005","Reator eletrônico 2x32W","UN",6,8,24,"Ilumina RJ",12]],
+    "Hidráulica":[["HD-001","Reparo válvula descarga","UN",5,6,18,"HidroPeças",8],["HD-002","Tubo PVC 50mm (barra 6m)","BR",12,6,20,"HidroPeças",6],["HD-003","Bomba submersível 1CV","UN",1,2,4,"BombasRio",20],["HD-004","Anel de vedação 50mm","UN",25,15,60,"HidroPeças",5]],
+    "HVAC":[["AC-001","Filtro de ar G4 610x610","UN",14,12,48,"ClimaFiltros",10],["AC-002","Correia A-42","UN",9,6,24,"RolaTec",7],["AC-003","Gás refrigerante R-410A (kg)","KG",18,10,40,"FrioGás",12],["AC-004","Rolamento 6205 ZZ","UN",4,6,20,"RolaTec",9]],
+    "Civil":[["CV-001","Cimento CP-II 50kg","SC",10,8,30,"ConstruNorte",4],["CV-002","Rejunte cinza 1kg","UN",22,10,40,"ConstruNorte",4],["CV-003","Fita antiderrapante (rolo)","RL",7,4,16,"SegurPiso",8]],
+    "Segurança":[["SG-001","Luva nitrílica (par)","PR",35,25,100,"EPI Center",6],["SG-002","Capacete com jugular","UN",11,8,25,"EPI Center",6],["SG-003","Sinalizador de piso molhado","UN",6,4,12,"SegurPiso",8]]
+  };
+  db.items = [];
+  const locs = ["A","B","C","D"];
+  let li = 0;
+  for(const [cat, items] of Object.entries(cats)){
+    for(const [codigo, descricao, unidade, atual, min, max, fornecedor, leadTime] of items){
+      db.items.push({ id:uid(), codigo, descricao, categoria:cat, unidade, atual, min, max,
+        prateleira:locs[li%4], coluna:String(1+(li%5)), gaveta:String(1+(li%3)),
+        fornecedor, leadTime, ultimaCompra:"", valorUnit:Math.round((12+(li*37)%420)*100)/100 });
+      li++;
+    }
+  }
+  const equips = ["Chiller 01","Chiller 02","Escada rolante L2","Escada rolante L3","Elevador social 04","Praça de alimentação","Subestação","Banheiros L1","Fachada","Docas"];
+  db.movs = [];
+  let seed = 42;
+  const rnd = () => { seed = (seed*1103515245+12345) & 0x7fffffff; return seed/0x7fffffff; };
+  const today = new Date();
+  for(const it of db.items){
+    const freq = 2 + Math.floor(rnd()*5);
+    for(let m=0;m<6;m++){
+      const n = Math.max(0, Math.round(freq * (0.6+rnd()*0.9)));
+      for(let k=0;k<n;k++){
+        const d = new Date(today.getFullYear(), today.getMonth()-m, 1+Math.floor(rnd()*27));
+        if(d>today) continue;
+        const qty = Math.max(1, Math.round((it.max/12) * (0.4+rnd()*1.2)));
+        db.movs.push({ id:uid(), type:"saida", itemId:it.id, qty, date:dISO(d),
+          equip:equips[Math.floor(rnd()*equips.length)], user:"Almoxarife",
+          obs:"OS "+(4000+Math.floor(rnd()*900)), ts:d.getTime() });
+      }
+      if(rnd()>0.5){
+        const d = new Date(today.getFullYear(), today.getMonth()-m, 3+Math.floor(rnd()*24));
+        if(d<=today){
+          const qty = Math.max(2, Math.round(it.max*0.4*(0.5+rnd())));
+          db.movs.push({ id:uid(), type:"entrada", itemId:it.id, qty, date:dISO(d),
+            equip:"", user:"Almoxarife", obs:"NF "+(1000+Math.floor(rnd()*8000)), ts:d.getTime() });
+          if(!it.ultimaCompra || it.ultimaCompra<dISO(d)) it.ultimaCompra = dISO(d);
+        }
+      }
+    }
+  }
+  db.compras = [];
+  toast("Dados de exemplo carregados: "+db.items.length+" itens e "+db.movs.length+" movimentações.");
+  commit();
+}
+
+/* ================= AUDITORIA ================= */
+let auditRows = null, auditCarregando = false, auditFiltros = { de:"", ate:"", email:"", tabela:"" };
+const auditEmails = new Set();
+const AUD_TABELA = { alx_itens:"Item", alx_movs:"Movimentação", alx_compras:"Compra" };
+const AUD_ACAO = { criou:["Criou","verde"], alterou:["Alterou","amarelo"], excluiu:["Excluiu","vermelho"] };
+const AUD_CAMPO = { codigo:"código", descricao:"descrição", categoria:"categoria", unidade:"unidade",
+  atual:"estoque atual", min:"mínimo", max:"máximo", valor_unit:"valor unitário", prateleira:"prateleira",
+  coluna:"coluna", gaveta:"gaveta", fornecedor:"fornecedor", lead_time:"lead time", ultima_compra:"última compra",
+  qty:"quantidade", date:"data", obs:"observação", equip:"equipamento", usuario:"operador", type:"tipo",
+  qtd:"quantidade", status:"status", criada_em:"criada em", recebida_em:"recebida em", item_id:"item" };
+const audVal = v => v===null||v===undefined||v===""?"—":(typeof v==="number"?fmtN.format(v):String(v));
+const audProximoDia = s => { const d = parseISO(s); d.setDate(d.getDate()+1); return dISO(d); };
+
+function audDescreve(r){
+  const d = r.dados || {};
+  if(r.tabela==="alx_itens") return `${esc(d.descricao||"")} <span class="muted small mono">${esc(d.codigo||"")}</span>`;
+  const it = itemById(d.item_id);
+  const nome = it ? it.descricao : "(item excluído)";
+  if(r.tabela==="alx_movs") return `${d.type==="saida"?"Saída":"Entrada"} de ${fmtN.format(d.qty||0)} × ${esc(nome)}${d.date?` em ${fdate(d.date)}`:""}`;
+  return `Solicitação de compra — ${esc(nome)}${d.status?` (${esc(d.status)})`:""}`;
+}
+function audMudancas(r){
+  if(r.acao!=="alterou" || !r.antes) return "";
+  const mud = [];
+  for(const k of Object.keys(r.dados||{})){
+    if(k==="id"||k==="updated_at"||k==="ts") continue;
+    if(JSON.stringify(r.antes[k])!==JSON.stringify(r.dados[k]))
+      mud.push(`<strong>${esc(AUD_CAMPO[k]||k)}</strong>: ${esc(audVal(r.antes[k]))} → ${esc(audVal(r.dados[k]))}`);
+  }
+  return mud.join(" · ");
+}
+async function carregarAuditoria(){
+  if(auditCarregando) return;
+  auditCarregando = true;
+  try{
+    let q = "alx_audit?select=*&order=id.desc";
+    const f = auditFiltros;
+    if(f.de) q += "&criado_em=gte." + f.de;
+    if(f.ate) q += "&criado_em=lt." + audProximoDia(f.ate);
+    if(f.email) q += "&email=eq." + encodeURIComponent(f.email);
+    if(f.tabela) q += "&tabela=eq." + f.tabela;
+    auditRows = await api(q, { headers:{ Range:"0-499" } }) || [];
+    auditRows.forEach(r => { if(r.email) auditEmails.add(r.email); });
+  }catch(e){
+    auditRows = [];
+    toast("Falha ao carregar a auditoria: " + e.message, true);
+  }
+  auditCarregando = false;
+  if(current==="auditoria") render(true);
+}
+function vAuditoria(){
+  const f = auditFiltros;
+  const emails = [...auditEmails].sort();
+  const rows = auditRows;
+  return `
+  <div class="viewhead"><h2>Auditoria</h2>
+    <span class="desc">Quem criou, alterou ou excluiu cada registro — preenchida automaticamente pelo banco, não pode ser editada pelo app</span></div>
+  <div class="panel">
+    <div class="filterbar">
+      <div class="field"><label>De</label><input type="date" id="au-de" value="${esc(f.de)}"></div>
+      <div class="field"><label>Até</label><input type="date" id="au-ate" value="${esc(f.ate)}"></div>
+      <div class="field" style="min-width:210px"><label>Usuário</label><select id="au-email">
+        <option value="">Todos</option>
+        ${emails.map(e=>`<option value="${esc(e)}" ${f.email===e?"selected":""}>${esc(e)}</option>`).join("")}</select></div>
+      <div class="field"><label>Registro</label><select id="au-tabela">
+        <option value="">Todos</option>
+        <option value="alx_itens" ${f.tabela==="alx_itens"?"selected":""}>Itens</option>
+        <option value="alx_movs" ${f.tabela==="alx_movs"?"selected":""}>Movimentações</option>
+        <option value="alx_compras" ${f.tabela==="alx_compras"?"selected":""}>Compras</option></select></div>
+      <button class="btn sm" id="au-clear">Limpar filtros</button>
+      <button class="btn sm" id="au-reload">${I.hist} Atualizar</button>
+    </div>
+    <div class="pbody flush">
+    ${rows===null ? '<div class="empty">Carregando auditoria…</div>' :
+      rows.length ? `<div class="tablewrap"><table class="data"><thead><tr>
+        <th>Quando</th><th>Usuário</th><th>Ação</th><th>Registro</th><th>O quê</th><th>Mudanças</th></tr></thead><tbody>
+      ${rows.map(r=>{ const ac = AUD_ACAO[r.acao]||[r.acao,"cinza"]; return `<tr>
+        <td style="white-space:nowrap">${fmtDT.format(new Date(r.criado_em))}</td>
+        <td>${esc(r.email||"—")}</td>
+        <td><span class="pill ${ac[1]}">${ac[0]}</span></td>
+        <td>${AUD_TABELA[r.tabela]||esc(r.tabela)}</td>
+        <td>${audDescreve(r)}</td>
+        <td class="small">${audMudancas(r)||'<span class="muted">—</span>'}</td></tr>`}).join("")}
+      </tbody></table>${rows.length>=500?'<div class="empty">Exibindo os 500 registros mais recentes. Use os filtros para refinar.</div>':""}</div>`
+      : '<div class="empty">Nenhum registro de auditoria com estes filtros.</div>'}
+  </div></div>`;
+}
+function wireAuditoria(){
+  if(auditRows===null && !auditCarregando) carregarAuditoria();
+  const g = id => document.getElementById(id);
+  const upd = () => {
+    auditFiltros = { de:g("au-de").value, ate:g("au-ate").value, email:g("au-email").value, tabela:g("au-tabela").value };
+    carregarAuditoria();
+  };
+  ["au-de","au-ate","au-email","au-tabela"].forEach(id => { const el=g(id); if(el) el.addEventListener("change",upd); });
+  if(g("au-clear")) g("au-clear").onclick = () => { auditFiltros={de:"",ate:"",email:"",tabela:""}; carregarAuditoria(); render(true); };
+  if(g("au-reload")) g("au-reload").onclick = () => carregarAuditoria();
+}
+
+/* ================= MODAL ================= */
+function openModal(html, size){
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `<div class="modal-overlay"><div class="modal ${size||""}" role="dialog" aria-modal="true">${html}</div></div>`;
+  root.querySelector(".modal-overlay").addEventListener("mousedown", e => { if(e.target===e.currentTarget) closeModal(); });
+  root.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
+  const first = root.querySelector("input,select,button.primary");
+  if(first) first.focus();
+}
+function closeModal(){ document.getElementById("modal-root").innerHTML = ""; }
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+function confirmDlg(msg, onOk, okLabel){
+  openModal(`
+    <div class="mhead"><h3>Confirmação</h3><button class="iconbtn" data-close>${I.x}</button></div>
+    <div class="mbody"><p style="margin:0">${esc(msg)}</p></div>
+    <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn danger" id="cf-ok">${esc(okLabel||"Confirmar")}</button></div>`,"sm");
+  document.getElementById("cf-ok").onclick = () => { closeModal(); onOk(); };
+}
+
+/* ================= RENDER ================= */
+function render(keepFocus){
+  syncCompras();
+  renderNav();
+  const view = document.getElementById("view");
+  const renderers = { dashboard:vDashboard, itens:vItens, entrada:()=>vMovForm("entrada"), saida:()=>vMovForm("saida"),
+    movs:vMovs, critico:vCritico, compras:vCompras, indicadores:vIndicadores, auditoria:vAuditoria, dados:vDados };
+  view.innerHTML = renderers[current]();
+  wire();
+  if(!keepFocus) window.scrollTo(0,0);
+}
+function wire(){
+  document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => go(b.dataset.goto));
+  const seed1 = document.getElementById("seed-demo"); if(seed1) seed1.onclick = seedDemo;
+  const seed2 = document.getElementById("seed-demo2"); if(seed2) seed2.onclick = () => {
+    if(!db.items.length) seedDemo();
+    else confirmDlg("Isto substituirá os dados atuais pelos dados de demonstração. Continuar?", seedDemo, "Substituir");
+  };
+  ["lista-ns","lista-ns2"].forEach(id => {
+    const b = document.getElementById(id);
+    if(b) b.onclick = () => {
+      if(!db.items.length) carregarListaNS();
+      else confirmDlg("Isto substituirá os dados atuais pela lista oficial NorteShopping (500 itens). As movimentações serão apagadas. Continuar?", carregarListaNS, "Carregar lista");
+    };
+  });
+  if(current==="itens"){
+    const nv = document.getElementById("novo-item"); if(nv) nv.onclick = () => openItemModal();
+    document.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
+    document.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+      const it = itemById(b.dataset.del); if(!it) return;
+      confirmDlg(`Excluir o item “${it.descricao}” (${it.codigo})? As movimentações dele permanecerão no histórico como “(excluído)”.`, () => {
+        db.items = db.items.filter(x=>x.id!==it.id);
+        db.compras = db.compras.filter(c=>c.itemId!==it.id);
+        toast("Item excluído."); commit();
+      }, "Excluir");
+    });
+    bindExport("exp-itens-csv","itens.csv",()=>toCSV(itensRows()));
+    bindExportX("exp-itens-xlsx","itens.xlsx",itensRows,"Itens");
+  }
+  if(current==="entrada") wireMovForm("entrada");
+  if(current==="saida") wireMovForm("saida");
+  if(current==="auditoria") wireAuditoria();
+  if(current==="movs"){
+    wireMovs();
+    bindExport("exp-movs-csv","movimentacoes.csv",()=>toCSV(movsRows()));
+    bindExportX("exp-movs-xlsx","movimentacoes.xlsx",movsRows,"Movimentações");
+  }
+  if(current==="compras"){
+    document.querySelectorAll("[data-comprar]").forEach(b => b.onclick = () => {
+      const c = db.compras.find(x=>x.id===b.dataset.comprar);
+      if(c){ c.status="Comprado"; toast("Solicitação marcada como comprada."); commit(); }
+    });
+    document.querySelectorAll("[data-receber]").forEach(b => b.onclick = () => openReceberModal(b.dataset.receber));
+    bindExport("exp-compras-csv","compras.csv",()=>toCSV(comprasRows()));
+  }
+  if(current==="dados"){
+    bindExport("exp2-itens-csv","itens.csv",()=>toCSV(itensRows()));
+    bindExportX("exp2-itens-xlsx","itens.xlsx",itensRows,"Itens");
+    bindExport("exp2-movs-csv","movimentacoes.csv",()=>toCSV(movsRows()));
+    bindExportX("exp2-movs-xlsx","movimentacoes.xlsx",movsRows,"Movimentações");
+    const modelo = document.getElementById("dl-modelo");
+    if(modelo) modelo.onclick = () => downloadBlob("modelo_itens.xlsx", makeXLSX([
+      ["codigo","descricao","categoria","unidade","estoque_minimo","estoque_maximo","estoque_atual","prateleira","coluna","gaveta","fornecedor","lead_time","ultima_compra"],
+      ["EL-001","Disjuntor bipolar 25A","Elétrica","UN",5,20,8,"A","1","2","Schneider BR",7,"01/06/2026"]
+    ],"Modelo"));
+    const fi = document.getElementById("file-import");
+    if(fi) fi.addEventListener("change", async e => {
+      const file = e.target.files[0]; if(!file) return;
+      const out = document.getElementById("import-result");
+      out.textContent = "Processando " + file.name + "…";
+      try{
+        let rows;
+        if(/\.csv$/i.test(file.name)) rows = parseCSVText(await file.text());
+        else rows = await parseXLSX(await file.arrayBuffer());
+        const r = importRows(rows);
+        toast(`Importação concluída: ${r.add} novos, ${r.upd} atualizados${r.skip?", "+r.skip+" ignorados":""}.`);
+        commit(); go("itens");
+      }catch(err){
+        out.innerHTML = `<span style="color:var(--crit)">Erro: ${esc(err.message)}</span>`;
+        toast("Falha na importação: " + err.message, true);
+      }
+      e.target.value = "";
+    });
+    const bke = document.getElementById("bk-export");
+    if(bke) bke.onclick = () => {
+      const blob = new Blob([JSON.stringify({ app:"almoxarifado-norteshopping", versao:1, geradoEm:new Date().toISOString(), ...db }, null, 2)], {type:"application/json"});
+      downloadBlob("backup_almoxarifado_"+todayISO()+".json", blob);
+      toast("Backup exportado.");
+    };
+    const bki = document.getElementById("bk-file");
+    if(bki) bki.addEventListener("change", async e => {
+      const file = e.target.files[0]; if(!file) return;
+      try{
+        const d = JSON.parse(await file.text());
+        if(!Array.isArray(d.items) || !Array.isArray(d.movs)) throw new Error("Estrutura de backup não reconhecida.");
+        normalizeIds(d);
+        confirmDlg(`Restaurar backup com ${d.items.length} itens e ${d.movs.length} movimentações? Os dados atuais (da nuvem, para todos) serão substituídos.`, () => {
+          db = { items:d.items, movs:d.movs, compras:d.compras||[], user:d.user||"Almoxarife" };
+          toast("Backup restaurado."); commit();
+        }, "Restaurar");
+      }catch(err){ toast("Falha ao restaurar: " + err.message, true); }
+      e.target.value = "";
+    });
+    const wipe = document.getElementById("wipe");
+    if(wipe) wipe.onclick = () => {
+      confirmDlg("Apagar TODOS os dados da nuvem (para todos os usuários)? Esta ação não pode ser desfeita — recomendamos exportar um backup antes.", () => {
+        db = { items:[], movs:[], compras:[], user:db.user };
+        toast("Base apagada."); commit();
+      }, "Apagar tudo");
+    };
+  }
+}
+function bindExport(id, name, gen){
+  const b = document.getElementById(id);
+  if(b) b.onclick = () => { downloadBlob(name, new Blob([gen()],{type:"text/csv;charset=utf-8"})); toast(name+" exportado."); };
+}
+function bindExportX(id, name, rowsFn, sheet){
+  const b = document.getElementById(id);
+  if(b) b.onclick = () => { downloadBlob(name, makeXLSX(rowsFn(), sheet)); toast(name+" exportado."); };
+}
+
+/* ================= LOGIN & BOOT ================= */
+const LOGO_ALLOS = '<svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#FAA634" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg>';
+function showLogin(msg, tipo){
+  document.getElementById("auth-root").innerHTML = `
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="alogo">${LOGO_ALLOS}<div><div style="font-weight:700">NorteShopping</div><div class="small muted" style="text-transform:uppercase;letter-spacing:.8px">ALLOS · Almoxarifado</div></div></div>
+    <h2>Entrar no sistema</h2>
+    <p class="sub">Os dados do almoxarifado ficam na nuvem e são compartilhados pela equipe. Use o mesmo e-mail e senha do HidroLuz, se já tiver conta.</p>
+    <form id="auth-form">
+      <div class="field"><label>E-mail</label><input id="a-email" type="email" autocomplete="username" required></div>
+      <div class="field"><label>Senha</label><input id="a-senha" type="password" autocomplete="current-password" minlength="6" required></div>
+      <div class="btnrow" style="margin-top:14px">
+        <button class="btn primary" type="submit" id="a-entrar" style="flex:1;justify-content:center">Entrar</button>
+        <button class="btn" type="button" id="a-criar">Criar conta</button>
+      </div>
+    </form>
+    <p class="auth-msg ${tipo||""}" id="a-msg">${esc(msg||"")}</p>
+  </div></div>`;
+  const m = (t, cls) => { const el = document.getElementById("a-msg"); el.textContent = t; el.className = "auth-msg "+(cls||""); };
+  const entrar = async criar => {
+    const email = document.getElementById("a-email").value.trim();
+    const senha = document.getElementById("a-senha").value;
+    if(!email || !senha){ m("Preencha e-mail e senha.", "err"); return; }
+    m(criar ? "Criando conta…" : "Entrando…");
+    try{
+      const d = criar
+        ? await authReq("signup", { email, password: senha })
+        : await authReq("token?grant_type=password", { email, password: senha });
+      if(!d.access_token){ m("Conta criada. Confirme o e-mail que você recebeu e depois clique em Entrar.", "ok"); return; }
+      saveTokens(d);
+      if(!localStorage.getItem(OPER_KEY) && sess.email){
+        db.user = sess.email.split("@")[0];
+        localStorage.setItem(OPER_KEY, db.user);
+      }
+      document.getElementById("auth-root").innerHTML = "";
+      await boot();
+    }catch(e){ m(e.message, "err"); }
+  };
+  document.getElementById("auth-form").addEventListener("submit", e => { e.preventDefault(); entrar(false); });
+  document.getElementById("a-criar").onclick = () => entrar(true);
+  document.getElementById("a-email").focus();
+}
+function showLoading(txt){
+  document.getElementById("auth-root").innerHTML =
+    `<div class="auth-loading"><div style="width:34px">${LOGO_ALLOS}</div><div>${esc(txt||"Carregando dados da nuvem…")}</div></div>`;
+}
+async function boot(){
+  showLoading();
+  try{
+    await loadCloud();
+  }catch(e){
+    document.getElementById("auth-root").innerHTML = "";
+    showLogin("Não consegui carregar os dados: " + e.message, "err");
+    return;
+  }
+  document.getElementById("auth-root").innerHTML = "";
+  // primeira entrada: se este navegador tem a base antiga (LocalStorage) e a nuvem está vazia, sobe tudo
+  if(!db.items.length && !db.movs.length){
+    try{
+      const antigo = JSON.parse(localStorage.getItem(DB_KEY_ANTIGO) || "null");
+      if(antigo && Array.isArray(antigo.items) && antigo.items.length){
+        normalizeIds(antigo);
+        db.items = antigo.items; db.movs = antigo.movs||[]; db.compras = antigo.compras||[];
+        toast("Base local deste navegador enviada para a nuvem: "+db.items.length+" itens e "+db.movs.length+" movimentações.");
+        commit(); syncUI("saving");
+        return;
+      }
+    }catch(e){}
+  }
+  render(); syncUI("ok");
+}
+document.getElementById("logout").addEventListener("click", async e => {
+  e.preventDefault();
+  if(saving || savePendente || syncErro){ toast("Há alterações ainda não salvas na nuvem — aguarde a sincronização antes de sair.", true); return; }
+  const rt = sess && sess.refresh_token;
+  setSess(null);
+  try{ if(rt) await fetch(`${SUPA_URL}/auth/v1/logout`, { method:"POST", headers:{ apikey:SUPA_KEY, "Content-Type":"application/json" }, body:JSON.stringify({}) }); }catch(err){}
+  location.reload();
+});
+window.addEventListener("focus", async () => {
+  if(!sess || saving || savePendente || syncErro) return;
+  if(document.getElementById("modal-root").innerHTML) return; // não recarrega com um formulário aberto
+  try{ await loadCloud(); render(true); syncUI("ok"); }catch(e){}
+});
+window.addEventListener("beforeunload", e => {
+  if(saving || savePendente || syncErro){ e.preventDefault(); e.returnValue = ""; }
+});
+async function init(){
+  if(!sess){ showLogin(); return; }
+  showLoading("Verificando sessão…");
+  try{ await ensureToken(); }
+  catch(e){ setSess(null); showLogin("Sua sessão expirou. Entre novamente.", "err"); return; }
+  await boot();
+}
+init();
+</script>
