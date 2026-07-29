@@ -45,6 +45,22 @@ está em [db/supabase.sql](db/supabase.sql).
 - Ao voltar o foco para a aba (sem formulário aberto e sem pendências), o app
   recarrega da nuvem — assim uma máquina enxerga o que a outra lançou.
 
+## Grupos (multi-shopping)
+
+Cada **grupo = um shopping**, com itens, movimentações, compras e auditoria
+próprios, **isolados por RLS no banco** (`grupo_id = alx_meu_grupo()` em todas
+as políticas — um grupo não enxerga o outro nem chamando a API diretamente).
+
+- Na primeira entrada, o usuário **cria um grupo** (nome do shopping) ou
+  **entra num grupo existente com o código de acesso** (6 caracteres, exibido
+  em **Dados → Grupo (shopping)**).
+- O código de item é único **por grupo**; a lista oficial pode ser carregada
+  em cada grupo.
+- Tabelas: `alx_grupos` e `alx_membros`; RPCs `alx_criar_grupo`,
+  `alx_entrar_grupo` e `alx_meu_grupo_info` (só para autenticados).
+- Migration: `almoxarifado_grupos_multi_shopping`. Os dados anteriores viraram
+  o grupo **NorteShopping**, com os usuários da época como membros.
+
 ## Contas e auditoria
 
 Mesmo cadastro de usuários do HidroLuz (mesmo projeto Supabase). Conta nova pode

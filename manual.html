@@ -370,7 +370,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
   <div class="deck">
     <span class="eyebrow"><span class="n">2</span> Como funciona</span>
     <h2 class="title">Os dados ficam na nuvem — uma base só para todos</h2>
-    <p class="lead" style="margin-bottom:24px">Ao entrar com seu usuário, o sistema busca os dados <b>na nuvem</b> e grava cada lançamento na hora. O que você lança no seu computador, o colega vê no dele — é a <b>mesma base</b> para toda a equipe.</p>
+    <p class="lead" style="margin-bottom:24px">Ao entrar com seu usuário, o sistema busca os dados <b>na nuvem</b> e grava cada lançamento na hora. O que você lança no seu computador, o colega vê no dele — é a <b>mesma base</b> para toda a equipe do seu shopping. Cada shopping é um <b>grupo separado</b>: um nunca vê os dados do outro.</p>
     <div class="flow" style="margin-bottom:22px">
       <div class="node"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Qualquer computador</h3><p>ou celular, pelo endereço do sistema</p></div>
       <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6M19 12H5M11 6l-6 6 6 6" opacity=".0"/><path d="M4 12h16M14 6l6 6-6 6M10 6l-6 6 6 6"/></svg></div>
@@ -394,7 +394,8 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
       <div class="steps">
         <div class="step"><div class="b"></div><div><h3>Abra o endereço do sistema</h3><p>Funciona em qualquer navegador, no computador ou no celular. Salve nos favoritos.</p></div></div>
         <div class="step"><div class="b"></div><div><h3>Primeira vez? “Criar conta”</h3><p>Informe seu <b>e-mail</b> e crie uma <b>senha</b> (mínimo 6 caracteres). Se o sistema pedir, confirme o e-mail que você vai receber.</p></div></div>
-        <div class="step"><div class="b"></div><div><h3>Nas próximas, só “Entrar”</h3><p>O sistema carrega os dados da nuvem e mostra o painel. Para sair, use o <b>Sair</b> no rodapé do menu.</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Escolha o grupo do seu shopping</h3><p>Na primeira entrada: digite o <b>código de acesso</b> do grupo (peça a quem já usa) — ou <b>crie um grupo novo</b> com o nome do shopping. Cada shopping tem os próprios dados, isolados dos demais.</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Nas próximas, só “Entrar”</h3><p>O sistema carrega os dados do seu grupo e mostra o painel. Para sair, use o <b>Sair</b> no rodapé do menu.</p></div></div>
       </div>
       <div class="demo" data-demo="login"></div>
     </div>
@@ -718,6 +719,8 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
     <div class="faq" id="faq">
       <div class="qa"><div class="q"><span class="m">P.</span> Preciso de internet para usar?<span class="caret2">▸</span></div><div class="a">Sim — os dados vivem na nuvem. Se a conexão cair durante um lançamento, o sistema avisa, guarda a alteração e reenvia sozinho assim que a internet voltar. Não feche a aba enquanto houver aviso de pendência.</div></div>
       <div class="qa"><div class="q"><span class="m">P.</span> Posso usar em outro computador ou no celular?<span class="caret2">▸</span></div><div class="a">Pode — basta abrir o endereço e entrar com o seu e-mail e senha. Os dados são os mesmos em qualquer aparelho, sempre atualizados.</div></div>
+      <div class="qa"><div class="q"><span class="m">P.</span> Como coloco um colega no sistema do meu shopping?<span class="caret2">▸</span></div><div class="a">Ele cria a conta na tela de login e, em seguida, digita o <b>código de acesso</b> do seu grupo. O código aparece na tela <b>Dados → Grupo (shopping)</b> — compartilhe apenas com a equipe do seu shopping.</div></div>
+      <div class="qa"><div class="q"><span class="m">P.</span> Outro shopping consegue ver os nossos dados?<span class="caret2">▸</span></div><div class="a">Não. Cada shopping é um grupo isolado — itens, movimentações, compras e auditoria são separados por grupo <b>no banco de dados</b>, e só entra no grupo quem tem o código de acesso.</div></div>
       <div class="qa"><div class="q"><span class="m">P.</span> Lancei errado. E agora?<span class="caret2">▸</span></div><div class="a">Lance o movimento contrário (uma entrada compensa uma saída indevida, e vice-versa), anotando o motivo na observação. Assim o histórico continua contando a verdade — e a Auditoria mostra as duas pontas.</div></div>
       <div class="qa"><div class="q"><span class="m">P.</span> Esqueci minha senha.<span class="caret2">▸</span></div><div class="a">Fale com o gestor do sistema — ele consegue redefinir a senha no painel administrativo (Supabase). Em seguida, você entra normalmente com a senha nova.</div></div>
       <div class="qa"><div class="q"><span class="m">P.</span> Quem consegue ver o que eu alterei?<span class="caret2">▸</span></div><div class="a">Todos da equipe: a tela <b>Auditoria</b> mostra cada criação, alteração e exclusão com e-mail, data e o antes/depois. O registro é feito pelo banco de dados e não pode ser editado nem apagado pelo aplicativo.</div></div>

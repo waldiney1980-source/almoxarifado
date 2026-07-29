@@ -364,6 +364,9 @@ async function api(pathQuery, opts){
   }
 }
 
+async function rpc(nome, corpo){ return api("rpc/"+nome, { method:"POST", body: corpo||{} }); }
+let grupo = null; // {id, nome, codigo} do shopping do usuário
+
 /* ---- mapeamento app ⇄ tabelas ---- */
 const itemToRow = i => ({ id:i.id, codigo:i.codigo||"", descricao:i.descricao||"", categoria:i.categoria||"",
   unidade:i.unidade||"UN", atual:i.atual||0, min:i.min||0, max:i.max||0, valor_unit:i.valorUnit||0,
@@ -1152,6 +1155,15 @@ function vDados(){
         <input type="file" id="bk-file" accept=".json">
       </div>
     </div></div>
+    <div class="panel"><div class="phead"><h3>Grupo (shopping)</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">Este almoxarifado pertence ao grupo <strong>${esc(grupo?grupo.nome:"—")}</strong>. Cada shopping tem os próprios dados — um grupo nunca vê o outro.</p>
+      <p class="small">Para colocar alguém da sua equipe: a pessoa cria a conta na tela de login e entra com este <strong>código de acesso</strong>:</p>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="mono" style="font-size:22px;font-weight:700;letter-spacing:4px;background:var(--surface-2);border:1px dashed var(--line);border-radius:8px;padding:8px 16px">${esc(grupo?grupo.codigo:"—")}</span>
+        <button class="btn sm" id="copia-codigo">Copiar código</button>
+      </div>
+      <p class="small muted" style="margin-bottom:0">Compartilhe o código apenas com a equipe do seu shopping.</p>
+    </div></div>
     <div class="panel"><div class="phead"><h3>Cargas prontas</h3></div><div class="pbody">
       <p class="small" style="margin-top:0">A lista oficial de Hidráulica, Civil e Elétrica do NorteShopping já vem embutida no sistema.</p>
       <div class="btnrow">
@@ -1665,6 +1677,11 @@ function wire(){
     bindExport("exp-compras-csv","compras.csv",()=>toCSV(comprasRows()));
   }
   if(current==="dados"){
+    const cc = document.getElementById("copia-codigo");
+    if(cc) cc.onclick = async () => {
+      try{ await navigator.clipboard.writeText(grupo?grupo.codigo:""); toast("Código copiado."); }
+      catch(e){ toast("Não consegui copiar — anote o código exibido.", true); }
+    };
     bindExport("exp2-itens-csv","itens.csv",()=>toCSV(itensRows()));
     bindExportX("exp2-itens-xlsx","itens.xlsx",itensRows,"Itens");
     bindExport("exp2-movs-csv","movimentacoes.csv",()=>toCSV(movsRows()));
@@ -1737,7 +1754,7 @@ function showLogin(msg, tipo){
   <div class="auth-wrap"><div class="auth-card">
     <div class="alogo">${LOGO_ALLOS}<div><div style="font-weight:700">NorteShopping</div><div class="small muted" style="text-transform:uppercase;letter-spacing:.8px">ALLOS · Almoxarifado</div></div></div>
     <h2>Entrar no sistema</h2>
-    <p class="sub">Os dados do almoxarifado ficam na nuvem e são compartilhados pela equipe. Use o mesmo e-mail e senha do HidroLuz, se já tiver conta.</p>
+    <p class="sub">Os dados ficam na nuvem, compartilhados pela equipe do seu shopping. Crie sua conta e entre no grupo do seu shopping com o código de acesso — ou crie um grupo novo.</p>
     <form id="auth-form">
       <div class="field"><label>E-mail</label><input id="a-email" type="email" autocomplete="username" required></div>
       <div class="field"><label>Senha</label><input id="a-senha" type="password" autocomplete="current-password" minlength="6" required></div>
@@ -1776,7 +1793,67 @@ function showLoading(txt){
   document.getElementById("auth-root").innerHTML =
     `<div class="auth-loading"><div style="width:34px">${LOGO_ALLOS}</div><div>${esc(txt||"Carregando dados da nuvem…")}</div></div>`;
 }
+function aplicaGrupoUI(){
+  if(!grupo) return;
+  const t1 = document.querySelector(".sidebar .logo .t1");
+  if(t1) t1.textContent = grupo.nome;
+  document.title = "Almoxarifado — " + grupo.nome;
+}
+function showGrupo(msg, tipo){
+  document.getElementById("auth-root").innerHTML = `
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="alogo">${LOGO_ALLOS}<div><div style="font-weight:700">Almoxarifado</div><div class="small muted" style="text-transform:uppercase;letter-spacing:.8px">ALLOS · Grupos</div></div></div>
+    <h2>Escolha o seu grupo</h2>
+    <p class="sub">Cada shopping tem o seu próprio almoxarifado, isolado dos demais. Entre no grupo do seu shopping com o código de acesso — ou crie um grupo novo.</p>
+    <div class="field"><label>Código de acesso do grupo</label><input id="g-codigo" maxlength="6" style="text-transform:uppercase" placeholder="Ex.: K7M2PB" autocomplete="off"></div>
+    <button class="btn primary" id="g-entrar" style="width:100%;justify-content:center;margin-bottom:18px">Entrar no grupo</button>
+    <div style="border-top:1px solid var(--line); margin-bottom:14px"></div>
+    <div class="field"><label>Ou crie um grupo novo (nome do shopping)</label><input id="g-nome" placeholder="Ex.: Shopping Tijuca" autocomplete="off"></div>
+    <button class="btn" id="g-criar" style="width:100%;justify-content:center">Criar grupo</button>
+    <p class="auth-msg ${tipo||""}" id="g-msg">${esc(msg||"")}</p>
+    <p class="small" style="text-align:center;margin-top:10px"><a href="#" id="g-sair" style="color:var(--ink-3)">Sair (${esc(sess&&sess.email||"")})</a></p>
+  </div></div>`;
+  const m = (t, cls) => { const el = document.getElementById("g-msg"); el.textContent = t; el.className = "auth-msg "+(cls||""); };
+  document.getElementById("g-entrar").onclick = async () => {
+    const cod = document.getElementById("g-codigo").value.trim();
+    if(!cod){ m("Digite o código de acesso.", "err"); return; }
+    m("Entrando no grupo…");
+    try{
+      await rpc("alx_entrar_grupo", { p_codigo: cod });
+      grupo = await rpc("alx_meu_grupo_info");
+      document.getElementById("auth-root").innerHTML = "";
+      aplicaGrupoUI(); await carregar();
+    }catch(e){ m(e.message, "err"); }
+  };
+  document.getElementById("g-criar").onclick = async () => {
+    const nome = document.getElementById("g-nome").value.trim();
+    if(!nome){ m("Digite o nome do shopping para criar o grupo.", "err"); return; }
+    m("Criando grupo…");
+    try{
+      grupo = await rpc("alx_criar_grupo", { p_nome: nome });
+      document.getElementById("auth-root").innerHTML = "";
+      aplicaGrupoUI();
+      toast("Grupo “"+grupo.nome+"” criado. Código de acesso da equipe: "+grupo.codigo+" (veja em Dados).");
+      await carregar();
+    }catch(e){ m(e.message, "err"); }
+  };
+  document.getElementById("g-sair").onclick = e => { e.preventDefault(); setSess(null); location.reload(); };
+  document.getElementById("g-codigo").focus();
+}
 async function boot(){
+  showLoading("Verificando seu grupo…");
+  try{
+    grupo = await rpc("alx_meu_grupo_info");
+  }catch(e){
+    document.getElementById("auth-root").innerHTML = "";
+    showLogin("Não consegui verificar seu grupo: " + e.message, "err");
+    return;
+  }
+  if(!grupo){ showGrupo(); return; }
+  aplicaGrupoUI();
+  await carregar();
+}
+async function carregar(){
   showLoading();
   try{
     await loadCloud();

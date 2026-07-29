@@ -153,3 +153,19 @@ begin
       'trg_audit_' || t, t);
   end loop;
 end $$;
+
+-- ============================================================================
+-- Grupos / multi-shopping (migration: almoxarifado_grupos_multi_shopping)
+-- Cada grupo (shopping) tem seus próprios dados, isolados por RLS. Entrar num
+-- grupo exige o código de acesso. Os dados pré-existentes foram atribuídos ao
+-- grupo NorteShopping, com os usuários da época como membros.
+-- Ver a migration no projeto para o SQL completo — resumo do que existe:
+--   * tabelas alx_grupos (nome, codigo único) e alx_membros (user_id → grupo_id)
+--   * coluna grupo_id em alx_itens, alx_movs, alx_compras e alx_audit
+--   * código de item único POR GRUPO: unique (grupo_id, lower(codigo))
+--   * fn alx_meu_grupo() (security definer) usada nas políticas
+--   * trigger trg_grupo_* carimba o grupo em inserts e o congela em updates
+--   * políticas: using/with check (grupo_id = alx_meu_grupo()) nas 3 tabelas;
+--     alx_audit somente leitura filtrada por grupo
+--   * RPCs (execute só para authenticated): alx_criar_grupo(nome),
+--     alx_entrar_grupo(codigo), alx_meu_grupo_info()
