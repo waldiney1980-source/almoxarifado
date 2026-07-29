@@ -91,6 +91,5 @@ Se houver lançamentos feitos na versão antiga em alguma máquina:
   versão LocalStorage; a seção "Onde os dados ficam guardados" ficou desatualizada)
 - [db/supabase.sql](db/supabase.sql) — esquema do banco, para recriar em outro projeto
 
-Artifacts originais no Claude (versão anterior, sem nuvem):
-[app](https://claude.ai/code/artifact/7e45f272-56e4-4244-ae72-16c5ed9f36f3) ·
-[manual](https://claude.ai/code/artifact/83eddad4-da5c-4477-8c12-39c091e83913)
+O projeto nasceu como artifacts no Claude (versão LocalStorage, sem nuvem);
+esses artifacts foram apagados em 29/07/2026 — este repositório é a única fonte.
