@@ -378,9 +378,9 @@ const movToRow = m => ({ id:m.id, type:m.type, item_id:m.itemId, qty:m.qty||0, d
 const rowToMov = r => ({ id:r.id, type:r.type, itemId:r.item_id, qty:r.qty, date:r.date,
   obs:r.obs, equip:r.equip, req:r.requisitante||"", user:r.usuario, ts:Number(r.ts)||0 });
 const compraToRow = c => ({ id:c.id, item_id:c.itemId, qtd:c.qtd||0, status:c.status||"Pendente",
-  criada_em:c.criadaEm||"", recebida_em:c.recebidaEm||"" });
+  criada_em:c.criadaEm||"", recebida_em:c.recebidaEm||"", previsao:c.previsao||"" });
 const rowToCompra = r => ({ id:r.id, itemId:r.item_id, qtd:r.qtd, status:r.status,
-  criadaEm:r.criada_em, recebidaEm:r.recebida_em });
+  criadaEm:r.criada_em, recebidaEm:r.recebida_em, previsao:r.previsao||"" });
 const TABS = [
   { table:"alx_itens",   key:"items",   toRow:itemToRow,   fromRow:rowToItem },
   { table:"alx_movs",    key:"movs",    toRow:movToRow,    fromRow:rowToMov },
@@ -540,6 +540,13 @@ function syncCompras(){
   db.compras = db.compras.filter(c => itemById(c.itemId));
 }
 function comprasAbertas(){ return db.compras.filter(c => c.status==="Pendente" || c.status==="Comprado"); }
+const compraEmAndamento = itemId => db.compras.find(c => c.itemId===itemId && c.status==="Comprado");
+function emCompraPill(itemId){
+  const c = compraEmAndamento(itemId);
+  if(!c) return "";
+  const atrasada = c.previsao && c.previsao < todayISO();
+  return ` <span class="pill ${atrasada?"vermelho":"azul"}" title="Compra em andamento">Em compra${c.previsao?" · "+(atrasada?"atrasada — ":"chega ")+fdate(c.previsao):""}</span>`;
+}
 
 function commit(){ syncCompras(); save(); render(); }
 
@@ -725,7 +732,7 @@ function vDashboard(){
       <th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th>Situação</th><th>Localização</th></tr></thead><tbody>
       ${criticos.map(i=>`<tr><td class="mono">${esc(i.codigo)}</td><td>${esc(i.descricao)}</td>
         <td class="num">${fmtN.format(i.atual)}</td><td class="num">${fmtN.format(i.min)}</td>
-        <td><span class="pill ${statusItem(i)}">${statusLabel[statusItem(i)]}</span>${comprarHoje(i)?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
+        <td><span class="pill ${statusItem(i)}">${statusLabel[statusItem(i)]}</span>${emCompraPill(i.id)}${comprarHoje(i)&&!compraEmAndamento(i.id)?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
         <td class="loclabel">${esc(locStr(i))}</td></tr>`).join("")}
     </tbody></table></div>`:`<div class="empty">Nenhum item em situação crítica. 👍</div>`}
   </div></div>
@@ -763,7 +770,7 @@ function vItens(){
       <td class="num"><strong>${fmtN.format(i.atual)}</strong></td>
       <td class="num">${fmtN.format(i.min)}</td><td class="num">${fmtN.format(i.max)}</td>
       <td class="num">${i.valorUnit?fmtBRL.format(i.valorUnit):"—"}</td>
-      <td><span class="pill ${statusItem(i)}">${statusLabel[statusItem(i)]}</span></td>
+      <td>${'<span class="pill '+statusItem(i)+'">'+statusLabel[statusItem(i)]+"</span>"}${emCompraPill(i.id)}</td>
       <td class="loclabel">${esc(locStr(i))}</td>
       <td>${esc(i.fornecedor||"—")}</td>
       <td class="num">${i.leadTime?i.leadTime+" d":"—"}</td>
@@ -956,7 +963,9 @@ function vCritico(){
       <td><span class="pill vermelho">Crítico</span>${comprarHoje(i)?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
       <td>${c?`<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap">
         <input type="checkbox" data-emcompra="${c.id}" ${c.status==="Comprado"?"checked":""}>
-        ${c.status==="Comprado"?'<span class="pill amarelo">Em compra</span>':'<span class="small muted">Marcar</span>'}</label>`:'<span class="muted">—</span>'}</td>
+        ${c.status==="Comprado"
+          ?`<span class="pill amarelo">Em compra</span><span class="small muted">${c.previsao?("chega "+fdate(c.previsao)+(c.previsao<todayISO()?" — atrasada":"")):"sem previsão"}</span>`
+          :'<span class="small muted">Marcar</span>'}</label>`:'<span class="muted">—</span>'}</td>
       <td>${esc(i.fornecedor||"—")}</td><td class="loclabel">${esc(locStr(i))}</td></tr>`}).join("")}
     </tbody></table></div>`:`<div class="empty">Nenhum item abaixo do mínimo. Estoque saudável.</div>`}
   </div></div>
@@ -979,7 +988,7 @@ function vCompras(){
     <div class="btnrow"><button class="btn" id="exp-compras-csv">${I.down} CSV</button></div></div>
   <div class="panel"><div class="pbody flush">
     ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
-      <th>Criada em</th><th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th class="num">Qtd. sugerida</th><th class="num">Valor est.</th><th>Fornecedor</th><th class="num">Lead time</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+      <th>Criada em</th><th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th class="num">Qtd. sugerida</th><th class="num">Valor est.</th><th>Fornecedor</th><th class="num">Lead time</th><th>Status</th><th>Chegada prevista</th><th>Ações</th></tr></thead><tbody>
     ${list.map(c=>{const it=itemById(c.itemId); if(!it) return ""; return `<tr>
       <td>${fdate(c.criadaEm)}</td><td class="mono">${esc(it.codigo)}</td>
       <td><strong>${esc(it.descricao)}</strong>${comprarHoje(it)&&c.status!=="Recebido"?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
@@ -987,7 +996,10 @@ function vCompras(){
       <td class="num"><strong>${fmtN.format(c.qtd)}</strong></td>
       <td class="num">${it.valorUnit?fmtBRL.format(c.qtd*it.valorUnit):"—"}</td>
       <td>${esc(it.fornecedor||"—")}</td><td class="num">${it.leadTime?it.leadTime+" d":"—"}</td>
-      <td><span class="pill ${pillC[c.status]}">${c.status}</span></td>
+      <td><span class="pill ${pillC[c.status]}">${c.status==="Comprado"?"Em compra":c.status}</span></td>
+      <td style="white-space:nowrap">${c.previsao
+        ? fdate(c.previsao)+(c.status==="Comprado"&&c.previsao<todayISO()?' <span class="pill vermelho">Atrasada</span>':"")
+        : '<span class="muted">—</span>'}${c.status==="Comprado"?` <button class="iconbtn" data-prev="${c.id}" title="Editar previsão de chegada">${I.edit}</button>`:""}</td>
       <td style="white-space:nowrap">
         ${c.status==="Pendente"?`<button class="btn sm" data-comprar="${c.id}">Marcar comprado</button>`:""}
         ${c.status==="Comprado"?`<button class="btn sm primary" data-receber="${c.id}">Receber</button>`:""}
@@ -995,6 +1007,28 @@ function vCompras(){
       </td></tr>`}).join("")}
     </tbody></table></div>`:`<div class="empty">Nenhuma solicitação de compra. Elas aparecem aqui automaticamente quando um item atinge o estoque mínimo.</div>`}
   </div></div>`;
+}
+function openCompradoModal(compraId){
+  const c = db.compras.find(x=>x.id===compraId); if(!c) return;
+  const it = itemById(c.itemId); if(!it) return;
+  openModal(`
+    <div class="mhead"><h3>Compra em andamento</h3><button class="iconbtn" data-close>${I.x}</button></div>
+    <div class="mbody">
+      <p style="margin:0 0 12px"><strong>${esc(it.descricao)}</strong> <span class="muted mono">${esc(it.codigo)}</span><br>
+      <span class="small muted">Qtd. sugerida ${fmtN.format(c.qtd)}${it.fornecedor?" · fornecedor "+esc(it.fornecedor):""}</span></p>
+      <div class="formgrid">
+        <div class="field"><label>Chegada prevista</label><input id="cp-prev" type="date" value="${esc(c.previsao||"")}"></div>
+      </div>
+      <p class="small muted" style="margin:10px 0 0">O status e a data previstos aparecem no item enquanto a compra estiver em andamento.</p>
+    </div>
+    <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="cp-save">Confirmar</button></div>`,"sm");
+  document.getElementById("cp-save").onclick = () => {
+    c.status = "Comprado";
+    c.previsao = document.getElementById("cp-prev").value || "";
+    closeModal();
+    toast("Compra em andamento" + (c.previsao ? " — chegada prevista para " + fdate(c.previsao) + "." : "."));
+    commit();
+  };
 }
 function openReceberModal(compraId){
   const c = db.compras.find(x=>x.id===compraId); if(!c) return;
@@ -1159,8 +1193,8 @@ function movsRows(){
     })];
 }
 function comprasRows(){
-  return [["criada_em","codigo","descricao","estoque_atual","estoque_minimo","qtd_sugerida","status"],
-    ...db.compras.map(c=>{const it=itemById(c.itemId)||{};return [c.criadaEm,it.codigo||"",it.descricao||"",it.atual??"",it.min??"",c.qtd,c.status];})];
+  return [["criada_em","codigo","descricao","estoque_atual","estoque_minimo","qtd_sugerida","status","chegada_prevista"],
+    ...db.compras.map(c=>{const it=itemById(c.itemId)||{};return [c.criadaEm,it.codigo||"",it.descricao||"",it.atual??"",it.min??"",c.qtd,c.status,c.previsao||""];})];
 }
 
 /* ---------- Minimal XLSX writer (stored ZIP) ---------- */
@@ -1454,7 +1488,7 @@ const AUD_CAMPO = { codigo:"código", descricao:"descrição", categoria:"catego
   atual:"estoque atual", min:"mínimo", max:"máximo", valor_unit:"valor unitário", prateleira:"prateleira",
   coluna:"coluna", gaveta:"gaveta", fornecedor:"fornecedor", lead_time:"lead time", ultima_compra:"última compra",
   qty:"quantidade", date:"data", obs:"observação", equip:"equipamento", requisitante:"requisitante", usuario:"operador", type:"tipo",
-  qtd:"quantidade", status:"status", criada_em:"criada em", recebida_em:"recebida em", item_id:"item" };
+  qtd:"quantidade", status:"status", criada_em:"criada em", recebida_em:"recebida em", previsao:"chegada prevista", item_id:"item" };
 const audVal = v => v===null||v===undefined||v===""?"—":(typeof v==="number"?fmtN.format(v):String(v));
 const audProximoDia = s => { const d = parseISO(s); d.setDate(d.getDate()+1); return dISO(d); };
 
@@ -1609,9 +1643,14 @@ function wire(){
     document.querySelectorAll("[data-emcompra]").forEach(ch => ch.onchange = () => {
       const c = db.compras.find(x=>x.id===ch.dataset.emcompra);
       if(!c) return;
-      c.status = ch.checked ? "Comprado" : "Pendente";
-      toast(ch.checked ? "Item marcado como em compra." : "Item voltou para compra pendente.");
-      commit();
+      if(ch.checked){
+        ch.checked = false;             // confirma no modal; o commit re-renderiza marcado
+        openCompradoModal(c.id);
+      }else{
+        c.status = "Pendente"; c.previsao = "";
+        toast("Item voltou para compra pendente.");
+        commit();
+      }
     });
   }
   if(current==="movs"){
@@ -1620,10 +1659,8 @@ function wire(){
     bindExportX("exp-movs-xlsx","movimentacoes.xlsx",movsRows,"Movimentações");
   }
   if(current==="compras"){
-    document.querySelectorAll("[data-comprar]").forEach(b => b.onclick = () => {
-      const c = db.compras.find(x=>x.id===b.dataset.comprar);
-      if(c){ c.status="Comprado"; toast("Solicitação marcada como comprada."); commit(); }
-    });
+    document.querySelectorAll("[data-comprar]").forEach(b => b.onclick = () => openCompradoModal(b.dataset.comprar));
+    document.querySelectorAll("[data-prev]").forEach(b => b.onclick = () => openCompradoModal(b.dataset.prev));
     document.querySelectorAll("[data-receber]").forEach(b => b.onclick = () => openReceberModal(b.dataset.receber));
     bindExport("exp-compras-csv","compras.csv",()=>toCSV(comprasRows()));
   }
