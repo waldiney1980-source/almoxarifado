@@ -337,7 +337,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
     <h1>Controle de Estoque do Almoxarifado</h1>
     <p class="sub">Um sistema simples, compartilhado por toda a equipe: cada um entra com o seu usuário, os dados ficam na nuvem e cada mudança fica registrada. Este manual mostra tudo — com demonstrações animadas no meio do caminho.</p>
     <div class="meta">
-      <div><b>500 itens</b> lista oficial embutida</div>
+      <div><b>Lista oficial</b> Civil, Elétrica e Hidráulica embutida</div>
       <div><b>Na nuvem</b> mesma base para todos</div>
       <div><b>Auditoria</b> quem fez o quê, e quando</div>
       <div><b>4 demonstrações</b> passo a passo animado</div>
@@ -417,7 +417,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
         </div>
         <div class="canvas">
           <div class="kpis">
-            <div class="kpi"><div class="l">Itens</div><div class="v tnum">500</div></div>
+            <div class="kpi"><div class="l">Itens</div><div class="v tnum">512</div></div>
             <div class="kpi"><div class="l">Em estoque</div><div class="v tnum">104.817</div></div>
             <div class="kpi"><div class="l">Valor</div><div class="v small tnum">R$ 22 mi</div></div>
             <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div>
@@ -567,7 +567,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
       <div class="sem r"><div class="h"><span class="b"></span>Vermelho · Crítico</div><p>No mínimo ou abaixo. Precisa repor — já vira solicitação de compra.</p></div>
     </div>
     <div class="grid two" style="margin-top:22px">
-      <div class="callout info"><span class="ci">🎯</span><div>A tela <b>Estoque Crítico</b> lista somente as peças vermelhas e amarelas — você olha direto o que importa, sem rolar os 500 itens.</div></div>
+      <div class="callout info"><span class="ci">🎯</span><div>A tela <b>Estoque Crítico</b> lista somente as peças vermelhas e amarelas — você olha direto o que importa, sem rolar a lista inteira de itens.</div></div>
       <div class="callout good"><span class="ci">🛒</span><div>Quando o comprador age, o item ganha a etiqueta <b>“Em compra · chega dd/mm”</b> — todo mundo sabe que a reposição está a caminho. É o próximo assunto.</div></div>
     </div>
   </div>
@@ -631,7 +631,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
   <div class="deck">
     <span class="eyebrow"><span class="n">13</span> Planilhas</span>
     <h2 class="title">Importar itens de uma planilha</h2>
-    <p class="lead" style="margin-bottom:22px">Além dos 500 itens embutidos, você pode subir uma planilha <b>Excel (.xlsx)</b> ou <b>CSV</b>. O formato da lista oficial ALLOS é reconhecido automaticamente.</p>
+    <p class="lead" style="margin-bottom:22px">Além da lista oficial embutida, você pode subir uma planilha <b>Excel (.xlsx)</b> ou <b>CSV</b>. O formato da lista oficial ALLOS é reconhecido automaticamente.</p>
     <div class="grid two" style="gap:26px; align-items:start">
       <div class="steps">
         <div class="step"><div class="b"></div><div><h3>Vá em “Dados / Importar”</h3><p>Clique para escolher o arquivo no computador.</p></div></div>
@@ -917,7 +917,7 @@ const DEMO_DEFS = {
         html:`<div style="padding-top:4px">${authCard(loginForm('maria.silva@gmail.com','••••••••','criar'))}</div>` },
       { t:5000, cap:'Pronto! O sistema carrega os dados da nuvem — o mesmo estoque que toda a equipe vê.',
         html:miniApp('Painel', `<div class="kpis" style="grid-template-columns:repeat(2,1fr)">
-          <div class="kpi"><div class="l">Itens</div><div class="v tnum">500</div></div>
+          <div class="kpi"><div class="l">Itens</div><div class="v tnum">512</div></div>
           <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div></div>
           <div style="margin-top:10px"><span class="toastui">☁️ Nuvem sincronizada às 08:12</span></div>`) }
     ]
