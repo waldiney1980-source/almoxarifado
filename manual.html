@@ -408,7 +408,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
   <div class="deck">
     <span class="eyebrow"><span class="n">4</span> O Painel</span>
     <h2 class="title">Lendo o Painel num relance</h2>
-    <p class="lead" style="margin-bottom:22px">É a primeira tela. Os números do topo (os “KPIs”) resumem a situação; os gráficos mostram o consumo e o que está crítico.</p>
+    <p class="lead" style="margin-bottom:22px">É a primeira tela. Os números do topo (os “KPIs”) resumem a situação; os gráficos mostram o consumo e o que está crítico. No alto ficam os <b>filtros</b>: escolha o <b>período</b>, a <b>categoria</b> e o <b>equipamento</b> — o painel inteiro se recalcula.</p>
     <div class="mock">
       <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Painel</span></div>
       <div class="app">
@@ -438,10 +438,11 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
       </div>
     </div>
     <div class="grid three" style="margin-top:18px">
-      <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">📦</span><div><b>Itens</b> e <b>Em estoque</b>: quantos produtos existem e a soma das unidades.</div></div>
-      <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">💰</span><div><b>Valor</b>: quanto vale o estoque parado (quantidade × valor unitário).</div></div>
-      <div class="callout warn" style="padding:13px 15px; font-size:13px"><span class="ci">🔻</span><div><b>Abaixo do mínimo</b>: o número que você deve vigiar — peças a repor.</div></div>
+      <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">📅</span><div><b>Período</b>: 7, 30, 90 dias, 6 ou 12 meses — ou datas escolhidas por você. O gráfico se ajusta sozinho (por dia, semana ou mês).</div></div>
+      <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">🔧</span><div><b>Equipamento</b>: o painel passa a mostrar só o que aquele ativo consumiu — e as reposições dos itens dele.</div></div>
+      <div class="callout warn" style="padding:13px 15px; font-size:13px"><span class="ci">🔻</span><div><b>Abaixo do mínimo</b>: clique no cartão para ir direto ao Estoque Crítico.</div></div>
     </div>
+    <div class="callout good" style="margin-top:14px"><span class="ci">👆</span><div><b>Os gráficos são clicáveis:</b> clique numa barra do consumo para focar naquele dia/semana/mês; num <b>equipamento</b> para filtrar o painel por ele (clique de novo para desmarcar); e num <b>item</b> para abrir as movimentações dele no período. As tabelas grandes rolam dentro do próprio quadro, com o cabeçalho fixo.</div></div>
   </div>
 </section>
 

@@ -127,6 +127,14 @@ body{
 .panel .pbody.flush{padding:0}
 
 .tablewrap{overflow:auto; max-height:65vh; overscroll-behavior:contain}
+.tablewrap.sm{max-height:300px}
+.card.kpi.click{cursor:pointer; transition:border-color .15s, transform .1s}
+.card.kpi.click:hover{border-color:var(--accent); transform:translateY(-1px)}
+.chips{display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:0 18px 13px}
+.chipf{display:inline-flex; align-items:center; gap:6px; background:var(--accent-soft); color:var(--accent);
+  border-radius:999px; padding:4px 8px 4px 12px; font-size:12.5px; font-weight:600}
+.chipf button{background:none; border:0; cursor:pointer; color:inherit; font-size:15px; line-height:1; padding:0 3px; border-radius:50%}
+.chipf button:hover{background:rgba(0,0,0,.12)}
 table.data{width:100%; border-collapse:collapse; font-size:13px}
 table.data th{
   text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-3);
@@ -187,6 +195,9 @@ table.data td.num, table.data th.num{text-align:right; font-variant-numeric:tabu
 .chart svg{display:block; width:100%; height:auto}
 .chart .bar{fill:var(--chart-bar)}
 .chart .bar:hover{fill:var(--accent-strong)}
+.chart .bar.click{cursor:pointer}
+.chart .bar.sel{fill:var(--laranja)}
+.chart .hit{fill:transparent; cursor:pointer}
 .chart .gridline{stroke:var(--grid); stroke-width:1}
 .chart .axis{fill:var(--ink-3); font-size:11px}
 .chart .vlabel{fill:var(--ink-2); font-size:11px; font-weight:600}
@@ -636,43 +647,59 @@ document.getElementById("username").addEventListener("click", () => {
 });
 
 /* ================= CHARTS (SVG) ================= */
-function barChartV(data, {h=210, fmt=fmtN.format.bind(fmtN)}={}){
-  if(!data.length || data.every(d=>!d.value)) return '<div class="empty">Sem dados no período. Registre saídas para alimentar o gráfico.</div>';
+/* data: [{label, value, key?, sel?}] — com `key`, a barra vira clicável (data-k) */
+function barChartV(data, {h=210, fmt=fmtN.format.bind(fmtN), vazio="Sem dados no período. Registre saídas para alimentar o gráfico."}={}){
+  if(!data.length || data.every(d=>!d.value)) return `<div class="empty">${esc(vazio)}</div>`;
   const w = 560, padL = 40, padR = 8, padT = 18, padB = 26;
   const iw = w - padL - padR, ih = h - padT - padB;
   const max = Math.max(...data.map(d=>d.value), 1);
   const step = iw / data.length;
   const bw = Math.min(44, step * 0.55);
   const ticks = 4;
+  const passo = Math.ceil(data.length / 12);   // rótulos rareiam quando há muitas barras
   let s = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de barras">`;
+  let ultimoRotulo = null;
   for(let t=0;t<=ticks;t++){
     const v = max*t/ticks, y = padT + ih - ih*t/ticks;
     s += `<line class="gridline" x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}"/>`;
-    s += `<text class="axis" x="${padL-6}" y="${y+4}" text-anchor="end">${fmt(Math.round(v))}</text>`;
+    const r = fmt(Math.round(v));
+    if(r !== ultimoRotulo){                       // evita repetir rótulo quando a escala é pequena
+      s += `<text class="axis" x="${padL-6}" y="${y+4}" text-anchor="end">${r}</text>`;
+      ultimoRotulo = r;
+    }
   }
   data.forEach((d,i)=>{
     const bh = Math.max(d.value>0?2:0, ih * d.value/max);
     const x = padL + step*i + (step-bw)/2, y = padT + ih - bh;
-    s += `<g><rect class="bar" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3"><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
-    if(d.value>0) s += `<text class="vlabel" x="${x+bw/2}" y="${y-5}" text-anchor="middle">${fmt(d.value)}</text>`;
-    s += `<text class="axis" x="${padL + step*i + step/2}" y="${h-8}" text-anchor="middle">${esc(d.label)}</text></g>`;
+    const k = d.key!=null ? ` data-k="${esc(d.key)}"` : "";
+    const cls = "bar" + (d.key!=null?" click":"") + (d.sel?" sel":"");
+    s += `<g>`;
+    if(d.key!=null) s += `<rect class="hit" x="${padL+step*i}" y="${padT}" width="${step}" height="${ih}"${k}><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
+    s += `<rect class="${cls}" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3"${k}><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
+    if(d.value>0 && data.length<=14) s += `<text class="vlabel" x="${x+bw/2}" y="${y-5}" text-anchor="middle" pointer-events="none">${fmt(d.value)}</text>`;
+    if(i % passo === 0) s += `<text class="axis" x="${padL + step*i + step/2}" y="${h-8}" text-anchor="middle" pointer-events="none">${esc(d.label)}</text>`;
+    s += `</g>`;
   });
   s += `<line class="baseline" x1="${padL}" y1="${padT+ih}" x2="${w-padR}" y2="${padT+ih}"/></svg>`;
   return `<div class="chart">${s}</div>`;
 }
-function barChartH(data, {fmt=fmtN.format.bind(fmtN)}={}){
-  if(!data.length) return '<div class="empty">Sem consumo registrado nos últimos 90 dias.</div>';
+function barChartH(data, {fmt=fmtN.format.bind(fmtN), vazio="Sem consumo registrado no período."}={}){
+  if(!data.length) return `<div class="empty">${esc(vazio)}</div>`;
   const w = 560, rowH = 34, padT = 6, padB = 6, labelW = 170;
   const h = padT + padB + rowH*data.length;
   const iw = w - labelW - 60;
   const max = Math.max(...data.map(d=>d.value),1);
-  let s = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Itens mais consumidos">`;
+  let s = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de barras horizontais">`;
   data.forEach((d,i)=>{
     const y = padT + rowH*i, bw = Math.max(2, iw*d.value/max);
     const lbl = d.label.length>26 ? d.label.slice(0,25)+"…" : d.label;
-    s += `<g><text class="axis" x="${labelW-8}" y="${y+rowH/2+4}" text-anchor="end">${esc(lbl)}<title>${esc(d.label)}</title></text>`;
-    s += `<rect class="bar" x="${labelW}" y="${y+rowH/2-8}" width="${bw}" height="16" rx="3"><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
-    s += `<text class="vlabel" x="${labelW+bw+8}" y="${y+rowH/2+4}">${fmt(d.value)}</text></g>`;
+    const k = d.key!=null ? ` data-k="${esc(d.key)}"` : "";
+    const cls = "bar" + (d.key!=null?" click":"") + (d.sel?" sel":"");
+    s += `<g>`;
+    if(d.key!=null) s += `<rect class="hit" x="0" y="${y}" width="${w}" height="${rowH}"${k}><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
+    s += `<text class="axis" x="${labelW-8}" y="${y+rowH/2+4}" text-anchor="end" pointer-events="none">${esc(lbl)}</text>`;
+    s += `<rect class="${cls}" x="${labelW}" y="${y+rowH/2-8}" width="${bw}" height="16" rx="3"${k}><title>${esc(d.label)}: ${fmt(d.value)}</title></rect>`;
+    s += `<text class="vlabel" x="${labelW+bw+8}" y="${y+rowH/2+4}" pointer-events="none">${fmt(d.value)}</text></g>`;
   });
   s += `</svg>`;
   return `<div class="chart">${s}</div>`;
@@ -681,63 +708,187 @@ function barChartH(data, {fmt=fmtN.format.bind(fmtN)}={}){
 /* ================= DASHBOARD ================= */
 function monthKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
 const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+/* filtros do painel (período, categoria e equipamento) */
+let dashF = { periodo:"90", de:"", ate:"", categoria:"", equip:"" };
+const PERIODOS = [["7","Últimos 7 dias"],["30","Últimos 30 dias"],["90","Últimos 90 dias"],
+                  ["180","Últimos 6 meses"],["365","Últimos 12 meses"],["custom","Período personalizado"]];
+
+function dashRange(){
+  if(dashF.periodo === "custom"){
+    let ate = dashF.ate || todayISO();
+    let de = dashF.de;
+    if(!de){ const d = parseISO(ate); d.setDate(d.getDate()-89); de = dISO(d); }
+    if(de > ate){ const t = de; de = ate; ate = t; }
+    return { de, ate };
+  }
+  const dias = Number(dashF.periodo) || 90;
+  const d = new Date(); d.setDate(d.getDate()-(dias-1));
+  return { de: dISO(d), ate: todayISO() };
+}
+function rotuloPeriodo(){
+  if(dashF.periodo === "custom"){ const r = dashRange(); return fdate(r.de)+" a "+fdate(r.ate); }
+  return (PERIODOS.find(p=>p[0]===dashF.periodo)||["","período"])[1].toLowerCase();
+}
+/* Dados do painel conforme os filtros.
+   A categoria filtra tudo; o equipamento seleciona as saídas dele e, como
+   entrada não tem equipamento, traz as entradas dos itens que ele consumiu. */
+function dashDados(){
+  const { de, ate } = dashRange();
+  const noPeriodo = db.movs.filter(m => {
+    if(m.date < de || m.date > ate) return false;
+    if(dashF.categoria){ const it = itemById(m.itemId); if(!it || (it.categoria||"") !== dashF.categoria) return false; }
+    return true;
+  });
+  const saidas = noPeriodo.filter(m => m.type==="saida" && (!dashF.equip || (m.equip||"") === dashF.equip));
+
+  let itens = db.items;
+  if(dashF.categoria) itens = itens.filter(i => (i.categoria||"") === dashF.categoria);
+  if(dashF.equip){
+    const ids = new Set(saidas.map(m=>m.itemId));
+    itens = itens.filter(i => ids.has(i.id));
+  }
+  const idsU = new Set(itens.map(i=>i.id));
+  const entradas = noPeriodo.filter(m => m.type==="entrada" && (!dashF.equip || idsU.has(m.itemId)));
+  return { de, ate, saidas, entradas, itens, movs: saidas.concat(entradas) };
+}
+/* agrupa o consumo por dia, semana ou mês conforme o tamanho do período */
+function serieConsumo(movs, de, ate){
+  const d0 = parseISO(de), d1 = parseISO(ate);
+  const dias = Math.round((d1 - d0)/86400000) + 1;
+  const out = []; let keyOf;
+  if(dias <= 31){
+    for(const d = new Date(d0); d <= d1; d.setDate(d.getDate()+1))
+      out.push({ key:dISO(d), label:String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0"), value:0 });
+    keyOf = s => String(s).slice(0,10);
+  } else if(dias <= 126){
+    const ini = new Date(d0); ini.setDate(ini.getDate() - ((ini.getDay()+6)%7));
+    for(const d = new Date(ini); d <= d1; d.setDate(d.getDate()+7))
+      out.push({ key:dISO(d), label:String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0"), value:0 });
+    keyOf = s => { const d = parseISO(s); d.setDate(d.getDate() - ((d.getDay()+6)%7)); return dISO(d); };
+  } else {
+    for(const d = new Date(d0.getFullYear(), d0.getMonth(), 1); d <= d1; d.setMonth(d.getMonth()+1))
+      out.push({ key:monthKey(d), label:MESES[d.getMonth()]+"/"+String(d.getFullYear()).slice(2), value:0 });
+    keyOf = s => String(s).slice(0,7);
+  }
+  const idx = {}; out.forEach(b => idx[b.key] = b);
+  movs.forEach(m => { if(m.type!=="saida") return; const b = idx[keyOf(m.date)]; if(b) b.value += m.qty; });
+  return { serie: out, escala: dias<=31 ? "dia" : (dias<=126 ? "semana" : "mês") };
+}
+
 function vDashboard(){
-  const totalItens = db.items.length;
-  const totalEstoque = db.items.reduce((s,i)=>s+i.atual,0);
-  const valorEstoque = db.items.reduce((s,i)=>s+i.atual*(i.valorUnit||0),0);
-  const abaixoMin = db.items.filter(i=>i.atual<=i.min).length;
-  const solic = comprasAbertas().length;
-  const hoje = new Date();
-  const meses = [];
-  for(let k=5;k>=0;k--){
-    const d = new Date(hoje.getFullYear(), hoje.getMonth()-k, 1);
-    meses.push({ key:monthKey(d), label:MESES[d.getMonth()]+"/"+String(d.getFullYear()).slice(2), value:0 });
-  }
-  for(const m of db.movs){
-    if(m.type!=="saida") continue;
-    const k = String(m.date).slice(0,7);
-    const b = meses.find(x=>x.key===k);
-    if(b) b.value += m.qty;
-  }
-  const cons = {};
-  const lim = new Date(); lim.setDate(lim.getDate()-90);
-  for(const m of db.movs){
-    if(m.type!=="saida" || parseISO(m.date)<lim) continue;
-    cons[m.itemId] = (cons[m.itemId]||0)+m.qty;
-  }
-  const top = Object.entries(cons).map(([id,v])=>({label:(itemById(id)||{}).descricao||"(excluído)", value:v}))
+  const { de, ate, saidas, entradas, itens, movs } = dashDados();
+
+  const totalEstoque = itens.reduce((s,i)=>s+i.atual,0);
+  const valorEstoque = itens.reduce((s,i)=>s+i.atual*(i.valorUnit||0),0);
+  const consumo = saidas.reduce((s,m)=>s+m.qty,0);
+  const custoConsumo = saidas.reduce((s,m)=>{ const it=itemById(m.itemId); return s + m.qty*((it&&it.valorUnit)||0); },0);
+  const recebido = entradas.reduce((s,m)=>s+m.qty,0);
+  const criticos = itens.filter(i=>i.atual<=i.min*1.1).sort((a,b)=>(a.atual-a.min)-(b.atual-b.min));
+  const abaixoMin = itens.filter(i=>i.atual<=i.min).length;
+  const solic = comprasAbertas().filter(c => itens.some(i=>i.id===c.itemId)).length;
+  const comprarAgora = itens.filter(comprarHoje);
+
+  const { serie, escala } = serieConsumo(saidas, de, ate);
+
+  const porItem = {};
+  saidas.forEach(m => porItem[m.itemId] = (porItem[m.itemId]||0) + m.qty);
+  const topItens = Object.entries(porItem)
+    .map(([id,v]) => ({ key:id, label:(itemById(id)||{}).descricao || "(excluído)", value:v }))
     .sort((a,b)=>b.value-a.value).slice(0,6);
-  const criticos = db.items.filter(i=>i.atual<=i.min*1.1).sort((a,b)=>(a.atual-a.min)-(b.atual-b.min)).slice(0,8);
-  const comprarAgora = db.items.filter(comprarHoje);
+
+  const porEquip = {};
+  saidas.forEach(m => { if(m.equip) porEquip[m.equip] = (porEquip[m.equip]||0) + m.qty; });
+  const topEquip = Object.entries(porEquip)
+    .map(([e,v]) => ({ key:e, label:e, value:v, sel: dashF.equip===e }))
+    .sort((a,b)=>b.value-a.value).slice(0,7);
+
+  const cats = [...new Set(db.items.map(i=>i.categoria).filter(Boolean))].sort();
+  const equips = [...new Set(db.movs.map(m=>m.equip).filter(Boolean))].sort();
+  const recentes = movs.slice().sort((a,b)=> (b.date+"").localeCompare(a.date+"") || (b.ts||0)-(a.ts||0));
+  const filtrando = dashF.categoria || dashF.equip || dashF.periodo !== "90";
 
   return `
-  <div class="cards">
-    <div class="card kpi"><div class="lbl">Itens cadastrados</div><div class="val mono">${fmtN.format(totalItens)}</div><div class="sub">SKUs ativos no almoxarifado</div></div>
-    <div class="card kpi"><div class="lbl">Total em estoque</div><div class="val mono">${fmtN.format(totalEstoque)}</div><div class="sub">Unidades somadas</div></div>
-    ${valorEstoque?`<div class="card kpi"><div class="lbl">Valor em estoque</div><div class="val mono" style="font-size:24px">${fmtBRL.format(valorEstoque)}</div><div class="sub">quantidade × valor unitário</div></div>`:""}
-    <div class="card kpi ${abaixoMin?'alerta':'ok'}"><div class="lbl">Abaixo do mínimo</div><div class="val mono">${fmtN.format(abaixoMin)}</div><div class="sub">${abaixoMin?'Requer reposição':'Tudo dentro do mínimo'}</div></div>
-    <div class="card kpi ${solic?'alerta':''}"><div class="lbl">Solicitações abertas</div><div class="val mono">${fmtN.format(solic)}</div><div class="sub">Pendentes ou em compra</div></div>
+  <div class="panel">
+    <div class="filterbar">
+      <div class="field"><label>Período</label><select id="d-periodo">
+        ${PERIODOS.map(p=>`<option value="${p[0]}" ${dashF.periodo===p[0]?"selected":""}>${p[1]}</option>`).join("")}
+      </select></div>
+      ${dashF.periodo==="custom"?`
+      <div class="field"><label>De</label><input type="date" id="d-de" value="${esc(de)}"></div>
+      <div class="field"><label>Até</label><input type="date" id="d-ate" value="${esc(ate)}"></div>`:""}
+      <div class="field" style="min-width:180px"><label>Categoria</label><select id="d-cat">
+        <option value="">Todas</option>
+        ${cats.map(c=>`<option value="${esc(c)}" ${dashF.categoria===c?"selected":""}>${esc(c)}</option>`).join("")}
+      </select></div>
+      <div class="field" style="min-width:200px"><label>Equipamento / destino</label><select id="d-equip">
+        <option value="">Todos</option>
+        ${equips.map(e=>`<option value="${esc(e)}" ${dashF.equip===e?"selected":""}>${esc(e)}</option>`).join("")}
+      </select></div>
+      ${filtrando?`<button class="btn sm" id="d-clear">Limpar filtros</button>`:""}
+    </div>
+    ${filtrando?`<div class="chips">
+      <span class="muted small">Filtros:</span>
+      <span class="chipf">${esc(rotuloPeriodo())}${dashF.periodo!=="90"?`<button data-dclr="periodo" title="Voltar ao padrão">×</button>`:""}</span>
+      ${dashF.categoria?`<span class="chipf">Categoria: ${esc(dashF.categoria)}<button data-dclr="categoria" title="Remover">×</button></span>`:""}
+      ${dashF.equip?`<span class="chipf">Equipamento: ${esc(dashF.equip)}<button data-dclr="equip" title="Remover">×</button></span>`:""}
+    </div>`:""}
   </div>
+
+  <div class="cards">
+    <div class="card kpi"><div class="lbl">Consumo no período</div><div class="val mono">${fmtN.format(consumo)}</div>
+      <div class="sub">${custoConsumo?fmtBRL.format(custoConsumo)+" · ":""}${fmtN.format(saidas.length)} saídas</div></div>
+    <div class="card kpi"><div class="lbl">Recebido no período</div><div class="val mono">${fmtN.format(recebido)}</div>
+      <div class="sub">${fmtN.format(entradas.length)} entradas${dashF.equip?" · itens deste equipamento":""}</div></div>
+    <div class="card kpi"><div class="lbl">${dashF.categoria||dashF.equip?"Itens no filtro":"Itens cadastrados"}</div>
+      <div class="val mono">${fmtN.format(itens.length)}</div>
+      <div class="sub">${fmtN.format(totalEstoque)} unidades${valorEstoque?" · "+fmtBRL.format(valorEstoque):""}</div></div>
+    <div class="card kpi click ${abaixoMin?'alerta':'ok'}" data-goto="critico"><div class="lbl">Abaixo do mínimo</div>
+      <div class="val mono">${fmtN.format(abaixoMin)}</div><div class="sub">${abaixoMin?'Requer reposição →':'Tudo dentro do mínimo'}</div></div>
+    <div class="card kpi click ${solic?'alerta':''}" data-goto="compras"><div class="lbl">Solicitações abertas</div>
+      <div class="val mono">${fmtN.format(solic)}</div><div class="sub">Pendentes ou em compra →</div></div>
+  </div>
+
   ${comprarAgora.length?`<div class="panel" style="border-left:4px solid var(--crit)"><div class="pbody" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
     <span class="tag-hoje">Comprar hoje</span>
     <span>${comprarAgora.length} ${comprarAgora.length===1?'item não cobre':'itens não cobrem'} o consumo previsto durante o lead time do fornecedor:</span>
     <strong>${comprarAgora.slice(0,4).map(i=>esc(i.descricao)).join(", ")}${comprarAgora.length>4?" +"+(comprarAgora.length-4):""}</strong>
     <button class="btn sm" data-goto="compras" style="margin-left:auto">Ver compras</button></div></div>`:""}
+
   <div class="panelgrid">
-    <div class="panel"><div class="phead"><h3>Consumo mensal</h3><span class="hint">saídas · últimos 6 meses</span></div>
-      <div class="pbody">${barChartV(meses.map(m=>({label:m.label,value:m.value})))}</div></div>
-    <div class="panel"><div class="phead"><h3>Itens mais consumidos</h3><span class="hint">últimos 90 dias</span></div>
-      <div class="pbody">${barChartH(top)}</div></div>
+    <div class="panel"><div class="phead"><h3>Consumo por ${escala}</h3><span class="hint">${esc(rotuloPeriodo())} · clique numa barra para focar</span></div>
+      <div class="pbody" id="ch-serie">${barChartV(serie.map(b=>({...b, key:b.key})), {vazio:"Sem saídas no período selecionado."})}</div></div>
+    <div class="panel"><div class="phead"><h3>Itens mais consumidos</h3><span class="hint">clique para ver as movimentações</span></div>
+      <div class="pbody" id="ch-itens">${barChartH(topItens, {vazio:"Sem consumo no período selecionado."})}</div></div>
   </div>
-  <div class="panel"><div class="phead"><h3>Estoque crítico</h3><span class="hint">atual ≤ 110% do mínimo</span>
+
+  <div class="panelgrid">
+    <div class="panel"><div class="phead"><h3>Consumo por equipamento</h3><span class="hint">clique para filtrar o painel</span></div>
+      <div class="pbody" id="ch-equip">${barChartH(topEquip, {vazio:"Nenhuma saída com equipamento informado no período. Preencha “Equipamento / destino” na tela de Saída."})}</div></div>
+    <div class="panel"><div class="phead"><h3>Movimentações do período</h3><span class="hint">${fmtN.format(recentes.length)} registros</span>
+      <button class="btn sm" id="d-vermovs" style="margin-left:auto">Ver tudo</button></div>
+      <div class="pbody flush">
+      ${recentes.length?`<div class="tablewrap sm"><table class="data"><thead><tr>
+        <th>Data</th><th>Tipo</th><th>Item</th><th class="num">Qtd.</th><th>Requisitante</th><th>Equipamento</th></tr></thead><tbody>
+        ${recentes.slice(0,300).map(m=>{ const it=itemById(m.itemId); return `<tr>
+          <td>${fdate(m.date)}</td>
+          <td><span class="pill ${m.type==="entrada"?"azul":"cinza"}">${m.type==="entrada"?"Entrada":"Saída"}</span></td>
+          <td>${it?esc(it.descricao):"(excluído)"}</td>
+          <td class="num">${m.type==="saida"?"−":"+"}${fmtN.format(m.qty)}</td>
+          <td>${esc(m.req||"—")}</td><td>${esc(m.equip||"—")}</td></tr>`}).join("")}
+      </tbody></table></div>`:`<div class="empty">Nenhuma movimentação no período selecionado.</div>`}
+    </div></div>
+  </div>
+
+  <div class="panel"><div class="phead"><h3>Estoque crítico</h3><span class="hint">atual ≤ 110% do mínimo · ${fmtN.format(criticos.length)} ${criticos.length===1?"item":"itens"}</span>
     </div><div class="pbody flush">
-    ${criticos.length?`<div class="tablewrap"><table class="data"><thead><tr>
+    ${criticos.length?`<div class="tablewrap sm"><table class="data"><thead><tr>
       <th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th>Situação</th><th>Localização</th></tr></thead><tbody>
       ${criticos.map(i=>`<tr><td class="mono">${esc(i.codigo)}</td><td>${esc(i.descricao)}</td>
         <td class="num">${fmtN.format(i.atual)}</td><td class="num">${fmtN.format(i.min)}</td>
         <td><span class="pill ${statusItem(i)}">${statusLabel[statusItem(i)]}</span>${emCompraPill(i.id)}${comprarHoje(i)&&!compraEmAndamento(i.id)?' <span class="tag-hoje">Comprar hoje</span>':''}</td>
         <td class="loclabel">${esc(locStr(i))}</td></tr>`).join("")}
-    </tbody></table></div>`:`<div class="empty">Nenhum item em situação crítica. 👍</div>`}
+    </tbody></table></div>`:`<div class="empty">Nenhum item em situação crítica${dashF.categoria||dashF.equip?" neste filtro":""}. 👍</div>`}
   </div></div>
   ${!db.items.length?`<div class="panel"><div class="pbody" style="text-align:center;padding:30px">
     <p style="margin:0 0 14px">O almoxarifado ainda está vazio. Carregue a lista oficial do NorteShopping, importe uma planilha ou cadastre itens manualmente.</p>
@@ -747,6 +898,63 @@ function vDashboard(){
       <button class="btn" data-goto="itens">${I.plus} Cadastrar itens</button>
       <button class="btn" id="seed-demo">Dados de demonstração</button>
     </div></div></div>`:""}`;
+}
+
+function wireDashboard(){
+  const g = id => document.getElementById(id);
+  const set = (campo, valor) => { dashF[campo] = valor; render(); };
+
+  if(g("d-periodo")) g("d-periodo").onchange = e => {
+    dashF.periodo = e.target.value;
+    if(dashF.periodo === "custom" && !dashF.de){ const r = dashRange(); dashF.de = r.de; dashF.ate = r.ate; }
+    render();
+  };
+  if(g("d-de")) g("d-de").onchange = e => set("de", e.target.value);
+  if(g("d-ate")) g("d-ate").onchange = e => set("ate", e.target.value);
+  if(g("d-cat")) g("d-cat").onchange = e => set("categoria", e.target.value);
+  if(g("d-equip")) g("d-equip").onchange = e => set("equip", e.target.value);
+  if(g("d-clear")) g("d-clear").onclick = () => { dashF = { periodo:"90", de:"", ate:"", categoria:"", equip:"" }; render(); };
+  document.querySelectorAll("[data-dclr]").forEach(b => b.onclick = () => {
+    const c = b.dataset.dclr;
+    if(c === "periodo"){ dashF.periodo = "90"; dashF.de = ""; dashF.ate = ""; }
+    else dashF[c] = "";
+    render();
+  });
+
+  // barra do gráfico de consumo → foca naquele dia/semana/mês
+  const chS = g("ch-serie");
+  if(chS) chS.onclick = e => {
+    const k = e.target.getAttribute && e.target.getAttribute("data-k");
+    if(!k) return;
+    let de = k, ate = k;
+    if(k.length === 7){ const d = parseISO(k+"-01"); const f = new Date(d.getFullYear(), d.getMonth()+1, 0); de = dISO(d); ate = dISO(f); }
+    else { const d = parseISO(k); const f = new Date(d); f.setDate(f.getDate()+6); ate = dISO(f); }
+    if(ate > todayISO()) ate = todayISO();
+    dashF.periodo = "custom"; dashF.de = de; dashF.ate = ate;
+    render();
+  };
+  // item → abre as movimentações daquele item no mesmo período
+  const chI = g("ch-itens");
+  if(chI) chI.onclick = e => {
+    const k = e.target.getAttribute && e.target.getAttribute("data-k");
+    if(!k) return;
+    const r = dashRange();
+    movFilters = { de:r.de, ate:r.ate, item:k, tipo:"saida" };
+    go("movs");
+  };
+  // equipamento → liga/desliga o filtro do painel
+  const chE = g("ch-equip");
+  if(chE) chE.onclick = e => {
+    const k = e.target.getAttribute && e.target.getAttribute("data-k");
+    if(!k) return;
+    dashF.equip = (dashF.equip === k) ? "" : k;
+    render();
+  };
+  if(g("d-vermovs")) g("d-vermovs").onclick = () => {
+    const r = dashRange();
+    movFilters = { de:r.de, ate:r.ate, item:"", tipo:"" };
+    go("movs");
+  };
 }
 
 /* ================= ITENS ================= */
@@ -1648,6 +1856,7 @@ function wire(){
     bindExport("exp-itens-csv","itens.csv",()=>toCSV(itensRows()));
     bindExportX("exp-itens-xlsx","itens.xlsx",itensRows,"Itens");
   }
+  if(current==="dashboard") wireDashboard();
   if(current==="entrada") wireMovForm("entrada");
   if(current==="saida") wireMovForm("saida");
   if(current==="auditoria") wireAuditoria();
