@@ -141,7 +141,8 @@ h2.title{font-size:clamp(28px,4.5vw,44px); font-weight:800; letter-spacing:-.4px
 .kpi.warn .v{color:var(--warn)}
 
 .bars{display:flex; align-items:flex-end; gap:9px; height:90px; padding:10px 4px 0}
-.bars .col{flex:1; display:flex; flex-direction:column; align-items:center; gap:5px}
+/* a coluna precisa de altura própria para a barra em % ter contra o que resolver */
+.bars .col{flex:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:5px}
 .bars .bar{width:100%; max-width:26px; background:var(--petroleo); border-radius:4px 4px 0 0}
 .bars .cl{font-size:10px; color:var(--ink-3)}
 
@@ -340,7 +341,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
       <div><b>Lista oficial</b> Civil, Elétrica e Hidráulica embutida</div>
       <div><b>Na nuvem</b> mesma base para todos</div>
       <div><b>Auditoria</b> quem fez o quê, e quando</div>
-      <div><b>4 demonstrações</b> passo a passo animado</div>
+      <div><b>5 demonstrações</b> passo a passo animado</div>
     </div>
     <br>
     <button class="go" onclick="go(1)">Começar
@@ -404,38 +405,46 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
 </section>
 
 <!-- ============ SLIDE 4 — PAINEL ============ -->
-<section class="slide" id="s4" data-title="O Painel">
+<section class="slide" id="s4" data-title="O Painel" data-video="1">
   <div class="deck">
     <span class="eyebrow"><span class="n">4</span> O Painel</span>
     <h2 class="title">Lendo o Painel num relance</h2>
-    <p class="lead" style="margin-bottom:22px">É a primeira tela. Os números do topo (os “KPIs”) resumem a situação; os gráficos mostram o consumo e o que está crítico. No alto ficam os <b>filtros</b>: escolha o <b>período</b>, a <b>categoria</b> e o <b>equipamento</b> — o painel inteiro se recalcula.</p>
-    <div class="mock">
-      <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Painel</span></div>
-      <div class="app">
-        <div class="side">
-          <div class="brand"><svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg"><path fill="var(--laranja)" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg><b>NorteShopping</b></div>
-          <div class="navi"><span class="act">Painel</span><span>Itens</span><span>Saída</span><span>Entrada</span><span>Movimentações</span><span>Crítico</span><span>Compras</span><span>Auditoria</span></div>
-        </div>
-        <div class="canvas">
-          <div class="kpis">
-            <div class="kpi"><div class="l">Itens</div><div class="v tnum">512</div></div>
-            <div class="kpi"><div class="l">Em estoque</div><div class="v tnum">104.817</div></div>
-            <div class="kpi"><div class="l">Valor</div><div class="v small tnum">R$ 22 mi</div></div>
-            <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div>
+    <p class="lead" style="margin-bottom:20px">É a primeira tela. Os números do topo (os “KPIs”) resumem a situação; os gráficos mostram o consumo e o que está crítico. No alto ficam os <b>filtros</b>: escolha o <b>período</b>, a <b>categoria</b> e o <b>equipamento</b> — o painel inteiro se recalcula.</p>
+    <div class="grid two" style="gap:22px; align-items:start">
+      <div class="mock">
+        <div class="mock-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="tt">Painel</span></div>
+        <div class="app">
+          <div class="side">
+            <div class="brand"><svg viewBox="0 0 94.75 105.24" xmlns="http://www.w3.org/2000/svg"><path fill="var(--laranja)" d="M0,105.24c5.43-21.1,24.58-36.7,47.38-36.7,18.37,0,29.85,10.16,29.85,10.16,0,0-7.36-8.91-18.41-14.28l-11.33-43.43-11.1,42.35c-11.24,1.51-21,6.39-27.18,11.52L29.3,8.95c1.62-5.32,6.53-8.95,12.09-8.95h11.91c5.56,0,10.47,3.64,12.09,8.96l27.94,91.74c.54,1.48,1.02,2.99,1.42,4.54h-25.28l-.05-.2c-4.34-7.69-12.58-12.89-22.04-12.89s-17.52,5.08-21.9,12.63l-.12.46H0Z"/></svg><b>NorteShopping</b></div>
+            <div class="navi"><span class="act">Painel</span><span>Itens</span><span>Saída</span><span>Entrada</span><span>Movimentações</span><span>Crítico</span><span>Compras</span><span>Auditoria</span></div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px">
-            <div style="font-size:11px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:.5px">Consumo mensal · últimos 6 meses</div>
-            <div class="bars">
-              <div class="col"><div class="bar" style="height:38%"></div><div class="cl">Fev</div></div>
-              <div class="col"><div class="bar" style="height:55%"></div><div class="cl">Mar</div></div>
-              <div class="col"><div class="bar" style="height:42%"></div><div class="cl">Abr</div></div>
-              <div class="col"><div class="bar" style="height:70%"></div><div class="cl">Mai</div></div>
-              <div class="col"><div class="bar" style="height:60%"></div><div class="cl">Jun</div></div>
-              <div class="col"><div class="bar" style="height:88%; background:var(--laranja)"></div><div class="cl">Jul</div></div>
+          <div class="canvas">
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:11px">
+              <span class="btnface" style="padding:5px 9px; font-size:11px">📅 Últimos 90 dias ▾</span>
+              <span class="btnface" style="padding:5px 9px; font-size:11px">Categoria: todas ▾</span>
+              <span class="btnface" style="padding:5px 9px; font-size:11px">Equipamento: todos ▾</span>
+            </div>
+            <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+              <div class="kpi"><div class="l">Consumo no período</div><div class="v tnum">1.284</div></div>
+              <div class="kpi"><div class="l">Recebido</div><div class="v tnum">960</div></div>
+              <div class="kpi"><div class="l">Itens</div><div class="v tnum">512</div></div>
+              <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px">
+              <div style="font-size:11px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:.5px">Consumo por semana</div>
+              <div class="bars" style="height:70px">
+                <div class="col"><div class="bar" style="height:38%"></div><div class="cl">27/04</div></div>
+                <div class="col"><div class="bar" style="height:55%"></div><div class="cl">11/05</div></div>
+                <div class="col"><div class="bar" style="height:42%"></div><div class="cl">25/05</div></div>
+                <div class="col"><div class="bar" style="height:70%"></div><div class="cl">08/06</div></div>
+                <div class="col"><div class="bar" style="height:60%"></div><div class="cl">22/06</div></div>
+                <div class="col"><div class="bar" style="height:88%; background:var(--laranja)"></div><div class="cl">06/07</div></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <div class="demo" data-demo="painel"></div>
     </div>
     <div class="grid three" style="margin-top:18px">
       <div class="callout info" style="padding:13px 15px; font-size:13px"><span class="ci">📅</span><div><b>Período</b>: 7, 30, 90 dias, 6 ou 12 meses — ou datas escolhidas por você. O gráfico se ajusta sozinho (por dia, semana ou mês).</div></div>
@@ -909,7 +918,49 @@ const miniApp = (ativo, corpo) => `<div class="mock" style="box-shadow:none"><di
   <div class="canvas" style="padding:12px">${corpo}</div>
 </div></div>`;
 
+/* barras horizontais das telas de exemplo */
+const hbar = rows => `<div style="display:flex; flex-direction:column; gap:7px">${rows.map(r=>`
+  <div style="display:flex; align-items:center; gap:8px; font-size:11.5px">
+    <span style="flex:0 0 104px; text-align:right; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${r.l}</span>
+    <span style="flex:1; height:14px; background:var(--line-soft); border-radius:4px; overflow:hidden; position:relative">
+      <span style="display:block; height:100%; width:${r.p}%; background:${r.sel?"var(--laranja)":"var(--petroleo)"}; border-radius:4px"></span>
+      ${r.ptr?'<span class="ptr" style="left:'+(r.p/2)+'%; top:-20px">👆</span>':""}</span>
+    <b style="flex:0 0 36px; font-variant-numeric:tabular-nums">${r.v}</b></div>`).join("")}</div>`;
+const filtroChips = (periodo, equip) => `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; align-items:center">
+  <span class="btnface ${periodo.hl?"hl":""}" style="padding:4px 9px; font-size:11px; position:relative">📅 ${periodo.txt} ▾${periodo.ptr?'<span class="ptr" style="right:-6px; bottom:-22px">👆</span>':""}</span>
+  ${equip?`<span class="chip azul"><span class="d"></span>${equip}</span>`:`<span class="btnface" style="padding:4px 9px; font-size:11px">Equipamento: todos ▾</span>`}</div>`;
+
 const DEMO_DEFS = {
+  painel:{
+    title:'Filtrar o Painel',
+    frames:[
+      { t:4600, cap:'O Painel abre com os últimos 90 dias de toda a operação.',
+        html:miniApp('Painel', `${filtroChips({txt:"Últimos 90 dias"}, null)}
+          <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+            <div class="kpi"><div class="l">Consumo no período</div><div class="v tnum">1.284</div></div>
+            <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div></div>`) },
+      { t:4800, cap:'Troque o período — 7, 30, 90 dias, 6 ou 12 meses, ou datas escolhidas por você.',
+        html:miniApp('Painel', `${filtroChips({txt:"Últimos 30 dias", hl:true, ptr:true}, null)}
+          <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+            <div class="kpi"><div class="l">Consumo no período</div><div class="v tnum">431</div></div>
+            <div class="kpi crit"><div class="l">Abaixo do mín.</div><div class="v tnum">7</div></div></div>
+          <div style="font-size:11px; color:var(--ink-3); margin-top:8px">O gráfico passa a mostrar dia a dia.</div>`) },
+      { t:5200, cap:'Quer olhar um equipamento? Clique na barra dele no gráfico “Consumo por equipamento”.',
+        html:miniApp('Painel', `<div style="font-size:11.5px; font-weight:700; margin-bottom:9px">Consumo por equipamento</div>
+          ${hbar([{l:"Chiller 02", p:100, v:150, ptr:true},{l:"Elevador social 04", p:96, v:144},{l:"Praça de alimentação", p:70, v:106},{l:"Escada rolante L3", p:44, v:66}])}`) },
+      { t:5400, cap:'O painel inteiro se recalcula: só o que aquele equipamento consumiu — e as reposições dos itens dele.',
+        html:miniApp('Painel', `${filtroChips({txt:"Últimos 30 dias"}, "Equipamento: Chiller 02")}
+          <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+            <div class="kpi"><div class="l">Consumo no período</div><div class="v tnum">43</div><div style="font-size:10px;color:var(--ink-3)">R$ 2.004,60</div></div>
+            <div class="kpi"><div class="l">Itens no filtro</div><div class="v tnum">2</div></div></div>
+          <div style="margin-top:9px">${hbar([{l:"Chiller 02", p:100, v:43, sel:true}])}</div>`) },
+      { t:5200, cap:'E clicando num item você vai direto às movimentações dele, já no mesmo período.',
+        html:miniApp('Movimentações', `<div style="font-size:11.5px; font-weight:700; margin-bottom:9px">Itens mais consumidos</div>
+          ${hbar([{l:"Cabo flexível 2,5mm²", p:100, v:33, ptr:true},{l:"Disjuntor tripolar 63A", p:30, v:10}])}
+          <table class="t" style="margin-top:10px"><thead><tr><th>Data</th><th>Item</th><th class="num">Qtd.</th><th>Requisitante</th></tr></thead>
+          <tbody><tr style="background:var(--warn-bg)"><td class="tnum">28/07</td><td>Cabo flexível 2,5mm²</td><td class="num tnum">12</td><td>Equipe elétrica</td></tr></tbody></table>`) }
+    ]
+  },
   login:{
     title:'Entrar no sistema',
     frames:[
