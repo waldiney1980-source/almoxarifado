@@ -23,10 +23,11 @@ Tabelas com prefixo `alx_` (não colidem com os outros apps):
 | `alx_itens` | os itens do estoque (código único, quantidades, localização, fornecedor…) |
 | `alx_movs` | histórico de entradas e saídas |
 | `alx_compras` | solicitações de compra (Pendente → Comprado → Recebido) |
+| `alx_equipamentos` | cadastro de equipamento/destino que alimenta o campo da saída (nome único por grupo) |
 | `alx_audit` | trilha de auditoria: quem criou/alterou/excluiu cada registro |
 
 Todas com **RLS ligado** e política para usuários autenticados (dados
-compartilhados pela equipe). As três primeiras têm o **trigger `trg_guard_*`**
+compartilhados pela equipe). As quatro primeiras têm o **trigger `trg_guard_*`**
 que descarta escrita atrasada, no padrão do HidroLuz.
 
 A **auditoria é preenchida por trigger no servidor** (`alx_audit_fn`,
@@ -54,6 +55,7 @@ as políticas — um grupo não enxerga o outro nem chamando a API diretamente).
 - Na primeira entrada, o usuário **cria um grupo** (nome do shopping) ou
   **entra num grupo existente com o código de acesso** (6 caracteres, exibido
   em **Dados → Grupo (shopping)**).
+- O nome de equipamento também é único **por grupo**.
 - O código de item é único **por grupo**; a lista oficial pode ser carregada
   em cada grupo.
 - Tabelas: `alx_grupos` e `alx_membros`; RPCs `alx_criar_grupo`,

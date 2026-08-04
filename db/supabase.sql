@@ -48,14 +48,33 @@ create table if not exists public.alx_compras (
   owner_id    uuid not null default auth.uid() references auth.users(id) on delete cascade
 );
 
+-- Cadastro de Equipamento / destino (migration: almoxarifado_equipamentos_destinos).
+-- Alimenta a lista do campo "Equipamento / destino" da saída. A movimentação continua
+-- gravando o NOME em alx_movs.equip — o cadastro só padroniza a digitação.
+create table if not exists public.alx_equipamentos (
+  id         uuid primary key,
+  nome       text not null default '',
+  tag        text not null default '',
+  tipo       text not null default '',
+  local      text not null default '',
+  obs        text not null default '',
+  ativo      boolean not null default true,
+  updated_at bigint not null default 0,
+  owner_id   uuid not null default auth.uid() references auth.users(id) on delete cascade
+  -- grupo_id uuid references public.alx_grupos(id) on delete cascade  (ver bloco de grupos abaixo)
+);
+create unique index if not exists idx_alx_equip_nome  on public.alx_equipamentos(grupo_id, lower(nome));
+create index        if not exists idx_alx_equip_grupo on public.alx_equipamentos(grupo_id);
+
 create index if not exists idx_alx_movs_item    on public.alx_movs(item_id);
 create index if not exists idx_alx_movs_date    on public.alx_movs(date);
 create index if not exists idx_alx_compras_item on public.alx_compras(item_id);
 create unique index if not exists idx_alx_itens_codigo on public.alx_itens(lower(codigo));
 
-alter table public.alx_itens   enable row level security;
-alter table public.alx_movs    enable row level security;
-alter table public.alx_compras enable row level security;
+alter table public.alx_itens        enable row level security;
+alter table public.alx_movs         enable row level security;
+alter table public.alx_compras      enable row level security;
+alter table public.alx_equipamentos enable row level security;
 
 -- Escrita atrasada nunca sobrescreve a mais nova (mesmo padrão do HidroLuz).
 create or replace function public.alx_guard_updated_at()
@@ -70,7 +89,7 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['alx_itens','alx_movs','alx_compras'] loop
+  foreach t in array array['alx_itens','alx_movs','alx_compras','alx_equipamentos'] loop
     execute format('drop trigger if exists %I on public.%I', 'trg_guard_' || t, t);
     execute format(
       'create trigger %I before update on public.%I for each row execute function public.alx_guard_updated_at()',
@@ -146,7 +165,7 @@ revoke execute on function public.alx_audit_fn() from public, anon, authenticate
 do $$
 declare t text;
 begin
-  foreach t in array array['alx_itens','alx_movs','alx_compras'] loop
+  foreach t in array array['alx_itens','alx_movs','alx_compras','alx_equipamentos'] loop
     execute format('drop trigger if exists %I on public.%I', 'trg_audit_' || t, t);
     execute format(
       'create trigger %I after insert or update or delete on public.%I for each row execute function public.alx_audit_fn()',
@@ -161,11 +180,12 @@ end $$;
 -- grupo NorteShopping, com os usuários da época como membros.
 -- Ver a migration no projeto para o SQL completo — resumo do que existe:
 --   * tabelas alx_grupos (nome, codigo único) e alx_membros (user_id → grupo_id)
---   * coluna grupo_id em alx_itens, alx_movs, alx_compras e alx_audit
+--   * coluna grupo_id em alx_itens, alx_movs, alx_compras, alx_equipamentos e alx_audit
 --   * código de item único POR GRUPO: unique (grupo_id, lower(codigo))
 --   * fn alx_meu_grupo() (security definer) usada nas políticas
 --   * trigger trg_grupo_* carimba o grupo em inserts e o congela em updates
 --   * políticas: using/with check (grupo_id = alx_meu_grupo()) nas 3 tabelas;
 --     alx_audit somente leitura filtrada por grupo
+--   * nome de equipamento único POR GRUPO: unique (grupo_id, lower(nome))
 --   * RPCs (execute só para authenticated): alx_criar_grupo(nome),
 --     alx_entrar_grupo(codigo), alx_meu_grupo_info()

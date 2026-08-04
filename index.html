@@ -309,7 +309,7 @@ const uid = () => (crypto.randomUUID ? crypto.randomUUID() :
     const r = Math.random()*16|0; return (c==="x" ? r : (r&3|8)).toString(16);
   }));
 
-let db = { items:[], movs:[], compras:[], user: localStorage.getItem(OPER_KEY) || "Almoxarife" };
+let db = { items:[], movs:[], compras:[], equips:[], user: localStorage.getItem(OPER_KEY) || "Almoxarife" };
 
 /* ---- sessão ---- */
 let sess = null;
@@ -395,14 +395,19 @@ const compraToRow = c => ({ id:c.id, item_id:c.itemId, qtd:c.qtd||0, status:c.st
   criada_em:c.criadaEm||"", recebida_em:c.recebidaEm||"", previsao:c.previsao||"" });
 const rowToCompra = r => ({ id:r.id, itemId:r.item_id, qtd:r.qtd, status:r.status,
   criadaEm:r.criada_em, recebidaEm:r.recebida_em, previsao:r.previsao||"" });
+const equipToRow = e => ({ id:e.id, nome:e.nome||"", tag:e.tag||"", tipo:e.tipo||"",
+  local:e.local||"", obs:e.obs||"", ativo:e.ativo!==false });
+const rowToEquip = r => ({ id:r.id, nome:r.nome, tag:r.tag, tipo:r.tipo,
+  local:r.local, obs:r.obs, ativo:r.ativo!==false });
 const TABS = [
-  { table:"alx_itens",   key:"items",   toRow:itemToRow,   fromRow:rowToItem },
-  { table:"alx_movs",    key:"movs",    toRow:movToRow,    fromRow:rowToMov },
-  { table:"alx_compras", key:"compras", toRow:compraToRow, fromRow:rowToCompra }
+  { table:"alx_itens",        key:"items",   toRow:itemToRow,   fromRow:rowToItem },
+  { table:"alx_movs",         key:"movs",    toRow:movToRow,    fromRow:rowToMov },
+  { table:"alx_compras",      key:"compras", toRow:compraToRow, fromRow:rowToCompra },
+  { table:"alx_equipamentos", key:"equips",  toRow:equipToRow,  fromRow:rowToEquip }
 ];
 
 /* ---- sincronização: snapshot + gravação por diferença ---- */
-let snap = { alx_itens:{}, alx_movs:{}, alx_compras:{} }; // id -> {json, updated_at}
+let snap = { alx_itens:{}, alx_movs:{}, alx_compras:{}, alx_equipamentos:{} }; // id -> {json, updated_at}
 let saving = false, savePendente = false, syncErro = false;
 
 async function fetchAll(table){
@@ -416,7 +421,7 @@ async function fetchAll(table){
 }
 async function loadCloud(){
   const novo = {};
-  const novoSnap = { alx_itens:{}, alx_movs:{}, alx_compras:{} };
+  const novoSnap = { alx_itens:{}, alx_movs:{}, alx_compras:{}, alx_equipamentos:{} };
   for(const t of TABS){
     const rows = await fetchAll(t.table);
     novo[t.key] = rows.map(t.fromRow);
@@ -427,7 +432,7 @@ async function loadCloud(){
       };
     }
   }
-  db.items = novo.items; db.movs = novo.movs; db.compras = novo.compras;
+  db.items = novo.items; db.movs = novo.movs; db.compras = novo.compras; db.equips = novo.equips;
   snap = novoSnap;
 }
 function save(){ queueSave(); }
@@ -496,6 +501,7 @@ function normalizeIds(d){
   (d.items||[]).forEach(i => i.id = fix(i.id));
   (d.movs||[]).forEach(m => { m.id = fix(m.id); m.itemId = fix(m.itemId); });
   (d.compras||[]).forEach(c => { c.id = fix(c.id); c.itemId = fix(c.itemId); });
+  (d.equips||[]).forEach(e => e.id = fix(e.id));
 }
 
 /* ================= HELPERS ================= */
@@ -510,6 +516,15 @@ const parseISO = s => { const [y,m,d]=String(s||"").split("-").map(Number); retu
 const dISO = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const fdate = s => s ? fmtD.format(parseISO(String(s).slice(0,10))) : "—";
 const itemById = id => db.items.find(i => i.id === id);
+const equipById = id => (db.equips||[]).find(e => e.id === id);
+/* nomes de equipamento/destino: os cadastrados (ativos) + os que já aparecem no histórico */
+function equipNomes(incluirHistorico){
+  const vistos = new Map(); // chave normalizada -> nome exibido
+  (db.equips||[]).filter(e => e.ativo!==false && e.nome).forEach(e => vistos.set(e.nome.toLowerCase(), e.nome));
+  if(incluirHistorico!==false)
+    db.movs.forEach(m => { const n = (m.equip||"").trim(); if(n && !vistos.has(n.toLowerCase())) vistos.set(n.toLowerCase(), n); });
+  return [...vistos.values()].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+}
 const locStr = it => [it.prateleira&&("Prat. "+it.prateleira), it.coluna&&("Col. "+it.coluna), it.gaveta&&("Gav. "+it.gaveta)].filter(Boolean).join(" · ") || "—";
 
 function statusItem(it){
@@ -590,13 +605,15 @@ const I = {
   plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
   down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 5-5m-5 5-5-5"/><path d="M4 21h16"/></svg>',
   up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0-5 5m5-5 5 5"/><path d="M4 3h16"/></svg>',
-  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/></svg>'
+  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/></svg>',
+  wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0 5 5l-8.4 8.4a2.4 2.4 0 0 1-3.4-3.4l8.4-8.4Z"/><path d="M18.4 2.6 15.9 5l3.1 3.1 2.4-2.5a4.4 4.4 0 0 0-3-3Z"/></svg>'
 };
 
 /* ================= VIEWS REGISTRY ================= */
 const VIEWS = [
   { id:"dashboard", label:"Dashboard", icon:I.dash },
   { id:"itens", label:"Itens", icon:I.box },
+  { id:"equipamentos", label:"Equipamentos", icon:I.wrench },
   { id:"entrada", label:"Entrada", icon:I.in },
   { id:"saida", label:"Saída", icon:I.out },
   { id:"movs", label:"Movimentações", icon:I.list },
@@ -630,7 +647,8 @@ document.getElementById("nav").addEventListener("click", e => {
 });
 document.getElementById("globalsearch").addEventListener("input", e => {
   searchTerm = e.target.value.trim().toLowerCase();
-  if(current !== "itens") current = "itens";
+  // a busca filtra a tela atual quando ela tem lista própria; senão cai em Itens
+  if(current !== "itens" && current !== "equipamentos") current = "itens";
   render(true);
 });
 document.getElementById("username").addEventListener("click", () => {
@@ -804,7 +822,7 @@ function vDashboard(){
     .sort((a,b)=>b.value-a.value).slice(0,7);
 
   const cats = [...new Set(db.items.map(i=>i.categoria).filter(Boolean))].sort();
-  const equips = [...new Set(db.movs.map(m=>m.equip).filter(Boolean))].sort();
+  const equips = equipNomes();
   const recentes = movs.slice().sort((a,b)=> (b.date+"").localeCompare(a.date+"") || (b.ts||0)-(a.ts||0));
   const filtrando = dashF.categoria || dashF.equip || dashF.periodo !== "90";
 
@@ -1038,12 +1056,257 @@ function openItemModal(id){
   };
 }
 
+/* ================= EQUIPAMENTOS / DESTINOS ================= */
+/* Consumo acumulado por equipamento — casa pelo nome gravado na saída. */
+function consumoEquip(nome){
+  const n = String(nome||"").trim().toLowerCase();
+  if(!n) return 0;
+  return db.movs.filter(m => m.type==="saida" && String(m.equip||"").trim().toLowerCase()===n)
+    .reduce((s,m)=>s+(m.qty||0), 0);
+}
+function vEquips(){
+  const q = searchTerm;
+  const list = (db.equips||[])
+    .filter(e => !q || [e.nome,e.tag,e.tipo,e.local].some(f => String(f||"").toLowerCase().includes(q)))
+    .sort((a,b)=>String(a.nome||"").localeCompare(String(b.nome||""),"pt-BR",{numeric:true}));
+  // nomes que já aparecem nas saídas mas não estão cadastrados
+  const cadastrados = new Set((db.equips||[]).map(e=>String(e.nome||"").trim().toLowerCase()));
+  const soltos = [...new Set(db.movs.filter(m=>m.type==="saida"&&String(m.equip||"").trim())
+    .map(m=>String(m.equip).trim()))].filter(n=>!cadastrados.has(n.toLowerCase()));
+  return `
+  <div class="viewhead"><h2>Equipamentos / destinos</h2>
+    <span class="desc">${fmtN.format(list.length)} de ${fmtN.format((db.equips||[]).length)} cadastrados${q?` · filtro: “${esc(q)}”`:""}</span>
+    <div class="btnrow">
+      <button class="btn" id="exp-equips-csv">${I.down} CSV</button>
+      <button class="btn" id="exp-equips-xlsx">${I.down} Excel</button>
+      <button class="btn primary" id="novo-equip">${I.plus} Novo equipamento</button>
+    </div></div>
+  <div class="panel"><div class="phead"><h3>Carga da lista</h3><span class="hint">suba a lista pronta de uma vez</span></div><div class="pbody">
+    <p class="small" style="margin-top:0">Envie um arquivo <strong>.xlsx</strong> ou <strong>.csv</strong> com a relação de equipamentos e destinos.
+    A única coluna obrigatória é <strong>nome</strong>. Também são aceitas:</p>
+    <p class="small mono muted" style="word-break:break-word">nome (ou equipamento/destino) · tag (ou codigo) · tipo (ou sistema/categoria) · local (ou localizacao/pavimento) · obs · ativo</p>
+    <p class="small muted">Se a planilha não tiver cabeçalho, a <strong>primeira coluna</strong> é usada como nome. Equipamentos com nome já cadastrado são atualizados — nada é duplicado nem apagado.</p>
+    <div class="btnrow">
+      <label class="btn primary" for="file-equip">${I.up} Escolher arquivo…</label>
+      <input type="file" id="file-equip" accept=".xlsx,.csv">
+      <button class="btn" id="dl-modelo-equip">${I.down} Baixar modelo (xlsx)</button>
+      <button class="btn" id="equip-sugerido">${I.box} Carga sugerida (shopping)</button>
+    </div>
+    <div id="equip-import-result" class="small" style="margin-top:10px"></div>
+  </div></div>
+  ${soltos.length?`<div class="panel"><div class="phead"><h3>Usados nas saídas, ainda sem cadastro</h3>
+    <span class="hint">${fmtN.format(soltos.length)} ${soltos.length===1?"nome":"nomes"}</span></div><div class="pbody">
+    <p class="small" style="margin-top:0">Estes nomes foram digitados em saídas antes de existir cadastro. Cadastre para padronizar a escrita e evitar duplicidade no painel.</p>
+    <div class="btnrow" style="flex-wrap:wrap">${soltos.map(n=>`<button class="btn sm" data-addequip="${esc(n)}">${I.plus} ${esc(n)}</button>`).join("")}</div>
+    <div class="btnrow" style="margin-top:10px"><button class="btn" id="equip-add-todos">Cadastrar todos</button></div>
+  </div></div>`:""}
+  <div class="panel"><div class="pbody flush">
+    ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
+      <th>Nome</th><th>Tag</th><th>Tipo / sistema</th><th>Local</th>
+      <th class="num">Consumo acum.</th><th>Situação</th><th>Observação</th><th></th></tr></thead><tbody>
+    ${list.map(e=>`<tr>
+      <td><strong>${esc(e.nome)}</strong></td>
+      <td class="mono">${esc(e.tag||"—")}</td>
+      <td>${esc(e.tipo||"—")}</td>
+      <td>${esc(e.local||"—")}</td>
+      <td class="num">${fmtN.format(consumoEquip(e.nome))}</td>
+      <td><span class="pill ${e.ativo===false?"cinza":"verde"}">${e.ativo===false?"Inativo":"Ativo"}</span></td>
+      <td>${esc(e.obs||"—")}</td>
+      <td style="white-space:nowrap"><button class="iconbtn" data-editequip="${e.id}" title="Editar">${I.edit}</button><button class="iconbtn del" data-delequip="${e.id}" title="Excluir">${I.trash}</button></td>
+    </tr>`).join("")}
+    </tbody></table></div>`:`<div class="empty">${q?"Nenhum equipamento corresponde à busca.":"Nenhum equipamento cadastrado ainda. Suba a lista pronta acima ou cadastre manualmente."}</div>`}
+  </div></div>`;
+}
+function equipForm(e){
+  e = e || {};
+  const tipos = [...new Set((db.equips||[]).map(x=>x.tipo).filter(Boolean))];
+  const locais = [...new Set((db.equips||[]).map(x=>x.local).filter(Boolean))];
+  return `
+  <div class="formgrid">
+    <div class="field span2"><label>Nome <span class="req">*</span></label><input id="e-nome" value="${esc(e.nome||"")}" placeholder="Ex.: Chiller 02" required></div>
+    <div class="field"><label>Tag / código</label><input id="e-tag" value="${esc(e.tag||"")}" placeholder="Ex.: CH-02"></div>
+    <div class="field"><label>Tipo / sistema</label><input id="e-tipo" value="${esc(e.tipo||"")}" list="etipos" placeholder="Ex.: Refrigeração">
+      <datalist id="etipos">${tipos.map(t=>`<option value="${esc(t)}">`).join("")}</datalist></div>
+    <div class="field span2"><label>Local</label><input id="e-local" value="${esc(e.local||"")}" list="elocais" placeholder="Ex.: Casa de máquinas — L3">
+      <datalist id="elocais">${locais.map(l=>`<option value="${esc(l)}">`).join("")}</datalist></div>
+    <div class="field span2"><label>Observação</label><input id="e-obs" value="${esc(e.obs||"")}"></div>
+    <div class="field"><label>Situação</label><select id="e-ativo">
+      <option value="1" ${e.ativo===false?"":"selected"}>Ativo</option>
+      <option value="0" ${e.ativo===false?"selected":""}>Inativo (não aparece na saída)</option></select></div>
+  </div>`;
+}
+function openEquipModal(id, nomePre){
+  const e = id ? equipById(id) : null;
+  openModal(`
+    <div class="mhead"><h3>${e?"Editar equipamento":"Novo equipamento / destino"}</h3><button class="iconbtn" data-close>${I.x}</button></div>
+    <div class="mbody">${equipForm(e || (nomePre?{nome:nomePre}:null))}</div>
+    <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="save-equip">${e?"Salvar alterações":"Cadastrar"}</button></div>`);
+  document.getElementById("save-equip").onclick = () => {
+    const g = i => document.getElementById(i).value.trim();
+    const nome = g("e-nome");
+    if(!nome){ toast("Informe o nome do equipamento.", true); return; }
+    const dupe = (db.equips||[]).find(x => String(x.nome||"").toLowerCase()===nome.toLowerCase() && x.id!==(e&&e.id));
+    if(dupe){ toast("Já existe um equipamento chamado "+nome+".", true); return; }
+    const data = { nome, tag:g("e-tag"), tipo:g("e-tipo"), local:g("e-local"), obs:g("e-obs"),
+      ativo: document.getElementById("e-ativo").value==="1" };
+    if(e) Object.assign(e, data);
+    else db.equips.push(Object.assign({id:uid()}, data));
+    closeModal(); toast(e?"Equipamento atualizado.":"Equipamento cadastrado."); commit();
+  };
+}
+/* ---- importação da lista de equipamentos ---- */
+const HDR_EQUIP = {
+  nome:"nome", equipamento:"nome", equipamento_destino:"nome", destino:"nome", descricao:"nome", ativo_nome:"nome",
+  tag:"tag", codigo:"tag", cod:"tag", tag_ativo:"tag", patrimonio:"tag",
+  tipo:"tipo", sistema:"tipo", categoria:"tipo", familia:"tipo", grupo:"tipo",
+  local:"local", localizacao:"local", area:"local", pavimento:"local", setor:"local",
+  obs:"obs", observacao:"obs", observacoes:"obs", nota:"obs",
+  ativo:"ativo", situacao:"ativo", status:"ativo"
+};
+const ehFalso = v => /^(0|nao|não|n|inativo|false|desativado|desativada|inativa)$/i.test(String(v==null?"":v).trim());
+function importEquipRows(rows){
+  if(!rows.length) return { add:0, upd:0, skip:0, semCabecalho:false };
+  let hi = -1, hdr = null;
+  for(let i=0; i<Math.min(rows.length,15); i++){
+    const h = (rows[i]||[]).map(x => HDR_EQUIP[normHdr(x)] || null);
+    if(h.includes("nome")){ hi = i; hdr = h; break; }
+  }
+  const semCabecalho = hi < 0;
+  if(semCabecalho){ hi = -1; hdr = ["nome"]; } // sem cabeçalho: primeira coluna = nome
+  let add=0, upd=0, skip=0;
+  for(let r=hi+1;r<rows.length;r++){
+    const o = {};
+    (rows[r]||[]).forEach((v,c)=>{ if(hdr[c]) o[hdr[c]] = v; });
+    const nome = String(o.nome||"").trim();
+    if(!nome || HDR_EQUIP[normHdr(nome)]==="nome"){ skip++; continue; }
+    const data = {
+      nome,
+      tag:String(o.tag||"").trim(), tipo:String(o.tipo||"").trim(),
+      local:String(o.local||"").trim(), obs:String(o.obs||"").trim(),
+      ativo: o.ativo==null || String(o.ativo).trim()==="" ? true : !ehFalso(o.ativo)
+    };
+    const ex = (db.equips||[]).find(x => String(x.nome||"").toLowerCase()===nome.toLowerCase());
+    if(ex){
+      ex.nome = data.nome; ex.ativo = data.ativo;
+      if(data.tag) ex.tag = data.tag;
+      if(data.tipo) ex.tipo = data.tipo;
+      if(data.local) ex.local = data.local;
+      if(data.obs) ex.obs = data.obs;
+      upd++;
+    }else{ db.equips.push(Object.assign({id:uid()}, data)); add++; }
+  }
+  return { add, upd, skip, semCabecalho };
+}
+/* Carga sugerida: parque típico de shopping. É um ponto de partida — renomeie,
+   apague o que não existe e acrescente o que faltar. */
+const EQUIP_SUGERIDO = [
+  ["Chiller 01","CH-01","Refrigeração","Casa de máquinas"],
+  ["Chiller 02","CH-02","Refrigeração","Casa de máquinas"],
+  ["Chiller 03","CH-03","Refrigeração","Casa de máquinas"],
+  ["Torre de resfriamento 01","TR-01","Refrigeração","Cobertura"],
+  ["Torre de resfriamento 02","TR-02","Refrigeração","Cobertura"],
+  ["Bomba de água gelada 01","BAG-01","Refrigeração","Casa de máquinas"],
+  ["Bomba de água gelada 02","BAG-02","Refrigeração","Casa de máquinas"],
+  ["Bomba de condensação 01","BAC-01","Refrigeração","Casa de máquinas"],
+  ["Fancoil mall L1","FC-L1","Climatização","Mall L1"],
+  ["Fancoil mall L2","FC-L2","Climatização","Mall L2"],
+  ["Fancoil mall L3","FC-L3","Climatização","Mall L3"],
+  ["Self de praça de alimentação","SELF-PA","Climatização","Praça de alimentação"],
+  ["Elevador social 01","ELV-01","Elevação","Mall"],
+  ["Elevador social 02","ELV-02","Elevação","Mall"],
+  ["Elevador de carga","ELV-CG","Elevação","Doca"],
+  ["Escada rolante 01","ESC-01","Elevação","Mall L1-L2"],
+  ["Escada rolante 02","ESC-02","Elevação","Mall L2-L3"],
+  ["Grupo gerador","GMG-01","Elétrica","Casa de força"],
+  ["Subestação principal","SE-01","Elétrica","Casa de força"],
+  ["QGBT","QGBT","Elétrica","Casa de força"],
+  ["Nobreak central","UPS-01","Elétrica","Sala técnica"],
+  ["Casa de bombas de incêndio","CB-INC","Combate a incêndio","Subsolo"],
+  ["Sistema de sprinklers","SPK","Combate a incêndio","Geral"],
+  ["Reservatório de água potável","RES-AP","Hidráulica","Subsolo"],
+  ["Estação elevatória de esgoto","EEE-01","Hidráulica","Subsolo"],
+  ["Sanitários — Piso L1","SAN-L1","Banheiros","Mall L1"],
+  ["Sanitários — Piso L2","SAN-L2","Banheiros","Mall L2"],
+  ["Sanitários — Piso L3","SAN-L3","Banheiros","Mall L3"],
+  ["Estacionamento","ESTAC","Predial","Estacionamento"],
+  ["Doca / área de serviço","DOCA","Predial","Doca"],
+  ["Fachada","FACH","Predial","Externo"],
+  ["Área comum — Mall","MALL","Predial","Mall"],
+  ["Manutenção predial (uso geral)","GERAL","Predial","Geral"]
+];
+function carregarEquipsSugeridos(){
+  let add=0, jaTem=0;
+  EQUIP_SUGERIDO.forEach(([nome,tag,tipo,local]) => {
+    if((db.equips||[]).some(x => String(x.nome||"").toLowerCase()===nome.toLowerCase())){ jaTem++; return; }
+    db.equips.push({ id:uid(), nome, tag, tipo, local, obs:"", ativo:true });
+    add++;
+  });
+  toast(`Carga sugerida aplicada: ${add} equipamentos incluídos${jaTem?", "+jaTem+" já existiam":""}. Ajuste a lista ao parque real do seu shopping.`);
+  commit();
+}
+function equipsRows(){
+  return [["nome","tag","tipo","local","obs","ativo","consumo_acumulado"]].concat(
+    (db.equips||[]).slice().sort((a,b)=>String(a.nome||"").localeCompare(String(b.nome||""),"pt-BR",{numeric:true}))
+      .map(e=>[e.nome||"", e.tag||"", e.tipo||"", e.local||"", e.obs||"", e.ativo===false?"Não":"Sim", consumoEquip(e.nome)]));
+}
+function wireEquips(){
+  const nv = document.getElementById("novo-equip"); if(nv) nv.onclick = () => openEquipModal();
+  document.querySelectorAll("[data-editequip]").forEach(b => b.onclick = () => openEquipModal(b.dataset.editequip));
+  document.querySelectorAll("[data-delequip]").forEach(b => b.onclick = () => {
+    const e = equipById(b.dataset.delequip); if(!e) return;
+    confirmDlg(`Excluir o equipamento “${e.nome}”? As saídas já lançadas mantêm o nome no histórico.`, () => {
+      db.equips = db.equips.filter(x=>x.id!==e.id);
+      toast("Equipamento excluído."); commit();
+    }, "Excluir");
+  });
+  document.querySelectorAll("[data-addequip]").forEach(b => b.onclick = () => openEquipModal(null, b.dataset.addequip));
+  const todos = document.getElementById("equip-add-todos");
+  if(todos) todos.onclick = () => {
+    const cadastrados = new Set((db.equips||[]).map(e=>String(e.nome||"").trim().toLowerCase()));
+    const novos = [...new Set(db.movs.filter(m=>m.type==="saida"&&String(m.equip||"").trim()).map(m=>String(m.equip).trim()))]
+      .filter(n=>!cadastrados.has(n.toLowerCase()));
+    novos.forEach(nome => db.equips.push({ id:uid(), nome, tag:"", tipo:"", local:"", obs:"", ativo:true }));
+    toast(novos.length+" equipamento(s) cadastrado(s) a partir do histórico."); commit();
+  };
+  const sug = document.getElementById("equip-sugerido");
+  if(sug) sug.onclick = () => carregarEquipsSugeridos();
+  const modelo = document.getElementById("dl-modelo-equip");
+  if(modelo) modelo.onclick = () => downloadBlob("modelo_equipamentos.xlsx", makeXLSX([
+    ["nome","tag","tipo","local","obs","ativo"],
+    ["Chiller 02","CH-02","Refrigeração","Casa de máquinas","Carrier 30XA","Sim"],
+    ["Escada rolante 01","ESC-01","Elevação","Mall L1-L2","","Sim"]
+  ],"Modelo"));
+  const fe = document.getElementById("file-equip");
+  if(fe) fe.addEventListener("change", async ev => {
+    const file = ev.target.files[0]; if(!file) return;
+    const out = document.getElementById("equip-import-result");
+    if(out) out.textContent = "Processando " + file.name + "…";
+    try{
+      let rows;
+      if(/\.csv$/i.test(file.name)) rows = parseCSVText(await file.text());
+      else rows = await parseXLSX(await file.arrayBuffer());
+      const r = importEquipRows(rows);
+      if(!r.add && !r.upd) throw new Error("Nenhum equipamento encontrado na planilha.");
+      toast(`Lista carregada: ${r.add} novos, ${r.upd} atualizados${r.skip?", "+r.skip+" ignorados":""}.`
+        + (r.semCabecalho?" Sem cabeçalho reconhecido — usei a primeira coluna como nome." : ""));
+      commit(); go("equipamentos");
+    }catch(err){
+      if(out) out.innerHTML = `<span style="color:var(--crit)">Erro: ${esc(err.message)}</span>`;
+      toast("Falha ao carregar a lista: " + err.message, true);
+    }
+    ev.target.value = "";
+  });
+  bindExport("exp-equips-csv","equipamentos.csv",()=>toCSV(equipsRows()));
+  bindExportX("exp-equips-xlsx","equipamentos.xlsx",equipsRows,"Equipamentos");
+}
+
 /* ================= ENTRADA / SAÍDA ================= */
 function vMovForm(tipo){
   const isOut = tipo==="saida";
   const opts = db.items.slice().sort((a,b)=>a.descricao.localeCompare(b.descricao))
     .map(i=>`<option value="${i.id}">${esc(i.codigo)} — ${esc(i.descricao)} (${fmtN.format(i.atual)} ${esc(i.unidade||"UN")})</option>`).join("");
   const recentes = db.movs.filter(m=>m.type===tipo).slice(-8).reverse();
+  const equipAtivos = isOut ? equipNomes() : [];
   return `
   <div class="viewhead"><h2>${isOut?"Saída de material":"Entrada de material"}</h2>
     <span class="desc">${isOut?"Registre o consumo retirado do almoxarifado.":"Registre recebimentos e devoluções ao estoque."}</span></div>
@@ -1055,7 +1318,10 @@ function vMovForm(tipo){
       <div class="field"><label>Quantidade <span class="req">*</span></label><input id="m-qtd" type="number" min="0" step="any" placeholder="0"></div>
       <div class="field"><label>Data</label><input id="m-data" type="date" value="${todayISO()}"></div>
       ${isOut?`<div class="field"><label>Requisitante <span class="req">*</span></label><input id="m-req" placeholder="Quem pediu/retirou o material"></div>
-      <div class="field"><label>Equipamento / destino</label><input id="m-equip" placeholder="Ex.: Chiller 02, Escada rolante L3"></div>`:""}
+      <div class="field"><label>Equipamento / destino</label>
+        <input id="m-equip" list="equips-lista" placeholder="${equipAtivos.length?"Escolha na lista ou digite":"Ex.: Chiller 02, Escada rolante L3"}" autocomplete="off">
+        <datalist id="equips-lista">${equipAtivos.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+        <span class="small muted">${equipAtivos.length?`${fmtN.format(equipAtivos.length)} cadastrados · <a href="#" data-goto="equipamentos">gerenciar lista</a>`:`<a href="#" data-goto="equipamentos">Suba a lista de equipamentos</a> para padronizar este campo.`}</span></div>`:""}
       <div class="field span2"><label>Observação</label><input id="m-obs" placeholder="${isOut?'Ex.: OS 4231 — troca preventiva':'Ex.: NF 1234 — Fornecedor'}"></div>
     </div>
     <div class="btnrow" style="margin-top:14px">
@@ -1343,15 +1609,33 @@ function vDados(){
       </div>
       <div id="import-result" class="small" style="margin-top:10px"></div>
     </div></div>
+    <div class="panel"><div class="phead"><h3>Importar lista de equipamentos / destinos</h3></div><div class="pbody">
+      <p class="small" style="margin-top:0">Suba de uma vez a relação de equipamentos e destinos que aparecem no campo
+      <strong>“Equipamento / destino”</strong> das saídas. Arquivo <strong>.xlsx</strong> ou <strong>.csv</strong>; a única coluna obrigatória é
+      <strong>nome</strong> (sem cabeçalho, vale a primeira coluna). Também são aceitas:</p>
+      <p class="small mono muted" style="word-break:break-word">nome (ou equipamento/destino) · tag (ou codigo) · tipo (ou sistema/categoria) · local (ou localizacao/pavimento) · obs · ativo</p>
+      <p class="small muted">Nomes já cadastrados são atualizados; nada é duplicado. ${fmtN.format((db.equips||[]).length)} equipamento(s) cadastrado(s) hoje.</p>
+      <div class="btnrow">
+        <label class="btn primary" for="file-equip">${I.up} Escolher arquivo…</label>
+        <input type="file" id="file-equip" accept=".xlsx,.csv">
+        <button class="btn" id="dl-modelo-equip">${I.down} Baixar modelo (xlsx)</button>
+        <button class="btn" data-goto="equipamentos">Ver equipamentos</button>
+      </div>
+      <div id="equip-import-result" class="small" style="margin-top:10px"></div>
+    </div></div>
     <div class="panel"><div class="phead"><h3>Exportar</h3></div><div class="pbody">
       <p class="small" style="margin-top:0">Gere arquivos para uso no Excel ou em outros sistemas.</p>
       <div class="btnrow" style="margin-bottom:10px">
         <button class="btn" id="exp2-itens-xlsx">${I.down} Itens (Excel)</button>
         <button class="btn" id="exp2-itens-csv">${I.down} Itens (CSV)</button>
       </div>
-      <div class="btnrow">
+      <div class="btnrow" style="margin-bottom:10px">
         <button class="btn" id="exp2-movs-xlsx">${I.down} Movimentações (Excel)</button>
         <button class="btn" id="exp2-movs-csv">${I.down} Movimentações (CSV)</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="exp2-equips-xlsx">${I.down} Equipamentos (Excel)</button>
+        <button class="btn" id="exp2-equips-csv">${I.down} Equipamentos (CSV)</button>
       </div>
     </div></div>
     <div class="panel"><div class="phead"><h3>Backup completo</h3></div><div class="pbody">
@@ -1373,9 +1657,11 @@ function vDados(){
       <p class="small muted" style="margin-bottom:0">Compartilhe o código apenas com a equipe do seu shopping.</p>
     </div></div>
     <div class="panel"><div class="phead"><h3>Cargas prontas</h3></div><div class="pbody">
-      <p class="small" style="margin-top:0">A lista oficial de Hidráulica, Civil e Elétrica do NorteShopping já vem embutida no sistema.</p>
+      <p class="small" style="margin-top:0">A lista oficial de Hidráulica, Civil e Elétrica do NorteShopping já vem embutida no sistema.
+      A carga sugerida de equipamentos traz o parque típico de um shopping (chillers, torres, elevadores, escadas rolantes…) para você ajustar.</p>
       <div class="btnrow">
         <button class="btn primary" id="lista-ns2">${I.box} Carregar lista NorteShopping (500 itens)</button>
+        <button class="btn" id="equip-sugerido">${I.wrench} Carga sugerida de equipamentos</button>
         <button class="btn" id="seed-demo2">Dados de demonstração (com movimentações fictícias)</button>
       </div>
     </div></div>
@@ -1667,6 +1953,7 @@ function seedDemo(){
     }
   }
   const equips = ["Chiller 01","Chiller 02","Escada rolante L2","Escada rolante L3","Elevador social 04","Praça de alimentação","Subestação","Banheiros L1","Fachada","Docas"];
+  db.equips = equips.map(nome => ({ id:uid(), nome, tag:"", tipo:"", local:"", obs:"", ativo:true }));
   db.movs = [];
   let seed = 42;
   const rnd = () => { seed = (seed*1103515245+12345) & 0x7fffffff; return seed/0x7fffffff; };
@@ -1702,19 +1989,21 @@ function seedDemo(){
 /* ================= AUDITORIA ================= */
 let auditRows = null, auditCarregando = false, auditFiltros = { de:"", ate:"", email:"", tabela:"" };
 const auditEmails = new Set();
-const AUD_TABELA = { alx_itens:"Item", alx_movs:"Movimentação", alx_compras:"Compra" };
+const AUD_TABELA = { alx_itens:"Item", alx_movs:"Movimentação", alx_compras:"Compra", alx_equipamentos:"Equipamento" };
 const AUD_ACAO = { criou:["Criou","verde"], alterou:["Alterou","amarelo"], excluiu:["Excluiu","vermelho"] };
 const AUD_CAMPO = { codigo:"código", descricao:"descrição", categoria:"categoria", unidade:"unidade",
   atual:"estoque atual", min:"mínimo", max:"máximo", valor_unit:"valor unitário", prateleira:"prateleira",
   coluna:"coluna", gaveta:"gaveta", fornecedor:"fornecedor", lead_time:"lead time", ultima_compra:"última compra",
   qty:"quantidade", date:"data", obs:"observação", equip:"equipamento", requisitante:"requisitante", usuario:"operador", type:"tipo",
-  qtd:"quantidade", status:"status", criada_em:"criada em", recebida_em:"recebida em", previsao:"chegada prevista", item_id:"item" };
+  qtd:"quantidade", status:"status", criada_em:"criada em", recebida_em:"recebida em", previsao:"chegada prevista", item_id:"item",
+  nome:"nome", tag:"tag", tipo:"tipo", local:"local", ativo:"situação" };
 const audVal = v => v===null||v===undefined||v===""?"—":(typeof v==="number"?fmtN.format(v):String(v));
 const audProximoDia = s => { const d = parseISO(s); d.setDate(d.getDate()+1); return dISO(d); };
 
 function audDescreve(r){
   const d = r.dados || {};
   if(r.tabela==="alx_itens") return `${esc(d.descricao||"")} <span class="muted small mono">${esc(d.codigo||"")}</span>`;
+  if(r.tabela==="alx_equipamentos") return `${esc(d.nome||"")}${d.tag?` <span class="muted small mono">${esc(d.tag)}</span>`:""}`;
   const it = itemById(d.item_id);
   const nome = it ? it.descricao : "(item excluído)";
   if(r.tabela==="alx_movs") return `${d.type==="saida"?"Saída":"Entrada"} de ${fmtN.format(d.qty||0)} × ${esc(nome)}${d.date?` em ${fdate(d.date)}`:""}`;
@@ -1767,7 +2056,8 @@ function vAuditoria(){
         <option value="">Todos</option>
         <option value="alx_itens" ${f.tabela==="alx_itens"?"selected":""}>Itens</option>
         <option value="alx_movs" ${f.tabela==="alx_movs"?"selected":""}>Movimentações</option>
-        <option value="alx_compras" ${f.tabela==="alx_compras"?"selected":""}>Compras</option></select></div>
+        <option value="alx_compras" ${f.tabela==="alx_compras"?"selected":""}>Compras</option>
+        <option value="alx_equipamentos" ${f.tabela==="alx_equipamentos"?"selected":""}>Equipamentos</option></select></div>
       <button class="btn sm" id="au-clear">Limpar filtros</button>
       <button class="btn sm" id="au-reload">${I.hist} Atualizar</button>
     </div>
@@ -1822,14 +2112,14 @@ function render(keepFocus){
   syncCompras();
   renderNav();
   const view = document.getElementById("view");
-  const renderers = { dashboard:vDashboard, itens:vItens, entrada:()=>vMovForm("entrada"), saida:()=>vMovForm("saida"),
+  const renderers = { dashboard:vDashboard, itens:vItens, equipamentos:vEquips, entrada:()=>vMovForm("entrada"), saida:()=>vMovForm("saida"),
     movs:vMovs, critico:vCritico, compras:vCompras, indicadores:vIndicadores, auditoria:vAuditoria, dados:vDados };
   view.innerHTML = renderers[current]();
   wire();
   if(!keepFocus) window.scrollTo(0,0);
 }
 function wire(){
-  document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => go(b.dataset.goto));
+  document.querySelectorAll("[data-goto]").forEach(b => b.onclick = ev => { ev.preventDefault(); go(b.dataset.goto); });
   const seed1 = document.getElementById("seed-demo"); if(seed1) seed1.onclick = seedDemo;
   const seed2 = document.getElementById("seed-demo2"); if(seed2) seed2.onclick = () => {
     if(!db.items.length) seedDemo();
@@ -1856,6 +2146,7 @@ function wire(){
     bindExport("exp-itens-csv","itens.csv",()=>toCSV(itensRows()));
     bindExportX("exp-itens-xlsx","itens.xlsx",itensRows,"Itens");
   }
+  if(current==="equipamentos") wireEquips();
   if(current==="dashboard") wireDashboard();
   if(current==="entrada") wireMovForm("entrada");
   if(current==="saida") wireMovForm("saida");
@@ -1895,6 +2186,9 @@ function wire(){
     bindExportX("exp2-itens-xlsx","itens.xlsx",itensRows,"Itens");
     bindExport("exp2-movs-csv","movimentacoes.csv",()=>toCSV(movsRows()));
     bindExportX("exp2-movs-xlsx","movimentacoes.xlsx",movsRows,"Movimentações");
+    bindExport("exp2-equips-csv","equipamentos.csv",()=>toCSV(equipsRows()));
+    bindExportX("exp2-equips-xlsx","equipamentos.xlsx",equipsRows,"Equipamentos");
+    wireEquips(); // importação da lista de equipamentos e carga sugerida (mesmos ids da tela Equipamentos)
     const modelo = document.getElementById("dl-modelo");
     if(modelo) modelo.onclick = () => downloadBlob("modelo_itens.xlsx", makeXLSX([
       ["codigo","descricao","categoria","unidade","estoque_minimo","estoque_maximo","estoque_atual","prateleira","coluna","gaveta","fornecedor","lead_time","ultima_compra"],
@@ -1931,8 +2225,9 @@ function wire(){
         const d = JSON.parse(await file.text());
         if(!Array.isArray(d.items) || !Array.isArray(d.movs)) throw new Error("Estrutura de backup não reconhecida.");
         normalizeIds(d);
-        confirmDlg(`Restaurar backup com ${d.items.length} itens e ${d.movs.length} movimentações? Os dados atuais (da nuvem, para todos) serão substituídos.`, () => {
-          db = { items:d.items, movs:d.movs, compras:d.compras||[], user:d.user||"Almoxarife" };
+        const nEq = Array.isArray(d.equips) ? d.equips.length : 0;
+        confirmDlg(`Restaurar backup com ${d.items.length} itens, ${d.movs.length} movimentações e ${nEq} equipamentos? Os dados atuais (da nuvem, para todos) serão substituídos.`, () => {
+          db = { items:d.items, movs:d.movs, compras:d.compras||[], equips:d.equips||[], user:d.user||"Almoxarife" };
           toast("Backup restaurado."); commit();
         }, "Restaurar");
       }catch(err){ toast("Falha ao restaurar: " + err.message, true); }
@@ -1941,7 +2236,7 @@ function wire(){
     const wipe = document.getElementById("wipe");
     if(wipe) wipe.onclick = () => {
       confirmDlg("Apagar TODOS os dados da nuvem (para todos os usuários)? Esta ação não pode ser desfeita — recomendamos exportar um backup antes.", () => {
-        db = { items:[], movs:[], compras:[], user:db.user };
+        db = { items:[], movs:[], compras:[], equips:[], user:db.user };
         toast("Base apagada."); commit();
       }, "Apagar tudo");
     };
