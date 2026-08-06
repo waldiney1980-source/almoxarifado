@@ -90,6 +90,28 @@ O site é estático — o repositório publicado no GitHub Pages serve o
 4. Em ~2 minutos o app fica em
    `https://waldiney1980-source.github.io/almoxarifado/`.
 
+### ⚠️ Hoje o Pages publica do branch `gh-pages`, não do `main`
+
+Na configuração atual, o **Settings → Pages** deste repositório aponta para o
+branch **`gh-pages`**. Só `git push origin main` **não publica nada** — o site
+continua na versão anterior e nenhum build é enfileirado (nem com commit vazio).
+
+Enquanto for assim, publicar é:
+
+```bash
+git push origin main                  # guarda o código
+git push origin main:gh-pages         # é ISTO que publica
+```
+
+Para simplificar de vez, mude uma única vez em **Settings → Pages → Source**
+para o branch **`main` / `(root)`** — daí o `git push origin main` volta a
+publicar sozinho, e o branch `gh-pages` pode ser esquecido.
+
+Um workflow do Actions **não resolve** sem essa mudança: o environment
+`github-pages` só aceita deploy vindo de `gh-pages` e recusa o `main` com
+*“Branch main is not allowed to deploy to github-pages due to environment
+protection rules”*.
+
 A chave no código é a **publicável** (feita para ficar exposta); quem não tem
 conta não lê nada — o RLS bloqueia.
 
