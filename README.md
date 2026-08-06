@@ -20,9 +20,9 @@ Tabelas com prefixo `alx_` (não colidem com os outros apps):
 
 | Tabela | Conteúdo |
 |---|---|
-| `alx_itens` | os itens do estoque (código único, quantidades, localização, fornecedor…) |
+| `alx_itens` | os itens do estoque (código único, quantidades, localização, fornecedor, foto, prateleira vermelha…) |
 | `alx_movs` | histórico de entradas e saídas |
-| `alx_compras` | solicitações de compra (Pendente → Comprado → Recebido) |
+| `alx_compras` | pedidos de compra (Solicitada → Aprovada → Em Cotação → Comprada → Em Transporte → Recebida), com fornecedor, preço e observação |
 | `alx_equipamentos` | cadastro de equipamento/destino que alimenta o campo da saída (nome único por grupo) |
 | `alx_audit` | trilha de auditoria: quem criou/alterou/excluiu cada registro |
 

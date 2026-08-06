@@ -481,6 +481,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
   <div class="deck">
     <span class="eyebrow"><span class="n">6</span> Itens</span>
     <h2 class="title">Cadastrar, editar e excluir uma peça</h2>
+    <div class="callout info" style="margin:0 0 16px; font-size:13.5px"><span class="ci">📷</span><div>O cadastro aceita <b>foto da peça</b> (no celular, abre a câmera) e tem a marcação <b>Prateleira vermelha</b> para o que <b>não pode faltar</b> — esses itens aparecem destacados em vermelho na lista de materiais. Cada item também tem um <b>QR code</b> (botão na lista) para colar na prateleira: lido com a câmera, abre o app direto na <b>Saída</b> com o item já selecionado.</div></div>
     <div class="grid two" style="gap:28px; align-items:start">
       <div>
         <div class="steps">
@@ -524,7 +525,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
         <div class="card pad" style="margin-bottom:14px">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px"><div style="width:38px;height:38px;border-radius:10px;background:var(--crit-bg);color:var(--crit-ink);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div><h3 style="font-size:17px">Registrar Saída</h3></div>
           <div class="steps" style="gap:8px">
-            <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)">Escolha o <b>item</b> e a <b>quantidade</b> retirada.</p></div></div>
+            <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)"><b>Pesquise o item</b> pelo código ou por parte da descrição e informe a <b>quantidade</b> retirada.</p></div></div>
             <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)">Informe o <b>requisitante</b> — quem pediu o material. É <b>obrigatório</b>.</p></div></div>
             <div class="step"><div class="b" style="width:26px;height:26px;font-size:12px;background:var(--crit)"></div><div><p style="color:var(--ink)">Se quiser, o <b>equipamento/destino</b> e uma observação. Confirme: o estoque <b>baixa</b> na hora.</p></div></div>
           </div>
@@ -590,13 +591,13 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
   <div class="deck">
     <span class="eyebrow"><span class="n">10</span> Compras</span>
     <h2 class="title">Da falta à chegada: o ciclo da compra</h2>
-    <p class="lead" style="margin-bottom:20px">Quando uma peça bate no mínimo, o sistema cria sozinho a <b>solicitação de compra</b>. O comprador marca que está comprando e informa a <b>chegada prevista</b> — e o item passa a mostrar isso para todo mundo.</p>
+    <p class="lead" style="margin-bottom:20px">O fluxo é: <b>Estoque Crítico → Comprar → aba Compras → Recebimento → entrada no estoque</b>. Nada de solicitação automática: a compra nasce quando o comprador clica em <b>Comprar</b> — e o estoque só muda quando o material <b>chega</b>.</p>
     <div class="grid two" style="gap:22px; align-items:start">
       <div>
         <div class="steps">
-          <div class="step"><div class="b"></div><div><h3>Pendente</h3><p>Criada automaticamente, com a quantidade sugerida (máximo − atual).</p></div></div>
-          <div class="step"><div class="b"></div><div><h3>Em compra</h3><p>O comprador marca — na tela <b>Compras</b> ou pela caixinha da tela <b>Estoque Crítico</b> — e informa a <b>data prevista de chegada</b>.</p></div></div>
-          <div class="step"><div class="b"></div><div><h3>Recebido</h3><p>Quando o material chega, clique em <b>Receber</b>: o estoque sobe e a solicitação encerra.</p></div></div>
+          <div class="step"><div class="b"></div><div><h3>Comprar (Estoque Crítico)</h3><p>O botão abre um formulário com tudo o que ajuda a decidir: estoque atual, mínimo, <b>quantidade sugerida</b> (editável), último fornecedor, último preço pago e data da última compra.</p></div></div>
+          <div class="step"><div class="b"></div><div><h3>Acompanhar (aba Compras)</h3><p>O pedido entra na lista com fornecedor, quantidade, preço e previsão de entrega. O status evolui: <b>Solicitada → Aprovada → Em Cotação → Comprada → Em Transporte</b>.</p></div></div>
+          <div class="step"><div class="b"></div><div><h3>Receber</h3><p>Ao marcar <b>Recebida</b>, o sistema dá <b>entrada automática</b> da quantidade no estoque, registra a movimentação no histórico e tira o pedido da lista de pendentes.</p></div></div>
         </div>
         <div class="callout warn" style="margin-top:14px; font-size:13.5px"><span class="ci">⏰</span><div>Se a data prevista passar sem recebimento, o item fica marcado como <b>Atrasada</b> — em vermelho, para ninguém deixar passar.</div></div>
         <div class="callout info" style="margin-top:10px; font-size:13.5px"><span class="ci">🔥</span><div>A etiqueta <b>“Comprar hoje”</b> aparece quando o estoque não dura até a próxima entrega (considera o <b>lead time</b> do fornecedor).</div></div>
@@ -788,16 +789,16 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
       <div class="qq">
         <div class="qt"><span class="qn">2.</span> Uma peça bateu no estoque mínimo. O que acontece?</div>
         <div class="qopts">
-          <button class="qopt">Preciso criar a solicitação de compra manualmente</button>
+          <button class="qopt">O sistema compra sozinho e já soma no estoque</button>
           <button class="qopt">O sistema bloqueia novas saídas da peça</button>
-          <button class="qopt" data-ok>O sistema cria sozinho a solicitação, com quantidade sugerida</button>
+          <button class="qopt" data-ok>Ela entra no Estoque Crítico; o comprador clica em Comprar e acompanha na aba Compras</button>
         </div>
-        <div class="qexp">A solicitação nasce sozinha na tela <b>Compras</b>, sugerindo repor até o máximo. As saídas continuam liberadas — o sistema avisa, não trava.</div>
+        <div class="qexp">A compra nasce no botão <b>Comprar</b> do Estoque Crítico (com quantidade sugerida, último fornecedor e último preço) e fica na aba <b>Compras</b> até o recebimento — só aí o estoque sobe. As saídas continuam liberadas — o sistema avisa, não trava.</div>
       </div>
       <div class="qq">
         <div class="qt"><span class="qn">3.</span> O comprador fechou o pedido e o material chega dia 05/08. Onde isso fica visível?</div>
         <div class="qopts">
-          <button class="qopt" data-ok>No próprio item: etiqueta “Em compra · chega 05/08” nas telas Itens e Crítico</button>
+          <button class="qopt" data-ok>No próprio item: etiqueta com o status da compra e “chega 05/08” nas telas Itens e Crítico</button>
           <button class="qopt">Só no e-mail do comprador</button>
           <button class="qopt">Em lugar nenhum — o sistema não guarda essa data</button>
         </div>

@@ -189,3 +189,22 @@ end $$;
 --   * nome de equipamento único POR GRUPO: unique (grupo_id, lower(nome))
 --   * RPCs (execute só para authenticated): alx_criar_grupo(nome),
 --     alx_entrar_grupo(codigo), alx_meu_grupo_info()
+
+
+-- ============================================================================
+-- Foto e prateleira vermelha (migration: almoxarifado_foto_e_prateleira_vermelha)
+--   * alx_itens.foto text — caminho no bucket privado alx-fotos (<grupo_id>/<item_id>.jpg)
+--   * alx_itens.prateleira_vermelha boolean — item que não pode faltar
+--   * bucket storage alx-fotos (privado, 3 MB, jpeg/png/webp) com políticas
+--     select/insert/update/delete restritas à pasta do grupo do usuário
+--     ((storage.foldername(name))[1] = alx_meu_grupo()::text)
+-- ============================================================================
+
+-- ============================================================================
+-- Fluxo de compras (migration: almoxarifado_compras_status_e_fornecedor)
+--   * alx_compras.fornecedor text, preco double precision, obs text
+--   * status: Solicitada → Aprovada → Em Cotação → Comprada → Em Transporte → Recebida
+--     (antigos Pendente/Comprado/Recebido migrados; o app também normaliza na leitura)
+--   * a solicitação automática por estoque mínimo foi removida do app: compra
+--     nasce no botão Comprar e o estoque só muda no Recebimento
+-- ============================================================================
