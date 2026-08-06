@@ -203,6 +203,8 @@ end $$;
 -- ============================================================================
 -- Fluxo de compras (migration: almoxarifado_compras_status_e_fornecedor)
 --   * alx_compras.fornecedor text, preco double precision, obs text
+--   * alx_compras.foto text — foto do recebimento (NF/material), bucket alx-fotos
+--     em <grupo_id>/recebimentos/<compra_id>.jpg (migration almoxarifado_foto_recebimento)
 --   * status: Solicitada → Aprovada → Em Cotação → Comprada → Em Transporte → Recebida
 --     (antigos Pendente/Comprado/Recebido migrados; o app também normaliza na leitura)
 --   * a solicitação automática por estoque mínimo foi removida do app: compra

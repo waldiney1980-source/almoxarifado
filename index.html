@@ -126,8 +126,22 @@ body{
 .panel .pbody{padding:14px 18px}
 .panel .pbody.flush{padding:0}
 
-.tablewrap{overflow:auto; max-height:65vh; overscroll-behavior:contain}
+.tablewrap{overflow:auto; max-height:65vh; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--line) transparent}
+.tablewrap::-webkit-scrollbar{height:11px; width:11px}
+.tablewrap::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px; border:2px solid var(--surface)}
+.tablewrap::-webkit-scrollbar-thumb:hover{background:var(--ink-3)}
+.tablewrap::-webkit-scrollbar-track{background:transparent}
 .tablewrap.sm{max-height:300px}
+/* Itens: foto, código e descrição ficam congeladas ao rolar para o lado */
+table.data.fixcol th:nth-child(-n+3), table.data.fixcol td:nth-child(-n+3){position:sticky; background:var(--surface)}
+table.data.fixcol td:nth-child(-n+3){z-index:1}
+table.data.fixcol th:nth-child(-n+3){z-index:3; background:var(--surface-2)}
+table.data.fixcol th:nth-child(1), table.data.fixcol td:nth-child(1){left:0}
+table.data.fixcol th:nth-child(2), table.data.fixcol td:nth-child(2){left:var(--fx1,56px); white-space:nowrap}
+table.data.fixcol th:nth-child(3), table.data.fixcol td:nth-child(3){left:var(--fx2,170px);
+  box-shadow:6px 0 10px -6px rgba(0,0,0,.30); min-width:200px; max-width:340px}
+table.data.fixcol tbody tr:hover td:nth-child(-n+3){background:var(--surface-2)}
+table.data.fixcol tr.pv td:nth-child(-n+3){background:var(--crit-bg)}
 .card.kpi.click{cursor:pointer; transition:border-color .15s, transform .1s}
 .card.kpi.click:hover{border-color:var(--accent); transform:translateY(-1px)}
 .chips{display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:0 18px 13px}
@@ -288,7 +302,7 @@ a{color:var(--accent)}
       <h1 id="viewtitle">Dashboard</h1>
       <div class="searchwrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="globalsearch" type="search" placeholder="Buscar por código, descrição ou categoria…" aria-label="Busca global">
+        <input id="globalsearch" type="search" placeholder="Pesquisar — filtra a tela em que você está…" aria-label="Busca global">
       </div>
       <div class="userchip">
         <div class="avatar" id="avatar">A</div>
@@ -394,8 +408,8 @@ async function comprimirFoto(file){
   cv.getContext("2d").drawImage(bmp,0,0,cv.width,cv.height);
   return new Promise(res => cv.toBlob(res,"image/jpeg",0.82));
 }
-async function fotoUpload(itemId, blob){
-  const path = `${grupo.id}/${itemId}.jpg`;
+async function fotoUpload(nome, blob){   // nome relativo à pasta do grupo, ex.: "<id>.jpg" ou "recebimentos/<id>.jpg"
+  const path = `${grupo.id}/${nome}`;
   const token = await ensureToken();
   const r = await fetch(`${SUPA_URL}/storage/v1/object/alx-fotos/${path}`, {
     method:"POST", body: blob,
@@ -453,10 +467,10 @@ const rowToMov = r => ({ id:r.id, type:r.type, itemId:r.item_id, qty:r.qty, date
 const STATUS_ANTIGO = { Pendente:"Solicitada", Comprado:"Comprada", Recebido:"Recebida" };
 const compraToRow = c => ({ id:c.id, item_id:c.itemId, qtd:c.qtd||0, status:c.status||"Solicitada",
   criada_em:c.criadaEm||"", recebida_em:c.recebidaEm||"", previsao:c.previsao||"",
-  fornecedor:c.fornecedor||"", preco:c.preco||0, obs:c.obs||"" });
+  fornecedor:c.fornecedor||"", preco:c.preco||0, obs:c.obs||"", foto:c.foto||"" });
 const rowToCompra = r => ({ id:r.id, itemId:r.item_id, qtd:r.qtd, status:STATUS_ANTIGO[r.status]||r.status,
   criadaEm:r.criada_em, recebidaEm:r.recebida_em, previsao:r.previsao||"",
-  fornecedor:r.fornecedor||"", preco:r.preco||0, obs:r.obs||"" });
+  fornecedor:r.fornecedor||"", preco:r.preco||0, obs:r.obs||"", foto:r.foto||"" });
 const equipToRow = e => ({ id:e.id, nome:e.nome||"", tag:e.tag||"", tipo:e.tipo||"",
   local:e.local||"", obs:e.obs||"", ativo:e.ativo!==false });
 const rowToEquip = r => ({ id:r.id, nome:r.nome, tag:r.tag, tipo:r.tipo,
@@ -711,10 +725,11 @@ document.getElementById("nav").addEventListener("click", e => {
   const b = e.target.closest("button[data-view]");
   if(b) go(b.dataset.view);
 });
+const TELAS_COM_BUSCA = ["itens","equipamentos","compras","critico","movs","indicadores"];
 document.getElementById("globalsearch").addEventListener("input", e => {
   searchTerm = e.target.value.trim().toLowerCase();
-  // a busca filtra a tela atual quando ela tem lista própria; senão cai em Itens
-  if(current !== "itens" && current !== "equipamentos") current = "itens";
+  // a busca filtra a própria tela; só telas sem lista (painel, entrada, saída…) caem em Itens
+  if(!TELAS_COM_BUSCA.includes(current)) current = "itens";
   render(true);
 });
 document.getElementById("username").addEventListener("click", () => {
@@ -1054,7 +1069,7 @@ function vItens(){
       <button class="btn primary" id="novo-item">${I.plus} Novo item</button>
     </div></div>
   <div class="panel"><div class="pbody flush">
-    ${list.length?`<div class="tablewrap"><table class="data"><thead><tr>
+    ${list.length?`<div class="tablewrap"><table class="data fixcol"><thead><tr>
       <th></th><th>Código</th><th>Descrição</th><th>Categoria</th><th>Un.</th>
       <th class="num">Atual</th><th class="num">Mín.</th><th class="num">Máx.</th>
       <th class="num">Valor unit.</th>
@@ -1159,7 +1174,7 @@ function openItemModal(id){
     try{
       if(fotoNova){
         btn.disabled = true; btn.textContent = "Enviando foto…";
-        data.foto = await fotoUpload(alvo.id, fotoNova);
+        data.foto = await fotoUpload(alvo.id + ".jpg", fotoNova);
       }else if(fotoApagar && alvo.foto){
         await fotoRemove(alvo.foto); data.foto = "";
       }
@@ -1592,6 +1607,8 @@ function vMovs(){
   if(f.ate) list = list.filter(m=>m.date<=f.ate);
   if(f.item) list = list.filter(m=>m.itemId===f.item);
   if(f.tipo) list = list.filter(m=>m.type===f.tipo);
+  if(searchTerm) list = list.filter(m=>{ const it=itemById(m.itemId)||{};
+    return [it.codigo,it.descricao,m.req,m.equip,m.obs,m.user].some(x=>String(x||"").toLowerCase().includes(searchTerm)); });
   const opts = db.items.slice().sort((a,b)=>a.descricao.localeCompare(b.descricao))
     .map(i=>`<option value="${i.id}" ${f.item===i.id?"selected":""}>${esc(i.codigo)} — ${esc(i.descricao)}</option>`).join("");
   const totE = list.filter(m=>m.type==="entrada").reduce((s,m)=>s+m.qty,0);
@@ -1634,8 +1651,10 @@ function wireMovs(){
 
 /* ================= ESTOQUE CRÍTICO ================= */
 function vCritico(){
-  const list = db.items.filter(i=>i.atual<=i.min).sort((a,b)=>(a.atual-a.min)-(b.atual-b.min));
-  const atencao = db.items.filter(i=>i.atual>i.min && i.atual<=i.min*1.1);
+  const q = searchTerm;
+  const casa = i => !q || [i.codigo,i.descricao,i.categoria,i.fornecedor].some(f=>String(f||"").toLowerCase().includes(q));
+  const list = db.items.filter(i=>i.atual<=i.min).filter(casa).sort((a,b)=>(a.atual-a.min)-(b.atual-b.min));
+  const atencao = db.items.filter(i=>i.atual>i.min && i.atual<=i.min*1.1).filter(casa);
   return `
   <div class="viewhead"><h2>Estoque crítico</h2>
     <span class="desc">Itens com estoque atual ≤ estoque mínimo</span></div>
@@ -1658,7 +1677,7 @@ function vCritico(){
         ? `<span class="pill ${c.previsao&&c.previsao<todayISO()?"vermelho":"azul"}">${esc(c.status)}</span>${c.previsao?` <span class="small muted">chega ${fdate(c.previsao)}</span>`:""}`
         : `<button class="btn sm primary" data-comprar-item="${i.id}">${I.cart} Comprar</button>`}</td>
       <td>${esc(i.fornecedor||"—")}</td><td class="loclabel">${esc(locStr(i))}</td></tr>`}).join("")}
-    </tbody></table></div>`:`<div class="empty">Nenhum item abaixo do mínimo. Estoque saudável.</div>`}
+    </tbody></table></div>`:`<div class="empty">${q?"Nenhum item crítico corresponde à busca “"+esc(q)+"”.":"Nenhum item abaixo do mínimo. Estoque saudável."}</div>`}
   </div></div>
   ${atencao.length?`<div class="panel"><div class="phead"><h3>Em atenção</h3><span class="hint">até 10% acima do mínimo</span></div><div class="pbody flush">
     <div class="tablewrap"><table class="data"><thead><tr><th>Código</th><th>Descrição</th><th class="num">Atual</th><th class="num">Mínimo</th><th>Situação</th></tr></thead><tbody>
@@ -1670,9 +1689,12 @@ function vCritico(){
 const PILL_STATUS = { "Solicitada":"vermelho", "Aprovada":"azul", "Em Cotação":"amarelo",
   "Comprada":"amarelo", "Em Transporte":"azul", "Recebida":"verde" };
 function vCompras(){
-  const abertas = db.compras.filter(c=>c.status!=="Recebida")
+  const q = searchTerm;
+  const casa = c => { const it=itemById(c.itemId)||{};
+    return !q || [it.codigo,it.descricao,it.categoria,c.fornecedor,c.status,c.obs].some(f=>String(f||"").toLowerCase().includes(q)); };
+  const abertas = db.compras.filter(c=>c.status!=="Recebida").filter(casa)
     .sort((a,b)=>(a.criadaEm+"").localeCompare(b.criadaEm+""));
-  const recebidas = db.compras.filter(c=>c.status==="Recebida")
+  const recebidas = db.compras.filter(c=>c.status==="Recebida").filter(casa)
     .sort((a,b)=>(b.recebidaEm+"").localeCompare(a.recebidaEm+"")).slice(0,30);
   const linha = c => {
     const it=itemById(c.itemId); if(!it) return "";
@@ -1685,7 +1707,7 @@ function vCompras(){
       <td class="num">${c.preco?fmtBRL.format(c.preco):"—"}</td>
       <td>${aberta
         ? `<select class="selstatus" data-status="${c.id}">${STATUS_COMPRA.filter(s=>s!=="Recebida").map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select>`
-        : `<span class="pill verde">Recebida em ${fdate(c.recebidaEm)}</span>`}</td>
+        : `<span class="pill verde">Recebida em ${fdate(c.recebidaEm)}</span>${c.foto?` <img data-foto="${esc(c.foto)}" data-zoom="${esc(c.foto)}" class="thumb" alt="" title="Foto do recebimento" style="display:none;width:30px;height:30px">`:""}`}</td>
       <td style="white-space:nowrap">${c.previsao
         ? fdate(c.previsao)+(aberta&&c.previsao<todayISO()?' <span class="pill vermelho">Atrasada</span>':"")
         : '<span class="muted">—</span>'}${aberta?` <button class="iconbtn" data-prev="${c.id}" title="Editar previsão de entrega">${I.edit}</button>`:""}</td>
@@ -1702,7 +1724,7 @@ function vCompras(){
     <button class="btn primary" id="nova-compra">${I.plus} Nova solicitação</button></div></div>
   <div class="panel"><div class="phead"><h3>Em andamento</h3><span class="hint">${fmtN.format(abertas.length)} ${abertas.length===1?"pedido":"pedidos"}</span></div><div class="pbody flush">
     ${abertas.length?`<div class="tablewrap"><table class="data">${cab}<tbody>${abertas.map(linha).join("")}</tbody></table></div>`
-      :`<div class="empty">Nenhuma compra em andamento. Use o botão <strong>Comprar</strong> no Estoque Crítico ou <strong>Nova solicitação</strong> aqui.</div>`}
+      :`<div class="empty">${q?"Nenhuma compra corresponde à busca “"+esc(q)+"”.":"Nenhuma compra em andamento. Use o botão <strong>Comprar</strong> no Estoque Crítico ou <strong>Nova solicitação</strong> aqui."}</div>`}
   </div></div>
   ${recebidas.length?`<div class="panel"><div class="phead"><h3>Recebidas</h3><span class="hint">últimas ${fmtN.format(recebidas.length)}</span></div><div class="pbody flush">
     <div class="tablewrap"><table class="data">${cab}<tbody>${recebidas.map(linha).join("")}</tbody></table></div>
@@ -1792,14 +1814,45 @@ function openReceberModal(compraId){
         <div class="field"><label>Quantidade recebida</label><input id="r-qtd" type="number" min="0" step="any" value="${c.qtd}"></div>
         <div class="field"><label>Data</label><input id="r-data" type="date" value="${todayISO()}"></div>
         <div class="field span2"><label>Observação</label><input id="r-obs" placeholder="Ex.: NF 5678"></div>
+        <div class="field span2"><label>Foto do recebimento (NF ou material)</label>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <img id="r-foto-prev" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:none;background:var(--surface-2)">
+            <label class="btn sm" for="r-foto">${I.up} Adicionar foto…</label>
+            <input type="file" id="r-foto" accept="image/*" capture="environment" style="display:none">
+            <span class="small muted" id="r-foto-info">Opcional — no celular, abre a câmera.</span>
+          </div></div>
       </div>
     </div>
     <div class="mfoot"><button class="btn" data-close>Cancelar</button><button class="btn primary" id="r-save">Confirmar recebimento</button></div>`,"sm");
-  document.getElementById("r-save").onclick = () => {
+  let fotoRec = null;
+  document.getElementById("r-foto").addEventListener("change", async e => {
+    const file = e.target.files[0]; if(!file) return;
+    const info = document.getElementById("r-foto-info");
+    try{
+      info.textContent = "Preparando foto…";
+      fotoRec = await comprimirFoto(file);
+      const prev = document.getElementById("r-foto-prev");
+      prev.src = URL.createObjectURL(fotoRec); prev.style.display = "";
+      info.textContent = "Foto pronta — será enviada ao confirmar.";
+    }catch(err){ info.textContent = ""; toast("Não consegui ler a imagem: "+err.message, true); }
+    e.target.value = "";
+  });
+  document.getElementById("r-save").onclick = async () => {
     const qtd = num(document.getElementById("r-qtd").value);
     if(qtd<=0){ toast("Quantidade inválida.", true); return; }
     const date = document.getElementById("r-data").value || todayISO();
     const obs = document.getElementById("r-obs").value.trim() || "Recebimento de compra";
+    if(fotoRec){
+      const btn = document.getElementById("r-save");
+      try{
+        btn.disabled = true; btn.textContent = "Enviando foto…";
+        c.foto = await fotoUpload("recebimentos/"+c.id+".jpg", fotoRec);
+      }catch(err){
+        btn.disabled = false; btn.textContent = "Confirmar recebimento";
+        toast("Falha ao enviar a foto: "+err.message+" — o recebimento não foi confirmado.", true);
+        return;
+      }
+    }
     it.atual += qtd; it.ultimaCompra = date;
     const forn = c.fornecedor || it.fornecedor;
     db.movs.push({ id:uid(), type:"entrada", itemId:it.id, qty:qtd, date,
@@ -1829,7 +1882,7 @@ function openPrevisaoModal(compraId){
 
 /* ================= INDICADORES ================= */
 function vIndicadores(){
-  const rows = db.items.map(it=>{
+  const rows = db.items.filter(it=>!searchTerm||[it.codigo,it.descricao,it.categoria].some(f=>String(f||"").toLowerCase().includes(searchTerm))).map(it=>{
     const c30 = consumoPeriodo(it.id,30), c90 = consumoPeriodo(it.id,90);
     const md = c90/90;
     const dias = md>0 ? it.atual/md : Infinity;
@@ -2591,6 +2644,13 @@ function wire(){
     document.querySelectorAll("[data-qr]").forEach(b => b.onclick = () => openQRModal(b.dataset.qr));
     bindExport("exp-itens-csv","itens.csv",()=>toCSV(itensRows()));
     bindExportX("exp-itens-xlsx","itens.xlsx",itensRows,"Itens");
+    // mede as duas primeiras colunas para posicionar as congeladas
+    const fx = document.querySelector("table.fixcol");
+    if(fx && fx.rows.length){
+      const c = fx.rows[0].cells;
+      fx.style.setProperty("--fx1", c[0].offsetWidth+"px");
+      fx.style.setProperty("--fx2", (c[0].offsetWidth+c[1].offsetWidth)+"px");
+    }
   }
   document.querySelectorAll("[data-zoom]").forEach(img => img.onclick = async () => {
     const u = await fotoURL(img.dataset.zoom); if(!u) return;
