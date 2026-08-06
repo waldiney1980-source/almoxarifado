@@ -672,7 +672,7 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
     <div class="grid two" style="gap:26px; align-items:start">
       <div class="steps">
         <div class="step"><div class="b"></div><div><h3>Abra “Equipamentos”</h3><p>No menu à esquerda, logo abaixo de <b>Itens</b>. (O mesmo quadro está em <b>Dados</b>.)</p></div></div>
-        <div class="step"><div class="b"></div><div><h3>Suba a planilha</h3><p><b>.xlsx</b> ou <b>.csv</b>. A única coluna obrigatória é <b>nome</b> — se a planilha não tiver cabeçalho, vale a <b>primeira coluna</b>.</p></div></div>
+        <div class="step"><div class="b"></div><div><h3>Suba a planilha</h3><p><b>.xlsx</b>, <b>.xls</b> ou <b>.csv</b> — inclusive o <b>inventário ALLOS</b>, com uma aba por tipo de equipamento: todas as abas são lidas de uma vez. Basta uma coluna de <b>nome</b> (ou de código/tipo); sem cabeçalho, vale a <b>primeira coluna</b>.</p></div></div>
         <div class="step"><div class="b"></div><div><h3>Ou use a carga sugerida</h3><p>Um clique traz o parque típico de shopping (chillers, torres, elevadores, escadas rolantes, casa de bombas…) para você ajustar ao seu.</p></div></div>
         <div class="step"><div class="b"></div><div><h3>Lance a saída</h3><p>O campo passa a sugerir os nomes cadastrados — e continua aceitando digitar algo novo.</p></div></div>
       </div>
@@ -680,11 +680,12 @@ table.t td.num{text-align:right; font-variant-numeric:tabular-nums}
         <div class="card pad" style="padding:16px">
           <div style="font-size:12px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px">Colunas reconhecidas</div>
           <div class="pill-list">
-            <span>nome</span><span>tag</span><span>tipo / sistema</span><span>local</span><span>obs</span><span>ativo</span>
+            <span>nome</span><span>tag</span><span>tipo / sistema</span><span>local</span><span>obs</span><span>ativo</span><span>Código equipamento</span><span>Tipo de equipamento</span><span>Nome Completo Local</span>
           </div>
         </div>
         <div class="callout good" style="margin-top:14px; font-size:13.5px"><span class="ci">🛡️</span><div>Reimportar não duplica: nome já cadastrado é <b>atualizado</b>, e nada é apagado. Equipamento marcado como <b>inativo</b> some da lista da saída, mas o histórico dele continua intacto.</div></div>
         <div class="callout info" style="margin-top:12px; font-size:13.5px"><span class="ci">🔎</span><div>Nomes digitados em saídas antigas aparecem no quadro <b>“usados nas saídas, ainda sem cadastro”</b> — dá para cadastrar todos de uma vez e padronizar o histórico.</div></div>
+        <div class="callout info" style="margin-top:12px; font-size:13.5px"><span class="ci">🏷️</span><div>Quando a planilha não tem coluna de nome — o caso do inventário — o nome é montado como <b>tipo + código</b> (“AR CONDICIONADO JANELA ACON-004”), e o equipamento é reconhecido pelo <b>código</b>: reimportar atualiza, não duplica.</div></div>
       </div>
     </div>
   </div>

@@ -1082,13 +1082,13 @@ function vEquips(){
       <button class="btn primary" id="novo-equip">${I.plus} Novo equipamento</button>
     </div></div>
   <div class="panel"><div class="phead"><h3>Carga da lista</h3><span class="hint">suba a lista pronta de uma vez</span></div><div class="pbody">
-    <p class="small" style="margin-top:0">Envie um arquivo <strong>.xlsx</strong> ou <strong>.csv</strong> com a relação de equipamentos e destinos.
+    <p class="small" style="margin-top:0">Envie um arquivo <strong>.xlsx</strong>, <strong>.xls</strong> ou <strong>.csv</strong> com a relação de equipamentos e destinos. Planilha com <strong>várias abas</strong> (uma por tipo de equipamento, como o inventário ALLOS) é lida inteira.
     A única coluna obrigatória é <strong>nome</strong>. Também são aceitas:</p>
-    <p class="small mono muted" style="word-break:break-word">nome (ou equipamento/destino) · tag (ou codigo) · tipo (ou sistema/categoria) · local (ou localizacao/pavimento) · obs · ativo</p>
+    <p class="small mono muted" style="word-break:break-word">nome (ou equipamento/destino) · tag (ou codigo / “Código equipamento”) · tipo (ou sistema / categoria / “Tipo de equipamento”) · local (ou localizacao / pavimento / “Nome Completo Local”) · obs · ativo</p>
     <p class="small muted">Se a planilha não tiver cabeçalho, a <strong>primeira coluna</strong> é usada como nome. Equipamentos com nome já cadastrado são atualizados — nada é duplicado nem apagado.</p>
     <div class="btnrow">
       <label class="btn primary" for="file-equip">${I.up} Escolher arquivo…</label>
-      <input type="file" id="file-equip" accept=".xlsx,.csv">
+      <input type="file" id="file-equip" accept=".xlsx,.xls,.csv">
       <button class="btn" id="dl-modelo-equip">${I.down} Baixar modelo (xlsx)</button>
       <button class="btn" id="equip-sugerido">${I.box} Carga sugerida (shopping)</button>
     </div>
@@ -1156,46 +1156,84 @@ function openEquipModal(id, nomePre){
 }
 /* ---- importação da lista de equipamentos ---- */
 const HDR_EQUIP = {
-  nome:"nome", equipamento:"nome", equipamento_destino:"nome", destino:"nome", descricao:"nome", ativo_nome:"nome",
-  tag:"tag", codigo:"tag", cod:"tag", tag_ativo:"tag", patrimonio:"tag",
+  nome:"nome", equipamento:"nome", equipamento_destino:"nome", destino:"nome", descricao:"nome",
+  // inventário ALLOS: o código do equipamento é a tag (ACON-004, QELE-192…)
+  tag:"tag", codigo:"tag", cod:"tag", patrimonio:"tag", codigo_equipamento:"tag",
+  codigo_do_equipamento:"tag", tag_de_projeto:"tag", a04_tag_de_projeto:"tag",
   tipo:"tipo", sistema:"tipo", categoria:"tipo", familia:"tipo", grupo:"tipo",
+  tipo_de_equipamento:"tipo", tipo_equipamento:"tipo",
   local:"local", localizacao:"local", area:"local", pavimento:"local", setor:"local",
+  nome_local:"local", nome_completo_local:"local",   // "Nome Completo Local" vem depois e prevalece
   obs:"obs", observacao:"obs", observacoes:"obs", nota:"obs",
+  marca:"marca", a03_marca:"marca",
+  a07_ponto_referencial_local_instalado:"ref", ponto_referencial:"ref",
   ativo:"ativo", situacao:"ativo", status:"ativo"
 };
 const ehFalso = v => /^(0|nao|não|n|inativo|false|desativado|desativada|inativa)$/i.test(String(v==null?"":v).trim());
-function importEquipRows(rows){
-  if(!rows.length) return { add:0, upd:0, skip:0, semCabecalho:false };
+/* Importa UMA aba. `tocados` (opcional) guarda os ids já mexidos nesta carga:
+   num arquivo com várias abas, a primeira aba que traz um equipamento é a que
+   vale — as repetições depois (ex.: uma aba "Resumo") são ignoradas. */
+function importEquipRows(rows, opts){
+  opts = opts || {};
+  const tocados = opts.tocados || new Set();
+  const vazio = { add:0, upd:0, skip:0, dup:0, semCabecalho:false, semDados:true };
+  if(!rows.length) return vazio;
   let hi = -1, hdr = null;
   for(let i=0; i<Math.min(rows.length,15); i++){
     const h = (rows[i]||[]).map(x => HDR_EQUIP[normHdr(x)] || null);
-    if(h.includes("nome")){ hi = i; hdr = h; break; }
+    // basta reconhecer uma das colunas que identificam o equipamento
+    if(h.some(k => k==="nome" || k==="tag" || k==="tipo" || k==="local")){ hi = i; hdr = h; break; }
   }
   const semCabecalho = hi < 0;
-  if(semCabecalho){ hi = -1; hdr = ["nome"]; } // sem cabeçalho: primeira coluna = nome
-  let add=0, upd=0, skip=0;
+  if(semCabecalho){
+    if(opts.exigirCabecalho) return vazio;   // arquivo com várias abas: não chuta
+    hi = -1; hdr = ["nome"];                 // aba única sem cabeçalho: primeira coluna = nome
+  }
+  let add=0, upd=0, skip=0, dup=0;
   for(let r=hi+1;r<rows.length;r++){
     const o = {};
     (rows[r]||[]).forEach((v,c)=>{ if(hdr[c]) o[hdr[c]] = v; });
-    const nome = String(o.nome||"").trim();
-    if(!nome || HDR_EQUIP[normHdr(nome)]==="nome"){ skip++; continue; }
+    const tag = String(o.tag||"").trim(), tipo = String(o.tipo||"").trim();
+    // sem coluna de nome (caso do inventário), o nome vira "TIPO CÓDIGO"
+    const nome = String(o.nome||"").trim() || [tipo, tag].filter(Boolean).join(" ").trim();
+    if(!nome || HDR_EQUIP[normHdr(nome)]){ skip++; continue; }   // linha vazia ou repetição do cabeçalho
     const data = {
-      nome,
-      tag:String(o.tag||"").trim(), tipo:String(o.tipo||"").trim(),
-      local:String(o.local||"").trim(), obs:String(o.obs||"").trim(),
+      nome, tag, tipo,
+      local:String(o.local||"").trim(),
+      obs:[o.obs, o.ref, o.marca].map(v=>String(v==null?"":v).trim()).find(Boolean) || "",
       ativo: o.ativo==null || String(o.ativo).trim()==="" ? true : !ehFalso(o.ativo)
     };
-    const ex = (db.equips||[]).find(x => String(x.nome||"").toLowerCase()===nome.toLowerCase());
+    // casa pelo código (tag) quando houver; senão, pelo nome
+    const ex = (db.equips||[]).find(x => tag && String(x.tag||"").toLowerCase()===tag.toLowerCase())
+            || (db.equips||[]).find(x => String(x.nome||"").toLowerCase()===nome.toLowerCase());
     if(ex){
+      if(tocados.has(ex.id)){ dup++; continue; }
+      tocados.add(ex.id);
       ex.nome = data.nome; ex.ativo = data.ativo;
       if(data.tag) ex.tag = data.tag;
       if(data.tipo) ex.tipo = data.tipo;
       if(data.local) ex.local = data.local;
       if(data.obs) ex.obs = data.obs;
       upd++;
-    }else{ db.equips.push(Object.assign({id:uid()}, data)); add++; }
+    }else{
+      const novo = Object.assign({id:uid()}, data);
+      db.equips.push(novo); tocados.add(novo.id); add++;
+    }
   }
-  return { add, upd, skip, semCabecalho };
+  return { add, upd, skip, dup, semCabecalho, semDados: !add && !upd };
+}
+/* Importa a planilha inteira: uma aba (planilha simples) ou todas (inventário). */
+function importEquipAbas(abas){
+  const tocados = new Set();
+  const varias = abas.length > 1;
+  let add=0, upd=0, skip=0, dup=0, lidas=0, semCab=false;
+  for(const aba of abas){
+    const r = importEquipRows(aba.rows, { tocados, exigirCabecalho: varias });
+    add+=r.add; upd+=r.upd; skip+=r.skip; dup+=r.dup;
+    if(!r.semDados) lidas++;
+    if(r.semCabecalho && !r.semDados) semCab = true;
+  }
+  return { add, upd, skip, dup, abas:abas.length, lidas, semCabecalho:semCab };
 }
 /* Carga sugerida: parque típico de shopping. É um ponto de partida — renomeie,
    apague o que não existe e acrescente o que faltar. */
@@ -1282,12 +1320,21 @@ function wireEquips(){
     const out = document.getElementById("equip-import-result");
     if(out) out.textContent = "Processando " + file.name + "…";
     try{
-      let rows;
-      if(/\.csv$/i.test(file.name)) rows = parseCSVText(await file.text());
-      else rows = await parseXLSX(await file.arrayBuffer());
-      const r = importEquipRows(rows);
-      if(!r.add && !r.upd) throw new Error("Nenhum equipamento encontrado na planilha.");
-      toast(`Lista carregada: ${r.add} novos, ${r.upd} atualizados${r.skip?", "+r.skip+" ignorados":""}.`
+      const abas = /\.csv$/i.test(file.name)
+        ? [{ nome:"", rows: parseCSVText(await file.text()) }]
+        : await parseXLSXAbas(await file.arrayBuffer());
+      const r = importEquipAbas(abas);
+      if(!r.add && !r.upd)
+        throw new Error(r.abas>1
+          ? `Nenhum equipamento reconhecido nas ${r.abas} abas. É preciso uma coluna de nome, código, tipo ou local.`
+          : "Nenhum equipamento encontrado na planilha.");
+      const detalhe = [
+        r.abas>1 ? `${r.lidas} de ${r.abas} abas` : null,
+        r.dup ? `${r.dup} repetidos entre abas` : null,
+        r.skip ? `${r.skip} linhas ignoradas` : null
+      ].filter(Boolean).join(" · ");
+      if(out) out.innerHTML = `<span style="color:var(--good-ink)">${fmtN.format(r.add)} novos e ${fmtN.format(r.upd)} atualizados${detalhe?" — "+esc(detalhe):""}.</span>`;
+      toast(`Lista carregada: ${fmtN.format(r.add)} novos, ${fmtN.format(r.upd)} atualizados${detalhe?" ("+detalhe+")":""}.`
         + (r.semCabecalho?" Sem cabeçalho reconhecido — usei a primeira coluna como nome." : ""));
       commit(); go("equipamentos");
     }catch(err){
@@ -1604,20 +1651,20 @@ function vDados(){
       <p class="small muted">Itens com código já existente serão atualizados (campos preenchidos manualmente, como fornecedor e lead time, são preservados); novos códigos serão cadastrados. Sem coluna de estoque máximo, assume-se 2× o mínimo.</p>
       <div class="btnrow">
         <label class="btn primary" for="file-import">${I.up} Escolher arquivo…</label>
-        <input type="file" id="file-import" accept=".xlsx,.csv">
+        <input type="file" id="file-import" accept=".xlsx,.xls,.csv">
         <button class="btn" id="dl-modelo">${I.down} Baixar modelo (xlsx)</button>
       </div>
       <div id="import-result" class="small" style="margin-top:10px"></div>
     </div></div>
     <div class="panel"><div class="phead"><h3>Importar lista de equipamentos / destinos</h3></div><div class="pbody">
       <p class="small" style="margin-top:0">Suba de uma vez a relação de equipamentos e destinos que aparecem no campo
-      <strong>“Equipamento / destino”</strong> das saídas. Arquivo <strong>.xlsx</strong> ou <strong>.csv</strong>; a única coluna obrigatória é
-      <strong>nome</strong> (sem cabeçalho, vale a primeira coluna). Também são aceitas:</p>
-      <p class="small mono muted" style="word-break:break-word">nome (ou equipamento/destino) · tag (ou codigo) · tipo (ou sistema/categoria) · local (ou localizacao/pavimento) · obs · ativo</p>
+      <strong>“Equipamento / destino”</strong> das saídas. Arquivo <strong>.xlsx</strong>, <strong>.xls</strong> ou <strong>.csv</strong>, inclusive com
+      <strong>várias abas</strong>. Basta uma coluna de nome (sem cabeçalho, vale a primeira coluna). Também são aceitas:</p>
+      <p class="small mono muted" style="word-break:break-word">nome (ou equipamento/destino) · tag (ou codigo / “Código equipamento”) · tipo (ou sistema / categoria / “Tipo de equipamento”) · local (ou localizacao / pavimento / “Nome Completo Local”) · obs · ativo</p>
       <p class="small muted">Nomes já cadastrados são atualizados; nada é duplicado. ${fmtN.format((db.equips||[]).length)} equipamento(s) cadastrado(s) hoje.</p>
       <div class="btnrow">
         <label class="btn primary" for="file-equip">${I.up} Escolher arquivo…</label>
-        <input type="file" id="file-equip" accept=".xlsx,.csv">
+        <input type="file" id="file-equip" accept=".xlsx,.xls,.csv">
         <button class="btn" id="dl-modelo-equip">${I.down} Baixar modelo (xlsx)</button>
         <button class="btn" data-goto="equipamentos">Ver equipamentos</button>
       </div>
@@ -1795,7 +1842,12 @@ async function unzip(buf){
   };
 }
 function cellCol(ref){ let c=0; for(const ch of ref){ if(ch>="A"&&ch<="Z") c=c*26+(ch.charCodeAt(0)-64); else break; } return c-1; }
-async function parseXLSX(buf){
+/* Abre o arquivo e devolve as abas NA ORDEM DA PASTA DE TRABALHO (workbook.xml),
+   não na ordem em que estão dentro do zip — que é embaralhada. */
+async function abrirXLSX(buf){
+  const u8 = new Uint8Array(buf);
+  if(!(u8[0]===0x50 && u8[1]===0x4b))   // sem "PK": .xls antigo (BIFF), Excel 97-2003
+    throw new Error("Este arquivo é um .xls antigo (Excel 97-2003). Abra no Excel e use “Salvar como → Pasta de Trabalho do Excel (.xlsx)”.");
   const z = await unzip(buf);
   let shared = [];
   const ssx = await z.text("xl/sharedStrings.xml");
@@ -1803,11 +1855,30 @@ async function parseXLSX(buf){
     const doc = new DOMParser().parseFromString(ssx, "application/xml");
     shared = [...doc.getElementsByTagName("si")].map(si => [...si.getElementsByTagName("t")].map(t=>t.textContent).join(""));
   }
-  let sheetName = "xl/worksheets/sheet1.xml";
-  if(!z.names.includes(sheetName)) sheetName = z.names.find(n => /^xl\/worksheets\/.*\.xml$/.test(n));
-  if(!sheetName) throw new Error("Nenhuma planilha encontrada no arquivo");
-  const sx = await z.text(sheetName);
-  const doc = new DOMParser().parseFromString(sx, "application/xml");
+  const abas = [];
+  const wbx = await z.text("xl/workbook.xml");
+  const relx = await z.text("xl/_rels/workbook.xml.rels");
+  if(wbx && relx){
+    const rels = {};
+    for(const r of new DOMParser().parseFromString(relx,"application/xml").getElementsByTagName("Relationship"))
+      rels[r.getAttribute("Id")] = r.getAttribute("Target");
+    for(const s of new DOMParser().parseFromString(wbx,"application/xml").getElementsByTagName("sheet")){
+      const rid = s.getAttribute("r:id") || s.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
+      const alvo = rels[rid];
+      if(!alvo) continue;
+      const caminho = ("xl/" + String(alvo).replace(/^\/?(xl\/)?/, "")).replace(/\/{2,}/g,"/");
+      if(z.names.includes(caminho)) abas.push({ nome: s.getAttribute("name") || "", caminho });
+    }
+  }
+  if(!abas.length)   // sem workbook.xml legível: cai para os arquivos de planilha do zip
+    z.names.filter(n => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))
+      .sort((a,b)=>Number(a.match(/\d+/)[0])-Number(b.match(/\d+/)[0]))
+      .forEach(caminho => abas.push({ nome:"", caminho }));
+  if(!abas.length) throw new Error("Nenhuma planilha encontrada no arquivo");
+  return { z, shared, abas };
+}
+async function lerAbaXLSX(z, shared, caminho){
+  const doc = new DOMParser().parseFromString(await z.text(caminho), "application/xml");
   const rows = [];
   for(const rowEl of doc.getElementsByTagName("row")){
     const row = [];
@@ -1827,6 +1898,18 @@ async function parseXLSX(buf){
     rows.push(row);
   }
   return rows;
+}
+/* primeira aba — usado pela importação de itens */
+async function parseXLSX(buf){
+  const { z, shared, abas } = await abrirXLSX(buf);
+  return lerAbaXLSX(z, shared, abas[0].caminho);
+}
+/* todas as abas — o inventário de equipamentos vem com uma aba por tipo */
+async function parseXLSXAbas(buf){
+  const { z, shared, abas } = await abrirXLSX(buf);
+  const out = [];
+  for(const a of abas) out.push({ nome:a.nome, rows: await lerAbaXLSX(z, shared, a.caminho) });
+  return out;
 }
 function parseCSVText(text){
   text = text.replace(/^﻿/,"");
